@@ -170,7 +170,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			xDec = xmlDoc.CreateXmlDeclaration("1.0", "UTF-8", null);
 			xmlDoc.InsertBefore(xDec, xmlDoc.DocumentElement);
 
-			kmlRoot = xmlDoc.CreateElement("kml", "http://www.opengis.com/kml/2.2");
+			kmlRoot = xmlDoc.CreateElement("kml", "http://www.opengis.net/kml/2.2");
 			xmlDoc.AppendChild(kmlRoot);
 
 			kmlDocument = xmlDoc.CreateElement("Document");
