@@ -26,6 +26,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
 	using Arena.Core;
 	using Arena.List;
+	using Arena.Organization;
 	using Arena.Portal;
 
 	public partial class KMLDownloader : PortalControl
@@ -127,6 +128,19 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				dumpXml = true;
 			}
 
+			//
+			// Request to include the campus locations.
+			//
+			if (Request.Params["populateCampus"] != null)
+			{
+				foreach (Campus c in ArenaContext.Current.Organization.Campuses)
+				{
+					kml.AddCampusPlacemark(c);
+				}
+
+				dumpXml = true;
+			}
+
 			if (dumpXml)
 			{
 				kml.xml.Save(writer);
@@ -162,7 +176,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 		private XmlNode kmlRoot, kmlDocument;
 		private String[] areaColorList;
 		private int currentAreaColor;
-		private bool membershipStylesRegistered = false;
+		private bool pinStylesRegistered = false;
 
 		/// <summary>
 		/// Retrieve the XmlDocument that describes this KML object.
@@ -223,12 +237,12 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 		/// Create a style for each membership type. Detect common pin colors
 		/// and define the pins with those colors.
 		/// </summary>
-		private void RegisterMembershipStyles()
+		private void RegisterPinStyles()
 		{
 			LookupCollection lc;
 
 
-			if (membershipStylesRegistered == true)
+			if (pinStylesRegistered == true)
 				return;
 
 			lc = new LookupCollection(new Guid("0B4532DB-3188-40F5-B188-E7E6E4448C85"));
@@ -237,21 +251,42 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				if (String.IsNullOrEmpty(l.Qualifier) == false)
 				{
 					if (l.Qualifier == "pin_green.png")
-						RegisterPinStyle(l.Value, "#ff00ff00");
+					{
+						RegisterPinStyle("p" + l.Value, BaseUrl() + "UserControls/Custom/HDC/GoogleMaps/Images/person.png", "#ff00ff00");
+						RegisterPinStyle("f" + l.Value, BaseUrl() + "UserControls/Custom/HDC/GoogleMaps/Images/family.png", "#ff00ff00");
+					}
 					else if (l.Qualifier == "pin_red.png")
-						RegisterPinStyle(l.Value, "#ff0000d0");
+					{
+						RegisterPinStyle("p" + l.Value, BaseUrl() + "UserControls/Custom/HDC/GoogleMaps/Images/person.png", "#ff0000d0");
+						RegisterPinStyle("f" + l.Value, BaseUrl() + "UserControls/Custom/HDC/GoogleMaps/Images/family.png", "#ff0000d0");
+					}
 					else if (l.Qualifier == "pin_yellow.png")
-						RegisterPinStyle(l.Value, "#ff00ffff");
+					{
+						RegisterPinStyle("p" + l.Value, BaseUrl() + "UserControls/Custom/HDC/GoogleMaps/Images/person.png", "#ff00ffff");
+						RegisterPinStyle("f" + l.Value, BaseUrl() + "UserControls/Custom/HDC/GoogleMaps/Images/family.png", "#ff00ffff");
+					}
 					else if (l.Qualifier == "pin_grey.png")
-						RegisterPinStyle(l.Value, "#ff909090");
+					{
+						RegisterPinStyle("p" + l.Value, BaseUrl() + "UserControls/Custom/HDC/GoogleMaps/Images/person.png", "#ffb0b0b0");
+						RegisterPinStyle("f" + l.Value, BaseUrl() + "UserControls/Custom/HDC/GoogleMaps/Images/family.png", "#ffb0b0b0");
+					}
 					else
-						RegisterPinStyle(l.Value, "#ffffffff");
+					{
+						RegisterPinStyle("p" + l.Value, BaseUrl() + "UserControls/Custom/HDC/GoogleMaps/Images/person.png", null);
+						RegisterPinStyle("f" + l.Value, BaseUrl() + "UserControls/Custom/HDC/GoogleMaps/Images/family.png", null);
+					}
 				}
 				else
-					RegisterPinStyle(l.Value, "#ffffffff");
+				{
+					RegisterPinStyle("p" + l.Value, BaseUrl() + "UserControls/Custom/HDC/GoogleMaps/Images/person.png", null);
+					RegisterPinStyle("f" + l.Value, BaseUrl() + "UserControls/Custom/HDC/GoogleMaps/Images/family.png", null);
+				}
 			}
 
-			membershipStylesRegistered = true;
+			RegisterPinStyle("smallgroup", BaseUrl() + "UserControls/Custom/HDC/GoogleMaps/Images/house.png", "#ff00ff00");
+			RegisterPinStyle("campus", BaseUrl() + "UserControls/Custom/HDC/GoogleMaps/Images/chapel.png", null);
+
+			pinStylesRegistered = true;
 		}
 
 
@@ -259,8 +294,9 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 		/// Add all the style information for a new pin color.
 		/// </summary>
 		/// <param name="styleName">The name for this style tag.</param>
+		/// <param name="link">The hyperlink to use for the base image.</param>
 		/// <param name="color">The color as a google color string, #aabbggrr (aa=alpha, bb=blue, gg=green, rr=red).</param>
-		private void RegisterPinStyle(String styleName, String color)
+		private void RegisterPinStyle(String styleName, String link, String color)
 		{
 			XmlNode style = xmlDoc.CreateElement("Style");
 			XmlAttribute idAttrib = xmlDoc.CreateAttribute("id");
@@ -269,9 +305,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			idAttrib.Value = styleName;
 			style.Attributes.Append(idAttrib);
 			kmlDocument.AppendChild(style);
-			style.InnerXml = "<IconStyle><Icon>" +
-				"<href>http://maps.google.com/mapfiles/kml/pushpin/wht-pushpin.png</href>" +
-				"</Icon><color>" + color + "</color></IconStyle>";
+			style.InnerXml = "<IconStyle>" +
+				"<Icon><href>" + link + "</href></Icon>" +
+				(color != null ? "<color>" + color + "</color>" : "") +
+				"</IconStyle>";
 		}
 
 
@@ -399,7 +436,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			//
 			// Make sure all the membership pin types are registered.
 			//
-			RegisterMembershipStyles();
+			RegisterPinStyles();
 
 			//
 			// Create the placemark tag.
@@ -418,7 +455,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			// Create the style tag.
 			//
 			styleUrl = xmlDoc.CreateElement("styleUrl");
-			styleUrl.AppendChild(xmlDoc.CreateTextNode(p.MemberStatus.Value));
+			styleUrl.AppendChild(xmlDoc.CreateTextNode("#p" + p.MemberStatus.Value));
 			placemark.AppendChild(styleUrl);
 
 			//
@@ -476,7 +513,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			//
 			// Make sure all the membership pin types are registered.
 			//
-			RegisterMembershipStyles();
+			RegisterPinStyles();
 
 			//
 			// Create the placemark tag.
@@ -495,7 +532,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			// Create the style tag.
 			//
 			styleUrl = xmlDoc.CreateElement("styleUrl");
-			styleUrl.AppendChild(xmlDoc.CreateTextNode(head.MemberStatus.Value));
+			styleUrl.AppendChild(xmlDoc.CreateTextNode("#f" + head.MemberStatus.Value));
 			placemark.AppendChild(styleUrl);
 
 			personInfo = "";
@@ -538,6 +575,70 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			point = xmlDoc.CreateElement("Point");
 			coordinates = xmlDoc.CreateElement("coordinates");
 			coordinates.AppendChild(xmlDoc.CreateTextNode(String.Format("{0},{1},0", head.PrimaryAddress.Longitude, head.PrimaryAddress.Latitude)));
+			point.AppendChild(coordinates);
+			placemark.AppendChild(point);
+		}
+
+
+		/// <summary>
+		/// Create a new placemark object on the map that will identify a
+		/// single campus in the database.
+		/// </summary>
+		/// <param name="c">The Campus object to display.</param>
+		public void AddCampusPlacemark(Campus c)
+		{
+			XmlNode placemark, name, point, styleUrl, coordinates, description;
+
+
+			//
+			// If there is not a valid address, skip this person.
+			//
+			if (c.Address == null ||
+				(c.Address.Latitude == 0 && c.Address.Longitude == 0))
+				return;
+
+			//
+			// Make sure all the pin types are registered.
+			//
+			RegisterPinStyles();
+
+			//
+			// Create the placemark tag.
+			//
+			placemark = xmlDoc.CreateElement("Placemark");
+			kmlDocument.AppendChild(placemark);
+
+			//
+			// Create the name tag.
+			//
+			name = xmlDoc.CreateElement("name");
+			name.AppendChild(xmlDoc.CreateTextNode(c.Name));
+			placemark.AppendChild(name);
+
+			//
+			// Create the style tag.
+			//
+			styleUrl = xmlDoc.CreateElement("styleUrl");
+			styleUrl.AppendChild(xmlDoc.CreateTextNode("#campus"));
+			placemark.AppendChild(styleUrl);
+
+			//
+			// Store the description information.
+			//
+			description = xmlDoc.CreateElement("description");
+			description.InnerXml = "<![CDATA[" +
+				c.Address.StreetLine1 + "<br />" +
+				(String.IsNullOrEmpty(c.Address.StreetLine2) ? "" : c.Address.StreetLine2 + "<br />") +
+				c.Address.City + ", " + c.Address.State + " " + c.Address.PostalCode + "<br />" +
+				"]]>";
+			placemark.AppendChild(description);
+
+			//
+			// Set the coordinates and store the placemark.
+			//
+			point = xmlDoc.CreateElement("Point");
+			coordinates = xmlDoc.CreateElement("coordinates");
+			coordinates.AppendChild(xmlDoc.CreateTextNode(String.Format("{0},{1},0", c.Address.Longitude, c.Address.Latitude)));
 			point.AppendChild(coordinates);
 			placemark.AppendChild(point);
 		}
@@ -646,6 +747,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
 
 			url.Append(HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority));
+			url.Append(":" + HttpContext.Current.Request.Url.Port.ToString());
 			segments = HttpContext.Current.Request.Url.Segments;
 			for (i = 0; i < segments.Length - 1; i++)
 			{
