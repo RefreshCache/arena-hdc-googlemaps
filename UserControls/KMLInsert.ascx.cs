@@ -107,8 +107,8 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				"    topTabs.add(newTab);\n" +
 				"    tabStrip.endUpdate();\n" +
 				"    download = $(\"nobr:contains('Download')\").parent().parent().parent().parent()\n" +
-				"    download.find(\"nobr\").html(\"<img style=\\\"margin-top: -2px; margin-bottom: -4px; margin-right: 4px;\\\" src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\">Download\");\n" +
 				"  }\n" +
+				"  download.find(\"nobr\").html(\"<img style=\\\"margin-top: -2px; margin-bottom: -4px; margin-right: 4px;\\\" src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\">Download\");\n" +
 				"  download.removeAttr(\"onclick\");\n" +
 				"  download.click(function() {$('#KMLDownloadDialog').jqmShow();});\n" +
 				"});\n" +
