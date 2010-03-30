@@ -45,8 +45,8 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 		[BooleanSetting("Area Maps Option", "Allow the user to turn on the display of area overlay maps.", true, true)]
 		public Boolean AreaMapsSetting { get { return Convert.ToBoolean(Setting("AreaMaps", "1", true)); } }
 
-		[TextSetting("Small Group ClusterID", "Allow the user to turn on the display of small group locations in this clusterID. -1 or empty to disable.", false)]
-		public int ClusterIDSetting { get { return Convert.ToInt32(Setting("ClusterID", "-1", false)); } }
+		[TextSetting("Small Group CategoryID", "Allow the user to turn on the display of small group locations in this categoryID. -1 or empty to disable.", false)]
+		public int CategoryIDSetting { get { return Convert.ToInt32(Setting("CategoryID", "-1", false)); } }
 
 		[BooleanSetting("Campus Locations Option", "Allow the user to turn on the display of campus locations.", true, true)]
 		public Boolean CampusLocationsSetting { get { return Convert.ToBoolean(Setting("CampusLocations", "true", true)); } }
@@ -57,21 +57,32 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
 		private void Page_Load(object sender, System.EventArgs e)
 		{
+			//
+			// Register all the Javascript references.
+			//
 			smpScripts.Scripts.Add(new ScriptReference("~/Include/scripts/jquery.1.3.2.min.js"));
 			smpScripts.Scripts.Add(new ScriptReference("~/Include/scripts/jquery.jgrowl.min.js"));
 			smpScripts.Scripts.Add(new ScriptReference("Includes/jqModal.js"));
 			smpScripts.Scripts.Add(new ScriptReference("Includes/jquery.iphone-switch.js"));
 
+			//
+			// Enable/Disable the user choices.
+			//
 			showAreaSwitchDiv.Visible = AreaMapsSetting;
-			smallGroupsSwitchDiv.Visible = (ClusterIDSetting != -1);
+			smallGroupsSwitchDiv.Visible = (CategoryIDSetting > 0);
 			campusLocationsSwitchDiv.Visible = CampusLocationsSetting;
 
+			//
+			// Call the appropriate module handler.
+			//
 			if (ModuleTypeSetting == KMLInsertType.ListReportView)
 				Module_ListReportView();
 			else if (ModuleTypeSetting == KMLInsertType.AreaDetail)
 				Module_AreaDetail();
 			else
 				throw new Exception("Invalid Module Type has been specified.");
+
+
 		}
 		
 		#endregion
