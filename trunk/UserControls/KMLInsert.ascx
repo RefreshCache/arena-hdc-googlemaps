@@ -53,7 +53,7 @@
         if ($('#showAreaSwitch').data('switch_state') == 'on')
             url += '&showAreaID=all';
         if ($('#smallGroupsSwitch').data('switch_state') == 'on')
-            url += '&populateClusterID=0';
+            url += '&populateCategoryID=<%= CategoryIDSetting %>';
         if ($('#campusLocationsSwitch').data('switch_state') == 'on')
             url += '&populatCampus=yes';
 

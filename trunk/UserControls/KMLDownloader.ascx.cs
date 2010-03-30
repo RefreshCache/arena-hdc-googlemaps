@@ -28,6 +28,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 	using Arena.List;
 	using Arena.Organization;
 	using Arena.Portal;
+	using Arena.SmallGroup;
 
 	public partial class KMLDownloader : PortalControl
 	{
@@ -129,6 +130,22 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			}
 
 			//
+			// Populate the small group locations.
+			//
+			if (Request.Params["populateCategoryID"] != null)
+			{
+				GroupClusterCollection gcc = new GroupClusterCollection(Convert.ToInt32(Request.Params["populateCategoryID"]), ArenaContext.Current.Organization.OrganizationID);
+
+
+				foreach (GroupCluster gc in gcc)
+				{
+					PopulateKmlFromCluster(kml, gc);
+				}
+
+				dumpXml = true;
+			}
+
+			//
 			// Request to include the campus locations.
 			//
 			if (Request.Params["populateCampus"] != null)
@@ -151,10 +168,31 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			}
 		}
 
-		//
-		// Populate people from a given AreaID. A single placemark
-		// will consist of an entire family rather than individuals.
-		//
+		/// <summary>
+		/// Populate the KML data stream with all the small groups that are
+		/// a direct or indirect descendant of the given GroupCluster.
+		/// </summary>
+		/// <param name="kml">The KML object to populate.</param>
+		/// <param name="parent">The GroupCluster object to populate from.</param>
+		void PopulateKmlFromCluster(KML kml, GroupCluster parent)
+		{
+			foreach (GroupCluster gc in parent.ChildClusters)
+			{
+				PopulateKmlFromCluster(kml, gc);
+			}
+
+			foreach (Group g in parent.SmallGroups)
+			{
+				kml.AddSmallGroupPlacemark(g);
+			}
+		}
+
+		/// <summary>
+		/// Populate people from a given AreaID. A single placemark
+		/// will consist of an entire family rather than individuals.
+		/// </summary>
+		/// <param name="kml">The KML object to populate.</param>
+		/// <param name="areaID">The ID of the Area to populate from.</param>
 		private void PopulateKmlFromArea(KML kml, int areaID)
 		{
 			PersonCollection pc = new PersonCollection();
@@ -283,7 +321,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				}
 			}
 
-			RegisterPinStyle("smallgroup", BaseUrl() + "UserControls/Custom/HDC/GoogleMaps/Images/house.png", "#ff00ff00");
+			RegisterPinStyle("smallgroup", BaseUrl() + "UserControls/Custom/HDC/GoogleMaps/Images/home.png", "#ff00ff00");
 			RegisterPinStyle("campus", BaseUrl() + "UserControls/Custom/HDC/GoogleMaps/Images/chapel.png", null);
 
 			pinStylesRegistered = true;
@@ -317,16 +355,19 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 		/// information.
 		/// </summary>
 		/// <param name="p">The person object to retrieve information about.</param>
+		/// <param name="includeName">Wether or not to include the name of the person.</param>
 		/// <returns>An HTML formatted string.</returns>
-		private string PersonInfo(Person p)
+		private string PersonInfo(Person p, Boolean includeName)
 		{
-			String personInfo;
+			String personInfo = "";
 
 
 			//
 			// Build up the person information.
 			//
-			personInfo = p.MemberStatus.Value + "<br />" +
+			if (includeName)
+				personInfo += "<b>" + p.FullName + "</b><br />";
+			personInfo += p.MemberStatus.Value + "<br />" +
 				p.Gender.ToString() + "<br />" +
 				p.MaritalStatus.Value + "<br />" +
 				new FamilyMember(p.PersonID).FamilyRole.Value + "<br />" +
@@ -388,8 +429,9 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 		/// for the given person object.
 		/// </summary>
 		/// <param name="p">The person whose phone numbers we want.</param>
+		/// <param name="includeFamily">Wether or not to include family numbers for this person.</param>
 		/// <returns>An HTML formatted string.</returns>
-		private string PersonPhoneNumbers(Person p)
+		private string PersonPhoneNumbers(Person p, Boolean includeFamily)
 		{
 			StringBuilder phoneStrings = new StringBuilder();
 
@@ -402,7 +444,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				//
 				// Skip unlisted, empty or family (propagated) numbers.
 				//
-				if (phone.Unlisted == true || phone.Number.Length == 0 || phone.PhoneType.Qualifier.Contains("propagate") == true)
+				if (phone.Unlisted == true || phone.Number.Length == 0 || (includeFamily == false && phone.PhoneType.Qualifier.Contains("propagate") == true))
 					continue;
 
 				if (String.IsNullOrEmpty(phone.Extension))
@@ -412,6 +454,35 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			}
 
 			return phoneStrings.ToString();
+		}
+
+
+		/// <summary>
+		/// Find the main/home phone number for the given person and
+		/// return it as a descriptive string, e.g. Main/Home: 555-5555.
+		/// </summary>
+		/// <param name="p">The Person to lookup.</param>
+		/// <returns>String containing phone number or empty string if not found.</returns>
+		private string PersonMainPhoneDescription(Person p)
+		{
+			Guid target = new Guid("F2A0FBA2-D5AB-421F-A5AB-0C67DB6FD72E");
+
+
+			//
+			// Look for the main phone number.
+			//
+			foreach (PersonPhone phone in p.Phones)
+			{
+				if (phone.Unlisted == false && phone.PhoneType.Guid.Equals(target))
+				{
+					if (String.IsNullOrEmpty(phone.Extension))
+						return phone.PhoneType.Value + " #: " + phone.Number + "<br />";
+					else
+						return phone.PhoneType.Value + " #: " + phone.Number + " x" + phone.Extension + "<br />";
+				}
+			}
+
+			return "";
 		}
 
 
@@ -461,8 +532,8 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			//
 			// Build up the person information and phone numbers.
 			//
-			personInfo = PersonInfo(p);
-			phoneStrings = PersonPhoneNumbers(p);
+			personInfo = PersonInfo(p, false);
+			phoneStrings = PersonPhoneNumbers(p, true);
 
 			//
 			// Store the description information.
@@ -543,13 +614,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				//
 				// Build up the person information and phone numbers.
 				//
-				info = PersonInfo(p);
-				phones = PersonPhoneNumbers(p);
+				info = PersonInfo(p, true);
+				phones = PersonPhoneNumbers(p, false);
 
 				if (personInfo.Length > 0)
 					personInfo += "<hr width=\"75%\"/>";
 
-				personInfo += "<b>" + p.FullName + "</b><br />" + info;
+				personInfo += info;
 				if (phones.Length > 0)
 					personInfo += phones;
 			}
@@ -639,6 +710,83 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			point = xmlDoc.CreateElement("Point");
 			coordinates = xmlDoc.CreateElement("coordinates");
 			coordinates.AppendChild(xmlDoc.CreateTextNode(String.Format("{0},{1},0", c.Address.Longitude, c.Address.Latitude)));
+			point.AppendChild(coordinates);
+			placemark.AppendChild(point);
+		}
+
+
+		/// <summary>
+		/// Create a new placemark object on the map that will identify a
+		/// small group in the database.
+		/// </summary>
+		/// <param name="group">The Group object to display.</param>
+		public void AddSmallGroupPlacemark(Group group)
+		{
+			XmlNode placemark, name, point, styleUrl, coordinates, description;
+			String personInfo, phoneString;
+
+
+			//
+			// If there is not a valid address, skip this group.
+			//
+			if (group.TargetLocation == null ||
+				(group.TargetLocation.Latitude == 0 && group.TargetLocation.Longitude == 0))
+				return;
+
+			//
+			// Make sure all the pin types are registered.
+			//
+			RegisterPinStyles();
+
+			//
+			// Create the placemark tag.
+			//
+			placemark = xmlDoc.CreateElement("Placemark");
+			kmlDocument.AppendChild(placemark);
+
+			//
+			// Create the name tag.
+			//
+			name = xmlDoc.CreateElement("name");
+			name.AppendChild(xmlDoc.CreateTextNode(group.Name));
+			placemark.AppendChild(name);
+
+			//
+			// Create the style tag.
+			//
+			styleUrl = xmlDoc.CreateElement("styleUrl");
+			styleUrl.AppendChild(xmlDoc.CreateTextNode("#smallgroup"));
+			placemark.AppendChild(styleUrl);
+
+			//
+			// Build up the person information and phone numbers.
+			//
+			personInfo = PersonInfo(group.Leader, true);
+			phoneString = PersonMainPhoneDescription(group.Leader);
+
+			//
+			// Store the description information.
+			//
+			description = xmlDoc.CreateElement("description");
+			description.InnerXml = "<![CDATA[" +
+				group.TargetLocation.StreetLine1 + "<br />" +
+				(String.IsNullOrEmpty(group.TargetLocation.StreetLine2) ? "" : group.TargetLocation.StreetLine2 + "<br />") +
+				group.TargetLocation.City + ", " + group.TargetLocation.State + " " + group.TargetLocation.PostalCode + "<br />" +
+				group.ClusterType.Category.MeetingDayCaption + ": <b>" + group.MeetingDay.Value + "</b><br />" +
+				"Group Size: <b>" + group.Members.Count.ToString() + "</b><br />" +
+				"Registrations: <b>" + group.RegistrationCount.ToString() + "</b><br />" +
+				"<hr />" +
+				personInfo +
+				phoneString +
+				"]]>";
+			placemark.AppendChild(description);
+
+			//
+			// Set the coordinates and store the placemark.
+			//
+			point = xmlDoc.CreateElement("Point");
+			coordinates = xmlDoc.CreateElement("coordinates");
+			coordinates.AppendChild(xmlDoc.CreateTextNode(String.Format("{0},{1},0", group.TargetLocation.Longitude, group.TargetLocation.Latitude)));
 			point.AppendChild(coordinates);
 			placemark.AppendChild(point);
 		}
