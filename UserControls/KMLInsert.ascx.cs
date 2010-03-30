@@ -28,14 +28,15 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 		public enum KMLInsertType
 		{
 			ListReportView = 1,
-			AreaDetail = 2
+			AreaDetail = 2,
+			SmallGroupTabControl = 3
 		}
 		#region Module Settings
 
 		[CustomListSetting("Module Type", "Select the type of module, also located on this page, that this KML download module will be associated with.", true,
 			"1",
-			new string[] { "List Report View", "Area Detail" },
-			new string[] { "1", "2" }
+			new string[] { "List Report View", "Area Detail", "Small Group Tab Control" },
+			new string[] { "1", "2", "3" }
 		)]
 		public KMLInsertType ModuleTypeSetting { get { return (KMLInsertType)Convert.ToInt32(Setting("ModuleType", "1", true)); } }
 
@@ -79,6 +80,8 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				Module_ListReportView();
 			else if (ModuleTypeSetting == KMLInsertType.AreaDetail)
 				Module_AreaDetail();
+			else if (ModuleTypeSetting == KMLInsertType.SmallGroupTabControl)
+				Module_SmallGroupTabControl();
 			else
 				throw new Exception("Invalid Module Type has been specified.");
 
@@ -125,6 +128,22 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				"});\n" +
 				"var KMLDownloadURL = '&populateAreaID=" + Request.QueryString["AREA"] + "';";
 			Page.ClientScript.RegisterStartupScript(this.GetType(), this.ClientID + "_geAreaDetail", script, true);
+		}
+
+		void Module_SmallGroupTabControl()
+		{
+			if (String.IsNullOrEmpty(Request.QueryString["GROUP"]) == false)
+			{
+				String script;
+
+
+				script = "$(document).ready(function() {\n" +
+					"  var container = $(\"td.listPager[align='right']\");\n" +
+					"  container.append(\"<a href=\\\"#\\\" onclick=\\\"$('#KMLDownloadDialog').jqmShow(); return false;\\\"><img src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\"></a>\");\n" +
+					"});\n" +
+					"var KMLDownloadURL = '&populateSmallGroupID=" + Request.QueryString["GROUP"] + "';";
+				Page.ClientScript.RegisterStartupScript(this.GetType(), this.ClientID + "_geSmallGroupTabControl", script, true);
+			}
 		}
 	}
 }

@@ -146,6 +146,27 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			}
 
 			//
+			// Populate the given small group IDs.
+			//
+			if (Request.Params["populateSmallGroupID"] != null)
+			{
+				foreach (String groupString in Request.Params["populateSmallGroupID"].Split(','))
+				{
+					Group g = new Group(Convert.ToInt32(groupString));
+
+					foreach (GroupMember p in g.Members)
+					{
+						if (p.Active == true)
+							kml.AddPersonPlacemark(p);
+					}
+				}
+
+				if (Request.Params["populateSmallGroupID"].Split(',').Length == 1)
+					filename = new Group(Convert.ToInt32(Request.Params["populateSmallGroupID"])).Name + ".kml";
+				dumpXml = true;
+			}
+
+			//
 			// Request to include the campus locations.
 			//
 			if (Request.Params["populateCampus"] != null)
