@@ -139,9 +139,24 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
 				foreach (GroupCluster gc in gcc)
 				{
-					PopulateKmlFromCluster(kml, gc);
+					PopulateKmlFromCluster(kml, gc, false, true);
 				}
 
+				dumpXml = true;
+			}
+
+			//
+			// Populate people from the given cluster IDs.
+			//
+			if (Request.Params["populateClusterID"] != null)
+			{
+				foreach (String clusterString in Request.Params["populateClusterID"].Split(','))
+				{
+					PopulateKmlFromCluster(kml, new GroupCluster(Convert.ToInt32(clusterString)), true, false);
+				}
+
+				if (Request.Params["populateClusterID"].Split(',').Length == 1)
+					filename = new GroupCluster(Convert.ToInt32(Request.Params["populateClusterID"])).Name + ".kml";
 				dumpXml = true;
 			}
 
@@ -154,6 +169,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				{
 					Group g = new Group(Convert.ToInt32(groupString));
 
+					kml.AddPersonPlacemark(g.Leader);
 					foreach (GroupMember p in g.Members)
 					{
 						if (p.Active == true)
@@ -195,16 +211,31 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 		/// </summary>
 		/// <param name="kml">The KML object to populate.</param>
 		/// <param name="parent">The GroupCluster object to populate from.</param>
-		void PopulateKmlFromCluster(KML kml, GroupCluster parent)
+		/// <param name="includePeople">Wether or not to include people in this dump.</param>
+		/// <param name="includeGroups">Wether or not to include small groups in this dump.</param>
+		void PopulateKmlFromCluster(KML kml, GroupCluster parent, Boolean includePeople, Boolean includeGroups)
 		{
 			foreach (GroupCluster gc in parent.ChildClusters)
 			{
-				PopulateKmlFromCluster(kml, gc);
+				PopulateKmlFromCluster(kml, gc, includePeople, includeGroups);
 			}
 
 			foreach (Group g in parent.SmallGroups)
 			{
-				kml.AddSmallGroupPlacemark(g);
+				if (includeGroups)
+				{
+					kml.AddSmallGroupPlacemark(g);
+				}
+
+				if (includePeople)
+				{
+					kml.AddPersonPlacemark(g.Leader);
+
+					foreach (Person p in g.Members)
+					{
+						kml.AddPersonPlacemark(p);
+					}
+				}
 			}
 		}
 
