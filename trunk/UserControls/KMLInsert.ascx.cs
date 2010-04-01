@@ -30,15 +30,16 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			ListReportView = 1,
 			AreaDetail = 2,
 			SmallGroupTabControl = 3,
-			SmallGroupClusterTabControl = 4
+			SmallGroupClusterTabControl = 4,
+			ProfileTabControl = 5
 		}
 		#region Module Settings
 
 		[CustomListSetting("Module Type", "Select the type of module, also located on this page, that this KML download module will be associated with.", true,
 			"1",
 			new string[] { "List Report View", "Area Detail", "Small Group Tab Control",
-							"Small Group Cluster Tab Control" },
-			new string[] { "1", "2", "3", "4" }
+							"Small Group Cluster Tab Control", "Profile Tab Control" },
+			new string[] { "1", "2", "3", "4", "5" }
 		)]
 		public KMLInsertType ModuleTypeSetting { get { return (KMLInsertType)Convert.ToInt32(Setting("ModuleType", "1", true)); } }
 
@@ -78,7 +79,6 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			//
 			// Call the appropriate module handler.
 			//
-			//TODO: add support for profiles, prayer requests?
 			if (ModuleTypeSetting == KMLInsertType.ListReportView)
 				Module_ListReportView();
 			else if (ModuleTypeSetting == KMLInsertType.AreaDetail)
@@ -87,6 +87,8 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				Module_SmallGroupTabControl();
 			else if (ModuleTypeSetting == KMLInsertType.SmallGroupClusterTabControl)
 				Module_SmallGroupClusterTabControl();
+			else if (ModuleTypeSetting == KMLInsertType.ProfileTabControl)
+				Module_ProfileTabControl();
 			else
 				throw new Exception("Invalid Module Type has been specified.");
 
@@ -164,6 +166,22 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 					"});\n" +
 					"var KMLDownloadURL = '&populateClusterID=" + Request.QueryString["CLUSTER"] + "';";
 				Page.ClientScript.RegisterStartupScript(this.GetType(), this.ClientID + "_geSmallGroupTabControl", script, true);
+			}
+		}
+
+		void Module_ProfileTabControl()
+		{
+			if (String.IsNullOrEmpty(Request.QueryString["PROFILE"]) == false)
+			{
+				String script;
+
+
+				script = "$(document).ready(function() {\n" +
+					"  var container = $(\"td.listPager[align='right']\");\n" +
+					"  container.append(\"<a href=\\\"#\\\" onclick=\\\"$('#KMLDownloadDialog').jqmShow(); return false;\\\"><img src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\"></a>\");\n" +
+					"});\n" +
+					"var KMLDownloadURL = '&populateProfileID=" + Request.QueryString["PROFILE"] + "';";
+				Page.ClientScript.RegisterStartupScript(this.GetType(), this.ClientID + "_geProfileTabControl", script, true);
 			}
 		}
 	}
