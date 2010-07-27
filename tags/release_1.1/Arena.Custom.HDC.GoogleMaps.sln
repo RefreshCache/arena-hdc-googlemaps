@@ -1,0 +1,74 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library", "Library\Library.csproj", "{697D3FD5-025B-40F7-BBDC-3842BF601402}"
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "UserControls", "UserControls\", "{2136CC04-28E4-45D2-92EC-FD78D0EE3983}"
+	ProjectSection(WebsiteProperties) = preProject
+		SccProjectName = "Svn"
+		SccAuxPath = "Svn"
+		SccLocalPath = "Svn"
+		SccProvider = "SubversionScc"
+		TargetFramework = "3.5"
+		Debug.AspNetCompiler.VirtualPath = "/UserControls"
+		Debug.AspNetCompiler.PhysicalPath = "UserControls\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\UserControls\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/UserControls"
+		Release.AspNetCompiler.PhysicalPath = "UserControls\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\UserControls\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "3778"
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C7E7019B-A02D-4318-88BF-39751254D7B8}"
+	ProjectSection(SolutionItems) = preProject
+		HDCGoogleMaps.xml = HDCGoogleMaps.xml
+		package.xml = package.xml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|.NET = Debug|.NET
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Release|.NET = Release|.NET
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{697D3FD5-025B-40F7-BBDC-3842BF601402}.Debug|.NET.ActiveCfg = Debug|Any CPU
+		{697D3FD5-025B-40F7-BBDC-3842BF601402}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{697D3FD5-025B-40F7-BBDC-3842BF601402}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{697D3FD5-025B-40F7-BBDC-3842BF601402}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{697D3FD5-025B-40F7-BBDC-3842BF601402}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{697D3FD5-025B-40F7-BBDC-3842BF601402}.Release|.NET.ActiveCfg = Release|Any CPU
+		{697D3FD5-025B-40F7-BBDC-3842BF601402}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{697D3FD5-025B-40F7-BBDC-3842BF601402}.Release|Any CPU.Build.0 = Release|Any CPU
+		{697D3FD5-025B-40F7-BBDC-3842BF601402}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{697D3FD5-025B-40F7-BBDC-3842BF601402}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{2136CC04-28E4-45D2-92EC-FD78D0EE3983}.Debug|.NET.ActiveCfg = Debug|.NET
+		{2136CC04-28E4-45D2-92EC-FD78D0EE3983}.Debug|.NET.Build.0 = Debug|.NET
+		{2136CC04-28E4-45D2-92EC-FD78D0EE3983}.Debug|Any CPU.ActiveCfg = Debug|.NET
+		{2136CC04-28E4-45D2-92EC-FD78D0EE3983}.Debug|Mixed Platforms.ActiveCfg = Debug|.NET
+		{2136CC04-28E4-45D2-92EC-FD78D0EE3983}.Debug|Mixed Platforms.Build.0 = Debug|.NET
+		{2136CC04-28E4-45D2-92EC-FD78D0EE3983}.Release|.NET.ActiveCfg = Debug|.NET
+		{2136CC04-28E4-45D2-92EC-FD78D0EE3983}.Release|.NET.Build.0 = Debug|.NET
+		{2136CC04-28E4-45D2-92EC-FD78D0EE3983}.Release|Any CPU.ActiveCfg = Debug|.NET
+		{2136CC04-28E4-45D2-92EC-FD78D0EE3983}.Release|Mixed Platforms.ActiveCfg = Debug|.NET
+		{2136CC04-28E4-45D2-92EC-FD78D0EE3983}.Release|Mixed Platforms.Build.0 = Debug|.NET
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
