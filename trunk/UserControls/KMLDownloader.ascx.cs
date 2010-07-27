@@ -101,8 +101,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				{
 					Profile tag = new Profile(Convert.ToInt32(profileString));
 
-					foreach (Person p in tag.Members)
-						kml.AddPersonPlacemark(p);
+                    foreach (ProfileMember p in tag.Members)
+                    {
+                        if (p.Status.Qualifier != "D")
+                        {
+                            kml.AddPersonPlacemark(p);
+                        }
+                    }
 				}
 
 				if (Request.Params["populateProfileID"].Split(',').Length == 1)
@@ -122,7 +127,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				rdr = new Arena.DataLayer.Organization.OrganizationData().ExecuteReader(report.Query);
 				while (rdr.Read())
 				{
-					kml.AddPersonPlacemark(new Person(Convert.ToInt32(rdr["person_id"])));
+                    if (rdr["person_id"] != null)
+                    {
+                        kml.AddPersonPlacemark(new Person(Convert.ToInt32(rdr["person_id"])));
+                    }
 				}
 
 				filename = report.Name + ".kml";

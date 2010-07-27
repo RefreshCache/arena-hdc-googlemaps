@@ -55,7 +55,7 @@
         if ($('#smallGroupsSwitch').data('switch_state') == 'on')
             url += '&populateCategoryID=<%= CategoryIDSetting %>';
         if ($('#campusLocationsSwitch').data('switch_state') == 'on')
-            url += '&populatCampus=yes';
+            url += '&populateCampus=yes';
 
         url += KMLDownloadURL;
 
