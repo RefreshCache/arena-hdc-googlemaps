@@ -27,6 +27,12 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "UserControls", "UserControl
 		VWDPort = "3778"
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C7E7019B-A02D-4318-88BF-39751254D7B8}"
+	ProjectSection(SolutionItems) = preProject
+		HDCGoogleMaps.xml = HDCGoogleMaps.xml
+		package.xml = package.xml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True

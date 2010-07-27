@@ -1,0 +1,22 @@
+<ArenaPackage version="2009.2.100.1401">
+  <Readme></Readme>
+  <Modules>
+    <Module temp_module_id="-1" module_url="UserControls/Custom/HDC/GoogleMaps/KMLInsert.ascx" module_name="HDC Google Maps Insert" module_desc="This module inserts a KML Export control into an existing web page." allows_child_modules="0" image_path="" _source="UserControls/KMLInsert.ascx" _source_image="" _system="0" />
+    <Module temp_module_id="-2" module_url="UserControls/Custom/HDC/GoogleMaps/KMLDownloader.ascx" module_name="HDC KML Downloader" module_desc="Downloads information requested as a valid KML stream." allows_child_modules="0" image_path="" _source="UserControls/KMLDownloader.ascx" _source_image="" _system="0" />
+  </Modules>
+  <Pages />
+  <Files>
+    <File path="UserControls/Custom/HDC/GoogleMaps/Images/chapel.png" _source="UserControls/Images/chapel.png" />
+    <File path="UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png" _source="UserControls/Images/darkearth.png" />
+    <File path="UserControls/Custom/HDC/GoogleMaps/Images/family.png" _source="UserControls/Images/family.png" />
+    <File path="UserControls/Custom/HDC/GoogleMaps/Images/home.png" _source="UserControls/Images/home.png" />
+    <File path="UserControls/Custom/HDC/GoogleMaps/Images/iphone_switch.png" _source="UserControls/Images/iphone_switch.png" />
+    <File path="UserControls/Custom/HDC/GoogleMaps/Images/iphone_switch_container_off.png" _source="UserControls/Images/iphone_switch_container_off.png" />
+    <File path="UserControls/Custom/HDC/GoogleMaps/Images/iphone_switch_container_on.png" _source="UserControls/Images/iphone_switch_container_on.png" />
+    <File path="UserControls/Custom/HDC/GoogleMaps/Images/person.png" _source="UserControls/Images/person.png" />
+    <File path="UserControls/Custom/HDC/GoogleMaps/Images/title-bg.png" _source="UserControls/Images/title-bg.png" />
+    <File path="UserControls/Custom/HDC/GoogleMaps/Includes/jqModal.css" _source="UserControls/Includes/jqModal.css" />
+    <File path="UserControls/Custom/HDC/GoogleMaps/Includes/jqModal.js" _source="UserControls/Includes/jqModal.js" />
+    <File path="UserControls/Custom/HDC/GoogleMaps/Includes/jquery.iphone-switch.js" _source="UserControls/Includes/jquery.iphone-switch.js" />
+  </Files>
+</ArenaPackage>
