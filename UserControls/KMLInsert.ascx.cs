@@ -64,10 +64,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			//
 			// Register all the Javascript references.
 			//
-			smpScripts.Scripts.Add(new ScriptReference("~/Include/scripts/jquery.1.3.2.min.js"));
-			smpScripts.Scripts.Add(new ScriptReference("~/Include/scripts/jquery.jgrowl.min.js"));
-			smpScripts.Scripts.Add(new ScriptReference("Includes/jqModal.js"));
-			smpScripts.Scripts.Add(new ScriptReference("Includes/jquery.iphone-switch.js"));
+            BasePage.AddJavascriptInclude(this.Page, "include/scripts/jquery.1.3.2.min.js");
+            BasePage.AddJavascriptInclude(this.Page, "include/scripts/jquery.jgrowl.min.js");
+            BasePage.AddJavascriptInclude(this.Page, "UserControls/Custom/HDC/GoogleMaps/includes/jqModal.js");
+            BasePage.AddJavascriptInclude(this.Page, "UserControls/Custom/HDC/GoogleMaps/includes/jquery.iphone-switch.js");
 
 			//
 			// Enable/Disable the user choices.
