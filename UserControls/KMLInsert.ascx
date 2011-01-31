@@ -1,7 +1,5 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="KMLInsert.ascx.cs" Inherits="ArenaWeb.UserControls.Custom.HDC.GoogleMaps.KMLInsert" %>
+<%@ Control Language="C#" AutoEventWireup="true" CodeFile="KMLInsert.ascx.cs" CodeBehind="KMLInsert.ascx.cs" Inherits="ArenaWeb.UserControls.Custom.HDC.GoogleMaps.KMLInsert" %>
 <%@ Register TagPrefix="Arena" Namespace="Arena.Portal.UI" Assembly="Arena.Portal.UI" %>
-
-<asp:ScriptManagerProxy ID="smpScripts" runat="server" />
 
 <link type="text/css" rel="Stylesheet" href="UserControls/Custom/HDC/GoogleMaps/Includes/jqModal.css" />
 <link type="text/css" rel="Stylesheet" href="css/jquery.jgrowl.css" />
