@@ -94,7 +94,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			}
 
 			//
-			// Request to populate based on area IDs.
+			// Request to populate based on profile/tag IDs.
 			//
 			if (Request.Params["populateProfileID"] != null)
 			{

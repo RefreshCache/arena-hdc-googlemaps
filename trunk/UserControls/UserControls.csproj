@@ -69,11 +69,32 @@
     <Compile Include="KMLInsert.ascx.designer.cs">
       <DependentUpon>KMLInsert.ascx</DependentUpon>
     </Compile>
+    <Compile Include="PeopleInRange.ascx.cs">
+      <DependentUpon>PeopleInRange.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="PeopleInRange.ascx.designer.cs">
+      <DependentUpon>PeopleInRange.ascx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Images\chapel.png" />
+    <Content Include="Images\darkearth.png" />
+    <Content Include="Images\family.png" />
+    <Content Include="Images\home.png" />
+    <Content Include="Images\iphone_switch.png" />
+    <Content Include="Images\iphone_switch_container_off.png" />
+    <Content Include="Images\iphone_switch_container_on.png" />
+    <Content Include="Images\person.png" />
+    <Content Include="Images\title-bg.png" />
+    <Content Include="Includes\jqModal.css" />
+    <Content Include="Includes\jqModal.js" />
+    <Content Include="Includes\jquery.iphone-switch.js" />
     <Content Include="KMLDownloader.ascx" />
     <Content Include="KMLInsert.ascx" />
+    <Content Include="PeopleInRange.ascx" />
+    <Content Include="GoogleService.asmx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Library\Library.csproj">
