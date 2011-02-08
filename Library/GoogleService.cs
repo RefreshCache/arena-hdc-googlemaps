@@ -174,5 +174,28 @@ namespace Arena.Custom.HDC.GoogleMaps
                 (String.IsNullOrEmpty(start) ? 0 : Convert.ToInt32(start)),
                 (String.IsNullOrEmpty(count) ? Int32.MaxValue : Convert.ToInt32(count)));
         }
+
+        
+        /// <summary>
+        /// Load a collection of small groups who are in range of the specific coordinates.
+        /// </summary>
+        /// <param name="latitude">The latitude coordinate of the center point to search from.</param>
+        /// <param name="longitude">The longitude of the coordinate of the center point to search from.</param>
+        /// <param name="distance">The distance out to search from the center point.</param>
+        /// <param name="start">The starting index of the records to retrieve. To retrieve all records pass 0.</param>
+        /// <param name="count">The number of records to retrieve. Pass an empty string for all records. Due to a limitation in Microsofts JSON implementation you should not retrieve more than 100 records at a time.</param>
+        /// <returns>A list of SmallGroupPlacemarks that can be placed on a google map.</returns>
+        [WebMethod]
+        public List<SmallGroupPlacemark> LoadGroupsInRadius(Double latitude, Double longitude, Double distance, String start, String count)
+        {
+            Google google;
+
+
+            google = new Google(ArenaContext.Current.User, HttpContext.Current.Request.ApplicationPath);
+
+            return google.SmallGroupPlacemarksInRadius(latitude, longitude, distance,
+                (String.IsNullOrEmpty(start) ? 0 : Convert.ToInt32(start)),
+                (String.IsNullOrEmpty(count) ? Int32.MaxValue : Convert.ToInt32(count)));
+        }
     }
 }

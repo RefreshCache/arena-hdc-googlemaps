@@ -69,6 +69,11 @@ namespace Arena.Custom.HDC.GoogleMaps
         /// <summary>
         /// Loads entire family units onto the map.
         /// </summary>
-        Families = 1
+        Families = 1,
+
+        /// <summary>
+        /// Load small groups onto the map.
+        /// </summary>
+        SmallGroups = 2
     }
 }
