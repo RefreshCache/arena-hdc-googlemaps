@@ -8,11 +8,16 @@ using Arena.Core;
 
 namespace Arena.Custom.HDC.GoogleMaps.Maps
 {
+    /// <summary>
+    /// This class defines the information needed to identify a family unit on
+    /// the map as a placemark.
+    /// </summary>
+    [Serializable]
     public class FamilyPlacemark : Placemark
     {
-        public String PinImage;
-
-
+        /// <summary>
+        /// Generic constructor for use with serialization.
+        /// </summary>
         public FamilyPlacemark()
             : base()
         {
