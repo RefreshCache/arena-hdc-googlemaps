@@ -58,6 +58,33 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.TextBox txtDistance;
         
         /// <summary>
+        /// ddlType control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlType;
+        
+        /// <summary>
+        /// cbShowHome control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.CheckBox cbShowHome;
+        
+        /// <summary>
+        /// cbShowCampus control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.CheckBox cbShowCampus;
+        
+        /// <summary>
         /// btnPopulate control.
         /// </summary>
         /// <remarks>
@@ -65,6 +92,15 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnPopulate;
+        
+        /// <summary>
+        /// ltError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal ltError;
         
         /// <summary>
         /// myMap control.

@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.Text;
 
 using Arena.Core;
+using Arena.SmallGroup;
 using Arena.Security;
 using Arena.Custom.HDC.GoogleMaps.Maps;
 
@@ -216,6 +217,68 @@ namespace Arena.Custom.HDC.GoogleMaps
             rdr.Close();
 
             return families;
+        }
+
+        /// <summary>
+        /// Retrieve a list of SmallGroupPlacemark objects that are in the designated radius of the given
+        /// latitude and longitude coordinates. Possibly retrieve only a subet of those.
+        /// </summary>
+        /// <param name="latitude">The latitude of the center point.</param>
+        /// <param name="longitude">The longitude of the center point.</param>
+        /// <param name="radius">The distance from the center point to look up to.</param>
+        /// <param name="start">The 0-based starting index of the records to retrieve.</param>
+        /// <param name="count">The maximum number of records to retrieve. If the returned number is less than this number then no more records are available.</param>
+        /// <returns>List of SmallGroupPlacemarks that identify groups in range.</returns>
+        public List<SmallGroupPlacemark> SmallGroupPlacemarksInRadius(Double latitude, Double longitude, Double radius, int start, int count)
+        {
+            List<SmallGroupPlacemark> groups = new List<SmallGroupPlacemark>();
+            SqlConnection con;
+            SqlDataReader rdr;
+            SqlCommand cmd;
+            int i;
+
+
+            if (latitude == 0 && longitude == 0)
+                throw new ArgumentException("Address has not been geocoded.");
+
+            //
+            // Prepare the SQL query to request all small groups within a radius of an address.
+            //
+            con = new Arena.DataLib.SqlDbConnection().GetDbConnection();
+            con.Open();
+            cmd = con.CreateCommand();
+            cmd.CommandText = "SELECT DISTINCT(sg.group_id) FROM smgp_group AS sg" +
+                " LEFT JOIN core_person_address AS cpa ON cpa.person_id = sg.target_location_person_id" +
+                " LEFT JOIN core_address AS ca ON ca.address_id = cpa.address_id" +
+                " WHERE cpa.primary_address = 1" +
+                " AND dbo.cust_hdc_googlemaps_funct_distance_between(@LatFrom, @LongFrom, ca.Latitude, ca.Longitude) < @Distance" +
+                " ORDER BY sg.group_id";
+            cmd.Parameters.Add(new SqlParameter("@LatFrom", latitude));
+            cmd.Parameters.Add(new SqlParameter("@LongFrom", longitude));
+            cmd.Parameters.Add(new SqlParameter("@Distance", radius));
+
+            //
+            // Execute the reader and process all results.
+            rdr = cmd.ExecuteReader();
+            try
+            {
+                i = 0;
+                while (rdr.Read() && groups.Count < count)
+                {
+                    if (i++ < start)
+                        continue;
+
+                    try
+                    {
+                        groups.Add(new SmallGroupPlacemark(new Group(Convert.ToInt32(rdr[0]))));
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+            rdr.Close();
+
+            return groups;
         }
 
         /// <summary>

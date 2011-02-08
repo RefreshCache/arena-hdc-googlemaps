@@ -210,6 +210,14 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
                     script.AppendLine("        " + this.ClientObject + ".LoadPeopleInGeoRadius(" +
                         "new GeoAddress(" + loader.Latitude.ToString() + "," + loader.Longitude.ToString() + ")," + loader.Distance.ToString() + ",null);");
                 }
+                else if (loader.LoaderType == RadiusLoaderType.SmallGroups)
+                {
+                    //
+                    // This RadiusLoader is loading small groups.
+                    //
+                    script.AppendLine("        " + this.ClientObject + ".LoadGroupsInGeoRadius(" +
+                        "new GeoAddress(" + loader.Latitude.ToString() + "," + loader.Longitude.ToString() + ")," + loader.Distance.ToString() + ",null);");
+                }
             }
         }
 
