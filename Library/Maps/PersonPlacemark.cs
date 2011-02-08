@@ -8,11 +8,16 @@ using Arena.Core;
 
 namespace Arena.Custom.HDC.GoogleMaps.Maps
 {
+    /// <summary>
+    /// This class defines the information needed to put a single individual person
+    /// on the map as a placemark object.
+    /// </summary>
+    [Serializable]
     public class PersonPlacemark : Placemark
     {
-        public String PinImage;
-
-
+        /// <summary>
+        /// Empty constructor for use with serialization.
+        /// </summary>
         public PersonPlacemark()
             : base()
         {
