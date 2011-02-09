@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Web.Script.Serialization;
+using System.Xml.Serialization;
 
 using Arena.Core;
 
@@ -15,6 +17,20 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
     [Serializable]
     public class PersonPlacemark : Placemark
     {
+        #region Properties
+
+        /// <summary>
+        /// Identifies the Person object used to create this placemark.
+        /// </summary>
+        [ScriptIgnore]
+        [XmlIgnore]
+        public Person Person;
+
+        #endregion
+
+
+        #region Constructors
+
         /// <summary>
         /// Empty constructor for use with serialization.
         /// </summary>
@@ -41,6 +57,9 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
             this.PinImage = (String.IsNullOrEmpty(p.MemberStatus.Qualifier) ? "pin_grey.png" : p.MemberStatus.Qualifier);
             this.Latitude = p.PrimaryAddress.Latitude;
             this.Longitude = p.PrimaryAddress.Longitude;
+            this.Person = p;
         }
+
+        #endregion
     }
 }

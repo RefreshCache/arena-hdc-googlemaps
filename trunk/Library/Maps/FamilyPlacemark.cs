@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Web.Script.Serialization;
+using System.Xml.Serialization;
 
 using Arena.Core;
 
@@ -15,6 +17,20 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
     [Serializable]
     public class FamilyPlacemark : Placemark
     {
+        #region Properties
+
+        /// <summary>
+        /// Identifies the family that this placemark was created from.
+        /// </summary>
+        [ScriptIgnore]
+        [XmlIgnore]
+        public Family Family { get; set; }
+
+        #endregion
+
+
+        #region Constructors
+
         /// <summary>
         /// Generic constructor for use with serialization.
         /// </summary>
@@ -41,6 +57,9 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
             this.PinImage = (String.IsNullOrEmpty(f.FamilyHead.MemberStatus.Qualifier) ? "pin_grey.png" : f.FamilyHead.MemberStatus.Qualifier);
             this.Latitude = f.FamilyHead.PrimaryAddress.Latitude;
             this.Longitude = f.FamilyHead.PrimaryAddress.Longitude;
+            this.Family = f;
         }
+
+        #endregion
     }
 }
