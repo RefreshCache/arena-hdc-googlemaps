@@ -98,6 +98,12 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 loader.Distance = Convert.ToDouble(txtDistance.Text);
                 loader.LoaderType = (RadiusLoaderType)Enum.Parse(typeof(RadiusLoaderType), ddlType.SelectedValue);
                 myMap.RadiusLoaders.Add(loader);
+
+                //
+                // Set the center point for the map.
+                //
+                myMap.Center.Latitude = address.Latitude;
+                myMap.Center.Longitude = address.Longitude;
             }
             else
             {

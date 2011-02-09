@@ -48,7 +48,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			//
 			// Create the KML object to interface with.
 			//
-			kml = new KML(BaseUrl());
+            kml = new KML(new Google(ArenaContext.Current.User, BaseUrl()));
 
 			//
 			// Request to have area IDs filled.

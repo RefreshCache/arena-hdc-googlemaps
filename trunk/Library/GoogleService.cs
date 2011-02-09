@@ -9,6 +9,7 @@ using System.Web.Services;
 
 using Arena.Core;
 using Arena.Security;
+using Arena.SmallGroup;
 using Arena.Custom.HDC.GoogleMaps.Maps;
 
 
@@ -24,6 +25,8 @@ namespace Arena.Custom.HDC.GoogleMaps
     [System.Web.Script.Services.ScriptService]
     public class GoogleService : System.Web.Services.WebService
     {
+        #region Details Info Window Popups
+
         /// <summary>
         /// Retrieve the information to be displayed in the person details popup.
         /// </summary>
@@ -68,6 +71,31 @@ namespace Arena.Custom.HDC.GoogleMaps
 
             return google.FamilyDetailsPopup(f, true);
         }
+
+
+        /// <summary>
+        /// Retrieve the information to be displayed in the small group details popup.
+        /// </summary>
+        /// <param name="personID">The ID of the group in question.</param>
+        /// <returns>An HTML formatted string.</returns>
+        [WebMethod]
+        public string GroupDetailsInfoWindow(String groupID)
+        {
+            Group g;
+            Google google;
+
+
+            google = new Google(ArenaContext.Current.User, HttpContext.Current.Request.ApplicationPath);
+
+            //
+            // Load the person we are trying to retrieve details for.
+            //
+            g = new Group(Convert.ToInt32(groupID));
+
+            return google.SmallGroupDetailsPopup(g, true);
+        }
+
+        #endregion
 
 
         /// <summary>
@@ -128,6 +156,8 @@ namespace Arena.Custom.HDC.GoogleMaps
             return geocoded;
         }
 
+
+        #region Load In Radius
 
         /// <summary>
         /// Retrieve a list of people who are inside the radius of the given latitude
@@ -197,5 +227,7 @@ namespace Arena.Custom.HDC.GoogleMaps
                 (String.IsNullOrEmpty(start) ? 0 : Convert.ToInt32(start)),
                 (String.IsNullOrEmpty(count) ? Int32.MaxValue : Convert.ToInt32(count)));
         }
+
+        #endregion
     }
 }
