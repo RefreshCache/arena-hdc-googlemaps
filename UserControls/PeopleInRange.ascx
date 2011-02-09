@@ -12,5 +12,5 @@ Populate with: <asp:DropDownList runat="server" ID="ddlType" /> <asp:CheckBox ru
 </p>
 
 <p>
-<GMap:GoogleMap ID="myMap" runat="server" />
+<GMap:GoogleMap ID="myMap" runat="server" Width="640" Height="480" />
 </p>

@@ -43,6 +43,11 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         [Description("The height of the map on screen.")]
         public new Int32 Height { get; set; }
 
+        [Category("Appearance")]
+        [DefaultValue(12)]
+        [Description("The default zoom level to use on the map, higher number is zoomed in further.")]
+        public Int32 ZoomLevel { get; set; }
+
         /// <summary>
         /// A list of Placemark objects that will be placed on the map at load time. This should only
         /// be used for showing things like addresses. People or any other bulk list of items should
@@ -62,6 +67,11 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         /// </summary>
         public String ClientObject { get { return "GMap_" + this.ClientID; } }
 
+        /// <summary>
+        /// The center point to use for this map, defaults to the primary campus address.
+        /// </summary>
+        public GeocodedAddress Center;
+
         private LinkButton downloadButton;
 
         #endregion
@@ -77,8 +87,12 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         {
             this.Width = 480;
             this.Height = 360;
-            _Placemarks = new List<Placemark>();
-            _RadiusLoaders = new List<RadiusLoader>();
+            this._Placemarks = new List<Placemark>();
+            this._RadiusLoaders = new List<RadiusLoader>();
+            this.Center = new GeocodedAddress();
+            this.Center.Latitude = ArenaContext.Current.Organization.Address.Latitude;
+            this.Center.Longitude = ArenaContext.Current.Organization.Address.Longitude;
+            this.ZoomLevel = 12;
         }
 
         #endregion
@@ -121,7 +135,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
                 "        var o = {};\n");
             if (HideControls == true)
                 script.Append("        o.disableDefaultUI = true;\n");
-            script.Append("        var " + this.ClientObject + " = new GoogleMap(\"" + this.ClientID + "\", new GeoAddress(" + "34.5212" + ", " + "-117.3456" + "), \"\", o);\n");
+            script.Append("        var " + this.ClientObject + " = new GoogleMap(\"" + this.ClientID + "\", new GeoAddress(" + Center.Latitude.ToString() + ", " + Center.Longitude.ToString() + "), \"\", o);\n");
 
             //
             // Render in all the other elements.
@@ -224,7 +238,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             // Create the KML object to work with.
             //
             google = new Google(ArenaContext.Current.User, BaseUrl());
-            kml = new KML(BaseUrl());
+            kml = new KML(google);
 
             //
             // Add in each placemark.

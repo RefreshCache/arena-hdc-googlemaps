@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Xml;
 
@@ -13,6 +14,8 @@ namespace Arena.Custom.HDC.GoogleMaps
 {
     public class KML
     {
+        #region Properties
+
         private XmlDocument xmlDoc;
         private XmlNode kmlRoot, kmlDocument;
         private String[] areaColorList;
@@ -20,21 +23,9 @@ namespace Arena.Custom.HDC.GoogleMaps
         private bool pinStylesRegistered = false;
 
         /// <summary>
-        /// Specifies the relative URL to use when generating links to things
-        /// in Arena, for example https://www.highdesertchurch.com/Arena
+        /// The Google API interface we will use to generate information.
         /// </summary>
-        public String ArenaUrl
-        {
-            set
-            {
-                if (value == null || value[value.Length - 1] == '/')
-                    _ArenaUrl = value;
-                else
-                    _ArenaUrl = value + '/';
-            }
-            get { return _ArenaUrl; }
-        }
-        private String _ArenaUrl;
+        public Google Google;
 
         /// <summary>
         /// Retrieve the XmlDocument that describes this KML object.
@@ -44,12 +35,16 @@ namespace Arena.Custom.HDC.GoogleMaps
             get { return xmlDoc; }
         }
 
+        #endregion
+
+
+        #region Constructors
 
         /// <summary>
         /// Initialize a new KML object. The object can be rendered right
         /// away but will be empty and not contain any relevent information.
         /// </summary>
-        public KML(String ArenaUrl)
+        public KML(Google google)
         {
             XmlDeclaration xDec;
 
@@ -57,7 +52,7 @@ namespace Arena.Custom.HDC.GoogleMaps
             //
             // Prepare the url.
             //
-            this.ArenaUrl = ArenaUrl;
+            this.Google = google;
 
             //
             // Initialize the XML document object.
@@ -81,6 +76,10 @@ namespace Arena.Custom.HDC.GoogleMaps
             SetupColorTables();
         }
 
+        #endregion
+
+
+        #region Private Pin and Color Registration
 
         /// <summary>
         /// Setup all the color tables that will be used when cycling
@@ -94,7 +93,6 @@ namespace Arena.Custom.HDC.GoogleMaps
 											"4bffff00", "4bff00ff", "4b00ffff",
 											"6b666600", "6b660066", "6b006666" };
         }
-
 
         /// <summary>
         /// Create a style for each membership type. Detect common pin colors
@@ -111,47 +109,23 @@ namespace Arena.Custom.HDC.GoogleMaps
             lc = new LookupCollection(new Guid("0B4532DB-3188-40F5-B188-E7E6E4448C85"));
             foreach (Lookup l in lc)
             {
-                if (String.IsNullOrEmpty(l.Qualifier) == false)
+                if (!String.IsNullOrEmpty(l.Qualifier))
                 {
-                    if (l.Qualifier == "pin_green.png")
-                    {
-                        RegisterPinStyle("p" + l.Value, ArenaUrl + "UserControls/Custom/HDC/GoogleMaps/Images/person.png", "#ff00ff00");
-                        RegisterPinStyle("f" + l.Value, ArenaUrl + "UserControls/Custom/HDC/GoogleMaps/Images/family.png", "#ff00ff00");
-                    }
-                    else if (l.Qualifier == "pin_red.png")
-                    {
-                        RegisterPinStyle("p" + l.Value, ArenaUrl + "UserControls/Custom/HDC/GoogleMaps/Images/person.png", "#ff0000d0");
-                        RegisterPinStyle("f" + l.Value, ArenaUrl + "UserControls/Custom/HDC/GoogleMaps/Images/family.png", "#ff0000d0");
-                    }
-                    else if (l.Qualifier == "pin_yellow.png")
-                    {
-                        RegisterPinStyle("p" + l.Value, ArenaUrl + "UserControls/Custom/HDC/GoogleMaps/Images/person.png", "#ff00ffff");
-                        RegisterPinStyle("f" + l.Value, ArenaUrl + "UserControls/Custom/HDC/GoogleMaps/Images/family.png", "#ff00ffff");
-                    }
-                    else if (l.Qualifier == "pin_grey.png")
-                    {
-                        RegisterPinStyle("p" + l.Value, ArenaUrl + "UserControls/Custom/HDC/GoogleMaps/Images/person.png", "#ffb0b0b0");
-                        RegisterPinStyle("f" + l.Value, ArenaUrl + "UserControls/Custom/HDC/GoogleMaps/Images/family.png", "#ffb0b0b0");
-                    }
-                    else
-                    {
-                        RegisterPinStyle("p" + l.Value, ArenaUrl + "UserControls/Custom/HDC/GoogleMaps/Images/person.png", null);
-                        RegisterPinStyle("f" + l.Value, ArenaUrl + "UserControls/Custom/HDC/GoogleMaps/Images/family.png", null);
-                    }
+                    RegisterPinStyle("p" + l.Value, Google.ArenaUrl + "Images/Map/" + l.Qualifier, 0.6, null);
+                    RegisterPinStyle("f" + l.Value, Google.ArenaUrl + "Images/Map/" + l.Qualifier, 0.6, null);
                 }
                 else
                 {
-                    RegisterPinStyle("p" + l.Value, ArenaUrl + "UserControls/Custom/HDC/GoogleMaps/Images/person.png", null);
-                    RegisterPinStyle("f" + l.Value, ArenaUrl + "UserControls/Custom/HDC/GoogleMaps/Images/family.png", null);
+                    RegisterPinStyle("p" + l.Value, Google.ArenaUrl + "Images/Map/pin_grey.png", 0.6, null);
+                    RegisterPinStyle("f" + l.Value, Google.ArenaUrl + "Images/Map/pin_grey.png", 0.6, null);
                 }
             }
 
-            RegisterPinStyle("smallgroup", ArenaUrl + "UserControls/Custom/HDC/GoogleMaps/Images/home.png", "#ff00ff00");
-            RegisterPinStyle("campus", ArenaUrl + "UserControls/Custom/HDC/GoogleMaps/Images/chapel.png", null);
+            RegisterPinStyle("smallgroup", "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=glyphish_group|4040FF|000000", 0.75, null);
+            RegisterPinStyle("campus", Google.ArenaUrl + "UserControls/Custom/HDC/GoogleMaps/Images/chapel.png", 1, null);
 
             pinStylesRegistered = true;
         }
-
 
         /// <summary>
         /// Add all the style information for a new pin color.
@@ -159,7 +133,7 @@ namespace Arena.Custom.HDC.GoogleMaps
         /// <param name="styleName">The name for this style tag.</param>
         /// <param name="link">The hyperlink to use for the base image.</param>
         /// <param name="color">The color as a google color string, #aabbggrr (aa=alpha, bb=blue, gg=green, rr=red).</param>
-        private void RegisterPinStyle(String styleName, String link, String color)
+        private void RegisterPinStyle(String styleName, String link, Double scale, String color)
         {
             XmlNode style = xmlDoc.CreateElement("Style");
             XmlAttribute idAttrib = xmlDoc.CreateAttribute("id");
@@ -169,147 +143,67 @@ namespace Arena.Custom.HDC.GoogleMaps
             style.Attributes.Append(idAttrib);
             kmlDocument.AppendChild(style);
             style.InnerXml = "<IconStyle>" +
-                "<Icon><href>" + link + "</href></Icon>" +
+                "<scale>" + scale.ToString() + "</scale>" +
+                "<Icon><href>" + SecurityElement.Escape(link) + "</href></Icon>" +
                 (color != null ? "<color>" + color + "</color>" : "") +
                 "</IconStyle>";
         }
 
-
         /// <summary>
-        /// Create an HTML formatted string that contains the relavent person
-        /// information.
+        /// Add a color style for the given polygon.
         /// </summary>
-        /// <param name="p">The person object to retrieve information about.</param>
-        /// <param name="includeName">Wether or not to include the name of the person.</param>
-        /// <returns>An HTML formatted string.</returns>
-        private string PersonInfo(Person p, Boolean includeName)
+        /// <param name="styleName">The name of the style to use.</param>
+        /// <param name="fillColor">The google color code to fill the polygon with.</param>
+        /// <param name="outlineColor">The google color code to outline the polygon with.</param>
+        /// <param name="outlineWidth">The width of the outline to draw, 0 for no outline.</param>
+        private void AddPolyColorStyle(String styleName, String fillColor, String outlineColor, int outlineWidth)
         {
-            String personInfo = "";
+            XmlNode style;
+            XmlAttribute idAttrib;
 
 
             //
-            // Build up the person information.
+            // Create the StyleMap attribute and set it up to reference
+            // the normal and highlighted styles.
             //
-            if (includeName)
-                personInfo += "<b>" + p.FullName + "</b><br />";
-            personInfo += p.MemberStatus.Value + "<br />" +
-                p.Gender.ToString() + "<br />" +
-                p.MaritalStatus.Value + "<br />" +
-                new FamilyMember(p.PersonID).FamilyRole.Value + "<br />" +
-                "Age: " + p.Age.ToString() + "<br />";
-            if (p.BlobID != -1)
-            {
-                personInfo = "<table width=\"100%\"<tr>" +
-                    "</td><td valign=\"top\">" + personInfo + "</td>" +
-                    "<td width=\"100px\"><img src=\"" + ArenaUrl + "CachedBlob.aspx?guid=" + p.Blob.GUID.ToString() + "&width=100&height=100\" />" +
-                    "</tr></table>";
-            }
+            style = xmlDoc.CreateElement("StyleMap");
+            kmlDocument.AppendChild(style);
+            idAttrib = xmlDoc.CreateAttribute("id");
+            idAttrib.Value = styleName;
+            style.Attributes.Append(idAttrib);
+            style.InnerXml = String.Format("<Pair><key>normal</key><styleUrl>#{0}-n</styleUrl></Pair>" +
+                "<Pair><key>highlight</key><styleUrl>#{0}-h</styleUrl></Pair>",
+                styleName, styleName);
 
-            return personInfo;
+            //
+            // Create the normal style for this polygon.
+            //
+            style = xmlDoc.CreateElement("Style");
+            kmlDocument.AppendChild(style);
+            idAttrib = xmlDoc.CreateAttribute("id");
+            idAttrib.Value = String.Format("{0}-n", styleName);
+            style.Attributes.Append(idAttrib);
+            style.InnerXml = "<LineStyle><color>" + outlineColor + "</color><width>" + outlineWidth.ToString() + "</width></LineStyle>" +
+                "<PolyStyle><color>" + fillColor + "</color>" +
+                "<outline>" + (outlineWidth > 0 ? "1" : "0") + "</outline></PolyStyle>";
+
+            //
+            // Create the highlighted style for this polygon.
+            //
+            style = xmlDoc.CreateElement("Style");
+            kmlDocument.AppendChild(style);
+            idAttrib = xmlDoc.CreateAttribute("id");
+            idAttrib.Value = String.Format("{0}-h", styleName);
+            style.Attributes.Append(idAttrib);
+            style.InnerXml = "<LineStyle><color>" + outlineColor + "</color><width>" + outlineWidth.ToString() + "</width></LineStyle>" +
+                "<PolyStyle><color>" + fillColor + "</color>" +
+                "<outline>" + (outlineWidth > 0 ? "1" : "0") + "</outline></PolyStyle>";
         }
 
-
-        /// <summary>
-        /// Build an HTML formatted string that contains all shared family numbers
-        /// for the given family object.
-        /// </summary>
-        /// <param name="f">The family whose members will be searched for phone numbers.</param>
-        /// <returns>An HTML formatted string.</returns>
-        private string FamilyPhoneNumbers(Family f)
-        {
-            StringBuilder phoneStrings = new StringBuilder();
-            ArrayList phones = new ArrayList();
+        #endregion
 
 
-            foreach (Person p in f.FamilyMembers)
-            {
-                //
-                // Build up the phone numbers.
-                //
-                foreach (PersonPhone phone in p.Phones)
-                {
-                    //
-                    // Skip unlisted, empty or non-family (propagated) numbers. Also skip
-                    // any numbers we have already dealt with.
-                    //
-                    if (phone.Unlisted == true || phone.Number.Length == 0 ||
-                        phone.PhoneType.Qualifier.Contains("propagate") == false || phones.Contains(phone.Number) == true)
-                        continue;
-
-                    if (String.IsNullOrEmpty(phone.Extension))
-                        phoneStrings.Append(phone.PhoneType.Value + " #: " + phone.Number + "<br />");
-                    else
-                        phoneStrings.Append(phone.PhoneType.Value + " #: " + phone.Number + " x" + phone.Extension + "<br />");
-
-                    phones.Add(phone.Number);
-                }
-            }
-
-            return phoneStrings.ToString();
-        }
-
-
-        /// <summary>
-        /// Build an HTML formatted string that contains all personal phone numbers
-        /// for the given person object.
-        /// </summary>
-        /// <param name="p">The person whose phone numbers we want.</param>
-        /// <param name="includeFamily">Wether or not to include family numbers for this person.</param>
-        /// <returns>An HTML formatted string.</returns>
-        private string PersonPhoneNumbers(Person p, Boolean includeFamily)
-        {
-            StringBuilder phoneStrings = new StringBuilder();
-
-
-            //
-            // Build up the phone numbers.
-            //
-            foreach (PersonPhone phone in p.Phones)
-            {
-                //
-                // Skip unlisted, empty or family (propagated) numbers.
-                //
-                if (phone.Unlisted == true || phone.Number.Length == 0 || (includeFamily == false && phone.PhoneType.Qualifier.Contains("propagate") == true))
-                    continue;
-
-                if (String.IsNullOrEmpty(phone.Extension))
-                    phoneStrings.Append(phone.PhoneType.Value + " #: " + phone.Number + "<br />");
-                else
-                    phoneStrings.Append(phone.PhoneType.Value + " #: " + phone.Number + " x" + phone.Extension + "<br />");
-            }
-
-            return phoneStrings.ToString();
-        }
-
-
-        /// <summary>
-        /// Find the main/home phone number for the given person and
-        /// return it as a descriptive string, e.g. Main/Home: 555-5555.
-        /// </summary>
-        /// <param name="p">The Person to lookup.</param>
-        /// <returns>String containing phone number or empty string if not found.</returns>
-        private string PersonMainPhoneDescription(Person p)
-        {
-            Guid target = new Guid("F2A0FBA2-D5AB-421F-A5AB-0C67DB6FD72E");
-
-
-            //
-            // Look for the main phone number.
-            //
-            foreach (PersonPhone phone in p.Phones)
-            {
-                if (phone.Unlisted == false && phone.PhoneType.Guid.Equals(target))
-                {
-                    if (String.IsNullOrEmpty(phone.Extension))
-                        return phone.PhoneType.Value + " #: " + phone.Number + "<br />";
-                    else
-                        return phone.PhoneType.Value + " #: " + phone.Number + " x" + phone.Extension + "<br />";
-                }
-            }
-
-            return "";
-        }
-
+        #region Adding Placemarks
 
         /// <summary>
         /// Create a new placemark object on the map that will identify a
@@ -319,7 +213,6 @@ namespace Arena.Custom.HDC.GoogleMaps
         public void AddPersonPlacemark(Person p)
         {
             XmlNode placemark, name, point, styleUrl, coordinates, description;
-            String personInfo, phoneStrings;
 
 
             //
@@ -355,22 +248,11 @@ namespace Arena.Custom.HDC.GoogleMaps
             placemark.AppendChild(styleUrl);
 
             //
-            // Build up the person information and phone numbers.
-            //
-            personInfo = PersonInfo(p, false);
-            phoneStrings = PersonPhoneNumbers(p, true);
-
-            //
             // Store the description information.
             //
             description = xmlDoc.CreateElement("description");
             description.InnerXml = "<![CDATA[" +
-                personInfo +
-                "<hr />" +
-                p.PrimaryAddress.StreetLine1 + "<br />" +
-                (String.IsNullOrEmpty(p.PrimaryAddress.StreetLine2) ? "" : p.PrimaryAddress.StreetLine2 + "<br />") +
-                p.PrimaryAddress.City + ", " + p.PrimaryAddress.State + " " + p.PrimaryAddress.PostalCode + "<br />" +
-                phoneStrings.ToString() +
+                Google.PersonDetailsPopup(p, false, true) +
                 "]]>";
             placemark.AppendChild(description);
 
@@ -394,7 +276,6 @@ namespace Arena.Custom.HDC.GoogleMaps
         public void AddFamilyPlacemark(Family f)
         {
             XmlNode placemark, name, point, styleUrl, coordinates, description;
-            String personInfo, phoneStrings;
             Person head = f.FamilyHead;
 
 
@@ -431,37 +312,12 @@ namespace Arena.Custom.HDC.GoogleMaps
             styleUrl.AppendChild(xmlDoc.CreateTextNode("#f" + head.MemberStatus.Value));
             placemark.AppendChild(styleUrl);
 
-            personInfo = "";
-            foreach (Person p in f.FamilyMembers)
-            {
-                String info, phones;
-
-                //
-                // Build up the person information and phone numbers.
-                //
-                info = PersonInfo(p, true);
-                phones = PersonPhoneNumbers(p, false);
-
-                if (personInfo.Length > 0)
-                    personInfo += "<hr width=\"75%\"/>";
-
-                personInfo += info;
-                if (phones.Length > 0)
-                    personInfo += phones;
-            }
-            phoneStrings = FamilyPhoneNumbers(f);
-
             //
             // Store the description information.
             //
             description = xmlDoc.CreateElement("description");
             description.InnerXml = "<![CDATA[" +
-                personInfo +
-                "<hr />" +
-                f.FamilyHead.PrimaryAddress.StreetLine1 + "<br />" +
-                (String.IsNullOrEmpty(head.PrimaryAddress.StreetLine2) ? "" : head.PrimaryAddress.StreetLine2 + "<br />") +
-                head.PrimaryAddress.City + ", " + head.PrimaryAddress.State + " " + head.PrimaryAddress.PostalCode + "<br />" +
-                phoneStrings +
+                Google.FamilyDetailsPopup(f, true) +
                 "]]>";
             placemark.AppendChild(description);
 
@@ -548,7 +404,6 @@ namespace Arena.Custom.HDC.GoogleMaps
         public void AddSmallGroupPlacemark(Group group)
         {
             XmlNode placemark, name, point, styleUrl, coordinates, description;
-            String personInfo, phoneString;
 
 
             //
@@ -584,25 +439,11 @@ namespace Arena.Custom.HDC.GoogleMaps
             placemark.AppendChild(styleUrl);
 
             //
-            // Build up the person information and phone numbers.
-            //
-            personInfo = PersonInfo(group.Leader, true);
-            phoneString = PersonMainPhoneDescription(group.Leader);
-
-            //
             // Store the description information.
             //
             description = xmlDoc.CreateElement("description");
             description.InnerXml = "<![CDATA[" +
-                group.TargetLocation.StreetLine1 + "<br />" +
-                (String.IsNullOrEmpty(group.TargetLocation.StreetLine2) ? "" : group.TargetLocation.StreetLine2 + "<br />") +
-                group.TargetLocation.City + ", " + group.TargetLocation.State + " " + group.TargetLocation.PostalCode + "<br />" +
-                group.ClusterType.Category.MeetingDayCaption + ": <b>" + group.MeetingDay.Value + "</b><br />" +
-                "Group Size: <b>" + group.Members.Count.ToString() + "</b><br />" +
-                "Registrations: <b>" + group.RegistrationCount.ToString() + "</b><br />" +
-                "<hr />" +
-                personInfo +
-                phoneString +
+                Google.SmallGroupDetailsPopup(group, true) +
                 "]]>";
             placemark.AppendChild(description);
 
@@ -615,6 +456,8 @@ namespace Arena.Custom.HDC.GoogleMaps
             point.AppendChild(coordinates);
             placemark.AppendChild(point);
         }
+
+        #endregion
 
 
         /// <summary>
@@ -652,58 +495,6 @@ namespace Arena.Custom.HDC.GoogleMaps
                 "<Polygon><tessellate>1</tessellate><outerBoundaryIs><LinearRing><coordinates>{2}" +
                 "</coordinates></LinearRing></outerBoundaryIs></Polygon>",
                 a.Name, "area" + a.AreaID.ToString(), sb.ToString());
-        }
-
-
-        /// <summary>
-        /// Add a color style for the given polygon.
-        /// </summary>
-        /// <param name="styleName">The name of the style to use.</param>
-        /// <param name="fillColor">The google color code to fill the polygon with.</param>
-        /// <param name="outlineColor">The google color code to outline the polygon with.</param>
-        /// <param name="outlineWidth">The width of the outline to draw, 0 for no outline.</param>
-        public void AddPolyColorStyle(String styleName, String fillColor, String outlineColor, int outlineWidth)
-        {
-            XmlNode style;
-            XmlAttribute idAttrib;
-
-
-            //
-            // Create the StyleMap attribute and set it up to reference
-            // the normal and highlighted styles.
-            //
-            style = xmlDoc.CreateElement("StyleMap");
-            kmlDocument.AppendChild(style);
-            idAttrib = xmlDoc.CreateAttribute("id");
-            idAttrib.Value = styleName;
-            style.Attributes.Append(idAttrib);
-            style.InnerXml = String.Format("<Pair><key>normal</key><styleUrl>#{0}-n</styleUrl></Pair>" +
-                "<Pair><key>highlight</key><styleUrl>#{0}-h</styleUrl></Pair>",
-                styleName, styleName);
-
-            //
-            // Create the normal style for this polygon.
-            //
-            style = xmlDoc.CreateElement("Style");
-            kmlDocument.AppendChild(style);
-            idAttrib = xmlDoc.CreateAttribute("id");
-            idAttrib.Value = String.Format("{0}-n", styleName);
-            style.Attributes.Append(idAttrib);
-            style.InnerXml = "<LineStyle><color>" + outlineColor + "</color><width>" + outlineWidth.ToString() + "</width></LineStyle>" +
-                "<PolyStyle><color>" + fillColor + "</color>" +
-                "<outline>" + (outlineWidth > 0 ? "1" : "0") + "</outline></PolyStyle>";
-
-            //
-            // Create the highlighted style for this polygon.
-            //
-            style = xmlDoc.CreateElement("Style");
-            kmlDocument.AppendChild(style);
-            idAttrib = xmlDoc.CreateAttribute("id");
-            idAttrib.Value = String.Format("{0}-h", styleName);
-            style.Attributes.Append(idAttrib);
-            style.InnerXml = "<LineStyle><color>" + outlineColor + "</color><width>" + outlineWidth.ToString() + "</width></LineStyle>" +
-                "<PolyStyle><color>" + fillColor + "</color>" +
-                "<outline>" + (outlineWidth > 0 ? "1" : "0") + "</outline></PolyStyle>";
         }
     }
 }

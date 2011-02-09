@@ -252,6 +252,7 @@ namespace Arena.Custom.HDC.GoogleMaps
                 " LEFT JOIN core_address AS ca ON ca.address_id = cpa.address_id" +
                 " WHERE cpa.primary_address = 1" +
                 " AND dbo.cust_hdc_googlemaps_funct_distance_between(@LatFrom, @LongFrom, ca.Latitude, ca.Longitude) < @Distance" +
+                " AND sg.is_group_private = 0" +
                 " ORDER BY sg.group_id";
             cmd.Parameters.Add(new SqlParameter("@LatFrom", latitude));
             cmd.Parameters.Add(new SqlParameter("@LongFrom", longitude));
@@ -297,7 +298,8 @@ namespace Arena.Custom.HDC.GoogleMaps
             //
             // Load the basic person information and picture.
             //
-            info = PersonInfo(p, includeName, useSecurity);
+            info = "<div style=\"font-size: 12px;\">";
+            info += PersonInfo(p, includeName, useSecurity);
 
             //
             // Include the address, if security allowed.
@@ -331,6 +333,8 @@ namespace Arena.Custom.HDC.GoogleMaps
                 info += PersonPhoneNumbers(p, true).ToString();
             }
 
+            info += "</div>";
+
             return info;
         }
 
@@ -346,7 +350,7 @@ namespace Arena.Custom.HDC.GoogleMaps
             Person head = f.FamilyHead;
 
 
-            personInfo = "";
+            personInfo = "<div style=\"font-size: 12px;\">";
             foreach (Person p in f.FamilyMembers)
             {
                 String info, phones;
@@ -385,7 +389,42 @@ namespace Arena.Custom.HDC.GoogleMaps
             if (useSecurity == false || PersonFieldOperationAllowed(PersonFields.Profile_Phones, OperationType.View))
                 personInfo += FamilyPhoneNumbers(f);
 
+            personInfo += "</div>";
+
             return personInfo;
+        }
+
+        /// <summary>
+        /// Retrieve the full HTML used for a pin-popup in Maps or Earth for a family unit.
+        /// </summary>
+        /// <param name="f">The Family object to retrieve information about.</param>
+        /// <param name="useSecurity">If security should be enforced.</param>
+        /// <returns>An HTML formatted string.</returns>
+        public string SmallGroupDetailsPopup(Group g, Boolean useSecurity)
+        {
+            String info;
+
+
+            //
+            // Load in the group name and picture, if available.
+            //
+            info = "<div style=\"font-size: 12px;\">";
+            info += String.Format("<p style=\"text-align: center;\"><b>{0}</b></p>", g.Name);
+            if (!String.IsNullOrEmpty(g.PictureUrl))
+                info += String.Format("<p><img src=\"{0}\" /></p>", g.PictureUrl);
+
+            //
+            // Load in the basic group details.
+            //
+            info += "<table>";
+            info += String.Format("<tr><td>{0}:</td><td>{1}</td></tr>", g.ClusterType.Category.MeetingDayCaption, g.MeetingDay);
+            info += String.Format("<tr><td>{0}:</td><td>{1}</td></tr>", g.ClusterType.Category.TopicCaption, g.Topic);
+            info += String.Format("<tr><td>{0}:</td><td>{1}</td></tr>", "Average Age", g.AverageAge.ToString());
+            if (!String.IsNullOrEmpty(g.Notes))
+                info += String.Format("<tr><td colspan=\"2\">Notes:<br />{0}</td></tr>", g.Notes);
+            info += "</table></div>";
+
+            return info;
         }
 
         #endregion
