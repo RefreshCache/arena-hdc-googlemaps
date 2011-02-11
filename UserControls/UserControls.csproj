@@ -55,6 +55,13 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GoogleGroupLocator.ascx.cs">
+      <DependentUpon>GoogleGroupLocator.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GoogleGroupLocator.ascx.designer.cs">
+      <DependentUpon>GoogleGroupLocator.ascx</DependentUpon>
+    </Compile>
     <Compile Include="KMLDownloader.ascx.cs">
       <DependentUpon>KMLDownloader.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -79,6 +86,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="GoogleGroupLocator.ascx" />
     <Content Include="Images\chapel.png" />
     <Content Include="Images\darkearth.png" />
     <Content Include="Images\family.png" />

@@ -64,7 +64,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			//
 			// Register all the Javascript references.
 			//
-            BasePage.AddJavascriptInclude(this.Page, "include/scripts/jquery.1.3.2.min.js");
+            BasePage.AddJavascriptInclude(this.Page, BasePage.JQUERY_INCLUDE);
             BasePage.AddJavascriptInclude(this.Page, "include/scripts/jquery.jgrowl.min.js");
             BasePage.AddJavascriptInclude(this.Page, "UserControls/Custom/HDC/GoogleMaps/includes/jqModal.js");
             BasePage.AddJavascriptInclude(this.Page, "UserControls/Custom/HDC/GoogleMaps/includes/jquery.iphone-switch.js");

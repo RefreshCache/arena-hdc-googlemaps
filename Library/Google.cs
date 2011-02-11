@@ -135,6 +135,7 @@ namespace Arena.Custom.HDC.GoogleMaps
 
             //
             // Execute the reader and process all results.
+            //
             rdr = cmd.ExecuteReader();
             try
             {
