@@ -16,18 +16,6 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
     [Serializable]
     public class SmallGroupPlacemark : Placemark
     {
-        #region Properties
-
-        /// <summary>
-        /// Identifies the Group object that was used to create this placemark.
-        /// </summary>
-        [ScriptIgnore]
-        [XmlIgnore]
-        public Group Group;
-
-        #endregion
-
-
         #region Constructors
 
         /// <summary>
@@ -56,7 +44,6 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
             this.PinImage = "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=glyphish_group|4040FF|000000";
             this.Latitude = g.TargetLocation.Latitude;
             this.Longitude = g.TargetLocation.Longitude;
-            this.Group = g;
         }
 
         #endregion

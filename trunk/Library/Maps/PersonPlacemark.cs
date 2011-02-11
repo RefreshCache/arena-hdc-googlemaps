@@ -17,18 +17,6 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
     [Serializable]
     public class PersonPlacemark : Placemark
     {
-        #region Properties
-
-        /// <summary>
-        /// Identifies the Person object used to create this placemark.
-        /// </summary>
-        [ScriptIgnore]
-        [XmlIgnore]
-        public Person Person;
-
-        #endregion
-
-
         #region Constructors
 
         /// <summary>
@@ -57,7 +45,6 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
             this.PinImage = (String.IsNullOrEmpty(p.MemberStatus.Qualifier) ? "pin_grey.png" : p.MemberStatus.Qualifier);
             this.Latitude = p.PrimaryAddress.Latitude;
             this.Longitude = p.PrimaryAddress.Longitude;
-            this.Person = p;
         }
 
         #endregion

@@ -193,6 +193,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         {
             base.LoadViewState(savedState);
 
+            this.Center = (GeocodedAddress)ViewState["Center"];
             this._RadiusLoaders = (List<RadiusLoader>)ViewState["RadiusLoaders"];
             this._Placemarks = (List<Placemark>)ViewState["Placemarks"];
             this.HideControls = (Boolean)ViewState["HideControls"];
@@ -213,6 +214,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             ViewState["HideControls"] = this.HideControls;
             ViewState["Placemarks"] = this._Placemarks;
             ViewState["RadiusLoaders"] = this._RadiusLoaders;
+            ViewState["Center"] = this.Center;
 
             return base.SaveViewState();
         }
@@ -247,15 +249,15 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             {
                 if (typeof(PersonPlacemark).IsInstanceOfType(placemark))
                 {
-                    kml.AddPersonPlacemark(((PersonPlacemark)placemark).Person);
+                    kml.AddPersonPlacemark(new Person(new Guid(((PersonPlacemark)placemark).Unique)));
                 }
                 else if (typeof(FamilyPlacemark).IsInstanceOfType(placemark))
                 {
-                    kml.AddFamilyPlacemark(((FamilyPlacemark)placemark).Family);
+                    kml.AddFamilyPlacemark(new Family(Convert.ToInt32(((FamilyPlacemark)placemark).Unique)));
                 }
                 else if (typeof(SmallGroupPlacemark).IsInstanceOfType(placemark))
                 {
-                    kml.AddSmallGroupPlacemark(((SmallGroupPlacemark)placemark).Group);
+                    kml.AddSmallGroupPlacemark(new SmallGroup.Group(Convert.ToInt32(((SmallGroupPlacemark)placemark).Unique)));
                 }
                 else
                 {
@@ -274,7 +276,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
                     items = google.PersonPlacemarksInRadius(loader.Latitude, loader.Longitude, loader.Distance, 0, Int32.MaxValue);
                     foreach (PersonPlacemark p in items)
                     {
-                        kml.AddPersonPlacemark(p.Person);
+                        kml.AddPersonPlacemark(new Person(new Guid(p.Unique)));
                     }
                 }
                 else if (loader.LoaderType == RadiusLoaderType.Families)
@@ -282,9 +284,9 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
                     List<FamilyPlacemark> items;
 
                     items = google.FamilyPlacemarksInRadius(loader.Latitude, loader.Longitude, loader.Distance, 0, Int32.MaxValue);
-                    foreach (FamilyPlacemark p in items)
+                    foreach (FamilyPlacemark f in items)
                     {
-                        kml.AddFamilyPlacemark(p.Family);
+                        kml.AddFamilyPlacemark(new Family(Convert.ToInt32(f.Unique)));
                     }
                 }
                 else if (loader.LoaderType == RadiusLoaderType.SmallGroups)
@@ -292,9 +294,9 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
                     List<SmallGroupPlacemark> items;
 
                     items = google.SmallGroupPlacemarksInRadius(loader.Latitude, loader.Longitude, loader.Distance, 0, Int32.MaxValue);
-                    foreach (SmallGroupPlacemark p in items)
+                    foreach (SmallGroupPlacemark sg in items)
                     {
-                        kml.AddSmallGroupPlacemark(p.Group);
+                        kml.AddSmallGroupPlacemark(new SmallGroup.Group(Convert.ToInt32(sg.Unique)));
                     }
                 }
             }
@@ -327,7 +329,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
                     "icon: \"" + placemark.PinImage + "\"" +
                     ",position: new google.maps.LatLng(" + placemark.Latitude.ToString() + "," + placemark.Longitude.ToString() + ")" +
                     ",map: " + this.ClientObject + ".map" +
-                    ",title: \"" + placemark.Name + "\"" +
+                    ",title: \"" + placemark.Name.Replace("\"", "\\\"") + "\"" +
                     "});");
             }
         }

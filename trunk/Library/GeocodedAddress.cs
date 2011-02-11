@@ -8,6 +8,7 @@ namespace Arena.Custom.HDC.GoogleMaps
     /// <summary>
     /// Generic holder class that defines the Latitude and Longitude of an address.
     /// </summary>
+    [Serializable]
     public class GeocodedAddress
     {
         /// <summary>
