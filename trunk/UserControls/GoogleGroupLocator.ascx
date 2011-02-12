@@ -2,9 +2,38 @@
 <%@ Register TagPrefix="Arena" Namespace="Arena.Portal.UI" Assembly="Arena.Portal.UI" %>
 <%@ Register TagPrefix="GMap" Namespace="Arena.Custom.HDC.GoogleMaps.UI" Assembly="Arena.Custom.HDC.GoogleMaps" %>
 
-<p>
-    <GMap:GoogleMap runat="server" ID="map" HideDownload="true" />
-</p>
+<script language="javascript" type="text/javascript">
+    function RegisterSmallGroup(gm, marker) {
+        marker.googlemap = gm;
+        google.maps.event.addListener(marker, 'click', ShowGroupPopup);
+    }
+
+    function ShowGroupPopup() {
+        var g = this.googlemap;
+        var id = this.groupID;
+
+        if (g.infowindow != null)
+            g.infowindow.close();
+        g.infowindow = new google.maps.InfoWindow({ content: '<div style="text-align: center"><img src="' + GoogleMapRoot + 'ajax-spin.gif" style="border: none;" /></div>' });
+        g.infowindow.open(this.map, this);
+
+        $.ajax({
+            url: g.serviceurl + "/GroupDetailsInfoWindow",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ groupID: id }),
+            dataType: "json",
+            success: function (data, status) {
+                g.infowindow.setContent(data.d + '<div style="text-align: center"><hr width="75%" /><a href="default.aspx?page=<%= RegistrationPageSetting %>&group=' + id + '">Register for this group</a></div>');
+            },
+            error: function () {
+                g.infowindow.setContent('Failed to load details.');
+            }
+        });
+    }
+</script>
+
+<GMap:GoogleMap runat="server" ID="map" HideDownload="true" />
 
 <asp:Panel ID="pnlAddress" runat="server">
     <p id="pAddressError" runat="server" style="color: red;" visible="false">

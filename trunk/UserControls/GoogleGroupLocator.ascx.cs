@@ -32,13 +32,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
         #region Module Settings
 
-        [NumericSetting("Map Width", "The width in pixels to make the Google Map. Default is 480.", false)]
+        [NumericSetting("Map Width", "The width in pixels to make the map. Default is 480.", false)]
         public int MapWidthSetting { get { return Convert.ToInt32(Setting("MapWidth", "480", false)); } }
 
-        [NumericSetting("Map Height", "The height in pixels to make the Google Map. Default is 360.", false)]
+        [NumericSetting("Map Height", "The height in pixels to make the map. Default is 360.", false)]
         public int MapHeightSetting { get { return Convert.ToInt32(Setting("MapHeight", "360", false)); } }
 
-        [CustomListSetting("Filter Options", "The list of filter options to provide the user.", false, "",
+        [CustomListSetting("Filter Options", "The list of filter options to provide the user. If no options are selected then all filters will be provided.", false, "",
             new string[] { "No Filtering", "Meeting Day", "Topic", "Marital Preference", "Age Range", "Type", "Campus", "Area" },
             new string[] { "0", "1", "2", "3", "4", "5", "6", "7" },
             ListSelectionMode.Multiple)]
@@ -72,6 +72,9 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         [BooleanSetting("Filter Expanded", "If set to true then the filter will be expanded and visible by default.", true, true)]
         public Boolean FilterExpandedSetting { get { return Convert.ToBoolean(Setting("FilterExpanded", "true", true)); } }
 
+        [PageSetting("Registration Page", "The page to redirect to when somebody wishes to join a small group.", true)]
+        public int RegistrationPageSetting { get { return Convert.ToInt32(Setting("RegistrationPage", "", true)); } }
+
         #endregion
 
 
@@ -101,18 +104,6 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 AddCenterPlacemark();
 
                 //
-                // Process each small group.
-                //
-                foreach (Group g in LoadGroups())
-                {
-                    try
-                    {
-                        map.Placemarks.Add(new SmallGroupPlacemark(g));
-                    }
-                    catch { }
-                }
-
-                //
                 // Hide the filter if it is not available.
                 //
                 if (FilterOptionsSetting.Count == 0)
@@ -121,6 +112,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
                 SetupCaptions();
                 SetupFilters();
+                AddFilteredGroups();
             }
 
             //
@@ -211,39 +203,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         {
             map.ClearContent();
             AddCenterPlacemark();
-
-            //
-            // Process each small group and filter.
-            //
-            foreach (Group g in LoadGroups())
-            {
-                try
-                {
-                    if (ddlMeetingDay.SelectedValue != "-1" && g.MeetingDay.LookupID != Convert.ToInt32(ddlMeetingDay.SelectedValue))
-                        continue;
-
-                    if (ddlTopic.SelectedValue != "-1" && g.Topic.LookupID != Convert.ToInt32(ddlTopic.SelectedValue))
-                        continue;
-
-                    if (ddlMaritalPreference.SelectedValue != "-1" && g.PrimaryMaritalStatus.LookupID != Convert.ToInt32(ddlMaritalPreference.SelectedValue))
-                        continue;
-
-                    if (ddlAgeRange.SelectedValue != "-1" && g.PrimaryAge.LookupID != Convert.ToInt32(ddlAgeRange.SelectedValue))
-                        continue;
-
-                    if (ddlType.SelectedValue != "-1" && g.GroupType.LookupID != Convert.ToInt32(ddlType.SelectedValue))
-                        continue;
-
-                    if (ddlArea.SelectedValue != "-1" && g.AreaID != -1 && g.AreaID != Convert.ToInt32(ddlArea.SelectedValue))
-                        continue;
-
-                    if (ddlCampus.SelectedValue != "-1" && g.Leader.Campus.CampusId != Convert.ToInt32(ddlCampus.SelectedValue))
-                        continue;
-
-                    map.Placemarks.Add(new SmallGroupPlacemark(g));
-                }
-                catch { }
-            }
+            AddFilteredGroups();
         }
 
         #endregion
@@ -278,6 +238,48 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             placemark.PinImage = "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=home|FFFF00";
             placemark.Name = "";
             map.Placemarks.Add(placemark);
+        }
+
+
+        private void AddFilteredGroups()
+        {
+            Placemark placemark;
+
+
+            //
+            // Process each small group and filter.
+            //
+            foreach (Group g in LoadGroups())
+            {
+                try
+                {
+                    if (ddlMeetingDay.SelectedValue != "-1" && g.MeetingDay.LookupID != Convert.ToInt32(ddlMeetingDay.SelectedValue))
+                        continue;
+
+                    if (ddlTopic.SelectedValue != "-1" && g.Topic.LookupID != Convert.ToInt32(ddlTopic.SelectedValue))
+                        continue;
+
+                    if (ddlMaritalPreference.SelectedValue != "-1" && g.PrimaryMaritalStatus.LookupID != Convert.ToInt32(ddlMaritalPreference.SelectedValue))
+                        continue;
+
+                    if (ddlAgeRange.SelectedValue != "-1" && g.PrimaryAge.LookupID != Convert.ToInt32(ddlAgeRange.SelectedValue))
+                        continue;
+
+                    if (ddlType.SelectedValue != "-1" && g.GroupType.LookupID != Convert.ToInt32(ddlType.SelectedValue))
+                        continue;
+
+                    if (ddlArea.SelectedValue != "-1" && g.AreaID != -1 && g.AreaID != Convert.ToInt32(ddlArea.SelectedValue))
+                        continue;
+
+                    if (ddlCampus.SelectedValue != "-1" && g.Leader.Campus.CampusId != Convert.ToInt32(ddlCampus.SelectedValue))
+                        continue;
+
+                    placemark = new SmallGroupPlacemark(g);
+                    placemark.SetAddedHandler("RegisterSmallGroup");
+                    map.Placemarks.Add(placemark);
+                }
+                catch { }
+            }
         }
 
 
