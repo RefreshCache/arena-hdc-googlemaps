@@ -44,6 +44,8 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
         /// </summary>
         public String PinImage;
 
+        private String _AddedHandler;
+
         #endregion
 
 
@@ -81,5 +83,27 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
         }
 
         #endregion
+
+
+        /// <summary>
+        /// Sets the Javascript method to call when the placemark is added
+        /// to the map. This is only used when the placemark is being added
+        /// to the map manually via the Placemarks property.
+        /// </summary>
+        /// <param name="handler">The javascript function name to call, only include the function name not any parenthesis. It will be called with 2 parameters, the GoogleMap reference and a reference to the marker itself.</param>
+        public void SetAddedHandler(String handler)
+        {
+            _AddedHandler = handler;
+        }
+
+
+        /// <summary>
+        /// Retrieve the javascript function to call when the marker is added to the map.
+        /// </summary>
+        /// <returns>A string identifying the javascript function.</returns>
+        public String GetAddedHandler()
+        {
+            return _AddedHandler;
+        }
     }
 }

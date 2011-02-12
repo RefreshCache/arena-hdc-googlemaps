@@ -325,12 +325,25 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         {
             foreach (Placemark placemark in _Placemarks)
             {
-                script.AppendLine("        marker = new google.maps.Marker({" +
+                string ClassName = "";
+
+                if (typeof(SmallGroupPlacemark).IsInstanceOfType(placemark))
+                    ClassName = "GroupMarker";
+                else if (typeof(FamilyPlacemark).IsInstanceOfType(placemark))
+                    ClassName = "FamilyMarker";
+                else if (typeof(PersonPlacemark).IsInstanceOfType(placemark))
+                    ClassName = "PersonMarker";
+                else
+                    ClassName = "GenericMarker";
+
+                script.AppendLine("        marker = new " + ClassName + "({" +
                     "icon: \"" + placemark.PinImage + "\"" +
                     ",position: new google.maps.LatLng(" + placemark.Latitude.ToString() + "," + placemark.Longitude.ToString() + ")" +
                     ",map: " + this.ClientObject + ".map" +
                     ",title: \"" + placemark.Name.Replace("\"", "\\\"") + "\"" +
-                    "});");
+                    "}, '" + placemark.Unique + "');");
+                if (!String.IsNullOrEmpty(placemark.GetAddedHandler()))
+                    script.AppendLine("        " + placemark.GetAddedHandler() + "(" + this.ClientObject + ",marker);");
             }
         }
 
