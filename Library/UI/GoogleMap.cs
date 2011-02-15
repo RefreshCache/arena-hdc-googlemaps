@@ -7,8 +7,10 @@ using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using System.Web.UI.HtmlControls;
 
 using Arena.Core;
+using Arena.Organization;
 using Arena.Custom.HDC.GoogleMaps;
 using Arena.Custom.HDC.GoogleMaps.Maps;
 
@@ -25,7 +27,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
 
         [Category("Appearance")]
         [DefaultValue(false)]
-        [Description("Whether or not to hide the controls on the map.")]
+        [Description("Whether or not to hide all the controls on the map. To hide individual controls use the Show... properties.")]
         public Boolean HideControls { get; set; }
 
         [Category("Appearance")]
@@ -47,6 +49,41 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         [DefaultValue(12)]
         [Description("The default zoom level to use on the map, higher number is zoomed in further.")]
         public Int32 ZoomLevel { get; set; }
+
+        [Category("Behavior")]
+        [DefaultValue(-1)]
+        [Description("The maximum zoom level that can be used. Default value is -1 for no limit.")]
+        public Int32 MaxZoomLevel { get; set; }
+
+        [Category("Behavior")]
+        [DefaultValue(-1)]
+        [Description("The minimum zoom level that can be used. Default value is -1 for no limit.")]
+        public Int32 MinZoomLevel { get; set; }
+
+        [Category("Behavior")]
+        [DefaultValue(false)]
+        [Description("If set to true the user will not be able to zoom, pan or otherwise modify the viewport of the map.")]
+        public Boolean StaticMap { get; set; }
+
+        [Category("Appearance")]
+        [DefaultValue(true)]
+        [Description("Shows the pan controls on the map.")]
+        public Boolean ShowPanControls { get; set; }
+
+        [Category("Appearance")]
+        [DefaultValue(true)]
+        [Description("Shows the scale/zoom control on the map.")]
+        public Boolean ShowZoomControls { get; set; }
+
+        [Category("Appearance")]
+        [DefaultValue(true)]
+        [Description("Shows the street view icon on the map which enables the user to switch into street view mode.")]
+        public Boolean ShowStreetView { get; set; }
+
+        [Category("Appearance")]
+        [DefaultValue(true)]
+        [Description("Shows the map type controls (i.e. street, satellite, etc.) on the map.")]
+        public Boolean ShowMapType { get; set; }
 
         /// <summary>
         /// A list of Placemark objects that will be placed on the map at load time. This should only
@@ -72,7 +109,15 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         /// </summary>
         public GeocodedAddress Center;
 
+        private HtmlGenericControl commandDiv;
+
+        //
+        // These controls comprise the Download commands.
+        //
         private LinkButton downloadButton;
+        private HtmlGenericControl downloadDiv;
+        private CheckBox downloadIncludeCampus;
+        private CheckBox downloadIncludeAreaOverlays;
 
         #endregion
 
@@ -93,6 +138,13 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             this.Center.Latitude = ArenaContext.Current.Organization.Address.Latitude;
             this.Center.Longitude = ArenaContext.Current.Organization.Address.Longitude;
             this.ZoomLevel = 12;
+            this.MinZoomLevel = -1;
+            this.MaxZoomLevel = -1;
+            this.StaticMap = false;
+            this.ShowStreetView = true;
+            this.ShowPanControls = true;
+            this.ShowZoomControls = true;
+            this.ShowMapType = true;
         }
 
         #endregion
@@ -133,8 +185,41 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
                 "    var " + this.ClientObject + " = null;\n" +
                 "    $(document).ready(function() {\n" +
                 "        var o = {};\n");
+            script.AppendLine("        o.zoom = " + ZoomLevel.ToString() + ";");
+            if (MinZoomLevel != -1)
+                script.AppendLine("        o.minZoom = " + MinZoomLevel.ToString() + ";");
+            if (MaxZoomLevel != -1)
+                script.AppendLine("        o.maxZoom = " + MaxZoomLevel.ToString() + ";");
             if (HideControls == true)
-                script.Append("        o.disableDefaultUI = true;\n");
+                script.AppendLine("        o.disableDefaultUI = true;");
+            else
+            {
+                if (ShowMapType == false)
+                    script.AppendLine("        o.mapTypeControl = false;");
+                if (ShowPanControls == false)
+                    script.AppendLine("        o.panControl = false;");
+                if (ShowStreetView == false)
+                    script.AppendLine("        o.streetViewControl = false;");
+                if (ShowZoomControls == false)
+                {
+                    script.AppendLine("        o.scaleControl = false;");
+                    script.AppendLine("        o.zoomControl = false;");
+                }
+            }
+            if (StaticMap == true)
+            {
+                script.AppendLine("        o.disableDoubleClickZoom = true");
+                script.AppendLine("        o.draggable = false;");
+                script.AppendLine("        o.keyboardShortcuts = false;");
+                script.AppendLine("        o.mapTypeControl = false;");
+                script.AppendLine("        o.minZoom = " + ZoomLevel.ToString() + ";");
+                script.AppendLine("        o.maxZoom = " + ZoomLevel.ToString() + ";");
+                script.AppendLine("        o.panControl = false;");
+                script.AppendLine("        o.scaleControl = false;");
+                script.AppendLine("        o.scrollwheel = false;");
+                script.AppendLine("        o.streetViewControl = false;");
+                script.AppendLine("        o.zoomControl = false;");
+            }
             script.Append("        var " + this.ClientObject + " = new GoogleMap(\"" + this.ClientID + "\", new GeoAddress(" + Center.Latitude.ToString() + ", " + Center.Longitude.ToString() + "), \"\", o);\n");
 
             //
@@ -156,8 +241,11 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             //
             // Render child controls.
             //
+            commandDiv.RenderControl(output);
             if (HideDownload == false)
-                downloadButton.RenderControl(output);
+            {
+                downloadDiv.RenderControl(output);
+            }
         }
 
 
@@ -169,19 +257,17 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             Controls.Clear();
 
 
+            commandDiv = new HtmlGenericControl("DIV");
+            Controls.Add(commandDiv);
+            commandDiv.ID = "commandArea";
+
+
             //
             // Create the download button below the map.
             //
             if (HideDownload == false)
             {
-                downloadButton = new LinkButton();
-                downloadButton.ID = "download";
-                downloadButton.Style.Add("font-size", "small");
-                downloadButton.Style.Add("text-decoration", "none");
-                downloadButton.Text = "Download";
-                downloadButton.Click += new EventHandler(downloadButton_Click);
-
-                Controls.Add(downloadButton);
+                CreateDownloadControls();
             }
         }
 
@@ -200,6 +286,13 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             this.HideDownload = (Boolean)ViewState["HideDownload"];
             this.Height = (Int32)ViewState["Height"];
             this.Width = (Int32)ViewState["Width"];
+            this.StaticMap = (Boolean)ViewState["StaticMap"];
+            this.ShowStreetView = (Boolean)ViewState["ShowStreetView"];
+            this.ShowPanControls = (Boolean)ViewState["ShowPanControls"];
+            this.ShowZoomControls = (Boolean)ViewState["ShowZoomControls"];
+            this.ShowMapType = (Boolean)ViewState["ShowMapType"];
+            this.MinZoomLevel = (Int32)ViewState["MinZoomLevel"];
+            this.MaxZoomLevel = (Int32)ViewState["MaxZoomLevel"];
         }
 
 
@@ -208,6 +301,13 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         /// </summary>
         protected override object SaveViewState()
         {
+            ViewState["MaxZoomLevel"] = this.MaxZoomLevel;
+            ViewState["MinZoomLevel"] = this.MinZoomLevel;
+            ViewState["ShowMapType"] = this.ShowMapType;
+            ViewState["ShowZoomControls"] = this.ShowZoomControls;
+            ViewState["ShowPanControls"] = this.ShowPanControls;
+            ViewState["ShowStreetView"] = this.ShowStreetView;
+            ViewState["StaticMap"] = this.StaticMap;
             ViewState["Width"] = this.Width;
             ViewState["Height"] = this.Height;
             ViewState["HideDownload"] = this.HideDownload;
@@ -236,6 +336,8 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             KML kml;
 
 
+            EnsureChildControls();
+
             //
             // Create the KML object to work with.
             //
@@ -243,7 +345,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             kml = new KML(google);
 
             //
-            // Add in each placemark.
+            // Add in each individual placemark.
             //
             foreach (Placemark placemark in Placemarks)
             {
@@ -302,6 +404,28 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             }
 
             //
+            // Include the church campuses if they checked the box.
+            //
+            if (downloadIncludeCampus.Checked)
+            {
+                foreach (Campus c in ArenaContext.Current.Organization.Campuses)
+                {
+                    kml.AddCampusPlacemark(c);
+                }
+            }
+
+            //
+            // Include the area overlays if the user wants them.
+            //
+            if (downloadIncludeAreaOverlays.Checked)
+            {
+                foreach (Area a in new AreaCollection(ArenaContext.Current.Organization.OrganizationID))
+                {
+                    kml.AddAreaPolygon(a);
+                }
+            }
+
+            //
             // Convert the KML into it's raw XML data and send it to the client.
             //
             kml.xml.Save(writer);
@@ -311,6 +435,26 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             Page.Response.Write(sb.ToString());
             Page.Response.End();
         }
+
+
+        /// <summary>
+        /// Create a new personal tag with the given name for the user. The tag will have the
+        /// "person contents" of this map.
+        /// </summary>
+        void createTagButton_Click(object sender, EventArgs e)
+        {
+            Profile p = new Profile();
+
+
+            //
+            // Create the personal tag.
+            //
+            p.ProfileType = Enums.ProfileType.Personal;
+            p.Name = "test";
+            p.Active = true;
+            p.Save(ArenaContext.Current.User.Identity.Name);
+        }
+
 
         #endregion
 
@@ -382,6 +526,102 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
                         "new GeoAddress(" + loader.Latitude.ToString() + "," + loader.Longitude.ToString() + ")," + loader.Distance.ToString() + ",null);");
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Create all the controls needed to process download requests.
+        /// </summary>
+        private void CreateDownloadControls()
+        {
+            HtmlGenericControl downloadCancel, downloadShow;
+            Literal lt;
+
+            //
+            // Create the "download..." link that will show the download controls.
+            //
+            downloadShow = new HtmlGenericControl("A");
+            downloadShow.InnerText = "Download...";
+            downloadShow.Attributes.Add("class", "smallText");
+            downloadShow.Attributes.Add("href", "#");
+            downloadShow.Attributes.Add("onclick", this.ClientID + "_ShowDownload(); return false;");
+            commandDiv.Controls.Add(downloadShow);
+
+            //
+            // Create the download controls area.
+            //
+            downloadDiv = new HtmlGenericControl("DIV");
+            Controls.Add(downloadDiv);
+            downloadDiv.ID = "downloadDiv";
+            downloadDiv.Style.Add("display", "none");
+            lt = new Literal();
+            lt.Text = "<br />";
+            downloadDiv.Controls.Add(lt);
+
+            //
+            // Create the "include campuses" checkbox.
+            //
+            downloadIncludeCampus = new CheckBox();
+            downloadDiv.Controls.Add(downloadIncludeCampus);
+            downloadIncludeCampus.ID = "downloadIncludeCampus";
+            downloadIncludeCampus.Text = "Include Campus Locations";
+            downloadIncludeCampus.ToolTip = "This will cause your KML download to include pins which identify the various campuses defined in your organization.";
+            downloadIncludeCampus.CssClass = "smallText";
+            lt = new Literal();
+            lt.Text = "<br />";
+            downloadDiv.Controls.Add(lt);
+
+            //
+            // Create the "include areas" checkbox.
+            //
+            downloadIncludeAreaOverlays = new CheckBox();
+            downloadDiv.Controls.Add(downloadIncludeAreaOverlays);
+            downloadIncludeAreaOverlays.ID = "downloadIncludeAreaOverlays";
+            downloadIncludeAreaOverlays.Text = "Include Area Overlays";
+            downloadIncludeAreaOverlays.ToolTip = "Your KML will include colored overlays which identify the various small group areas you have defined.";
+            downloadIncludeAreaOverlays.CssClass = "smallText";
+            lt = new Literal();
+            lt.Text = "<br />";
+            downloadDiv.Controls.Add(lt);
+
+            //
+            // Create the button that triggers a download action.
+            //
+            downloadButton = new LinkButton();
+            downloadDiv.Controls.Add(downloadButton);
+            downloadButton.CssClass = "smallText";
+            downloadButton.ID = "download";
+            downloadButton.Text = "Download";
+            downloadButton.OnClientClick = this.ClientID + "_HideDownload();";
+            downloadButton.Click += new EventHandler(downloadButton_Click);
+            lt = new Literal();
+            lt.Text = "&nbsp;&nbsp;&nbsp;";
+            downloadDiv.Controls.Add(lt);
+
+            //
+            // Create the "cancel" link that will hide the download controls.
+            //
+            downloadCancel = new HtmlGenericControl("A");
+            downloadDiv.Controls.Add(downloadCancel);
+            downloadCancel.InnerText = "Cancel";
+            downloadCancel.Attributes.Add("class", "smallText");
+            downloadCancel.Attributes.Add("href", "#");
+            downloadCancel.Attributes.Add("onclick", this.ClientID + "_HideDownload(); return false;");
+
+            //
+            // Generate all the javascript needed.
+            //
+            StringBuilder script = new StringBuilder();
+
+            script.Append("<script language=\"javascript\" type=\"text/javascript\">\n" +
+                "function " + this.ClientID + "_ShowDownload() {\n" +
+                "  $('#" + commandDiv.ClientID + "').hide('fast', function() { $('#" + downloadDiv.ClientID + "').show(); });\n" +
+                "}\n" +
+                "function " + this.ClientID + "_HideDownload() {\n" +
+                "  $('#" + downloadDiv.ClientID + "').hide('fast', function() { $('#" + commandDiv.ClientID + "').show(); });\n" +
+                "}\n" +
+                "</script>\n");
+            Page.ClientScript.RegisterStartupScript(typeof(Page), this.ClientID + "_Download", script.ToString());
         }
 
 

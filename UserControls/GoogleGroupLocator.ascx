@@ -33,7 +33,7 @@
     }
 </script>
 
-<GMap:GoogleMap runat="server" ID="map" HideDownload="true" />
+<GMap:GoogleMap runat="server" ID="map" HideDownload="true" ShowMapType="false" ShowStreetView="false" MinZoomLevel="10" MaxZoomLevel="14" />
 
 <asp:Panel ID="pnlAddress" runat="server">
     <p id="pAddressError" runat="server" style="color: red;" visible="false">
