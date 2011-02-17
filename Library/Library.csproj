@@ -79,7 +79,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="KML.cs" />
-    <Compile Include="Loader.cs" />
+    <Compile Include="Maps\PlacemarkLoader.cs" />
     <Compile Include="Maps\CampusPlacemark.cs" />
     <Compile Include="Maps\FamilyPlacemark.cs" />
     <Compile Include="Maps\PersonPlacemark.cs" />
@@ -87,7 +87,7 @@
     <Compile Include="Maps\SmallGroupPlacemark.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Google.cs" />
-    <Compile Include="RadiusLoader.cs" />
+    <Compile Include="Maps\RadiusLoader.cs" />
     <Compile Include="UI\GoogleMap.cs" />
   </ItemGroup>
   <ItemGroup>

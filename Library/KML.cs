@@ -221,7 +221,7 @@ namespace Arena.Custom.HDC.GoogleMaps
         /// Add the placemarks that the given loader will want to populate us with.
         /// </summary>
         /// <param name="loader">The placemark loader to use.</param>
-        public void AddLoader(Loader loader)
+        public void AddLoader(PlacemarkLoader loader)
         {
             foreach (Placemark placemark in loader.LoadPlacemarks(Google))
             {
