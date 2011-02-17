@@ -13,7 +13,7 @@ namespace Arena.Custom.HDC.GoogleMaps
     /// load placemarks of any kind onto a map.
     /// </summary>
     [Serializable]
-    public abstract class Loader
+    public abstract class PlacemarkLoader
     {
         #region Properties
 

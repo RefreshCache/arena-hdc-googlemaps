@@ -14,7 +14,7 @@ namespace Arena.Custom.HDC.GoogleMaps
     /// from that point to determine which people to place on the map.
     /// </summary>
     [Serializable]
-    public class RadiusLoader : Loader
+    public class RadiusLoader : PlacemarkLoader
     {
         #region Properties
 
