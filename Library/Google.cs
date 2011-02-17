@@ -79,6 +79,9 @@ namespace Arena.Custom.HDC.GoogleMaps
             int i;
 
 
+            if (PermissionsOperationAllowed(new PermissionCollection(ObjectType.Tag, profile.ProfileID), OperationType.View) == false)
+                return people;
+
             for (i = start; i < profile.Members.Count && people.Count < count; i++)
             {
                 p = profile.Members[i];
@@ -272,7 +275,9 @@ namespace Arena.Custom.HDC.GoogleMaps
 
                     try
                     {
-                        groups.Add(new SmallGroupPlacemark(new Group(Convert.ToInt32(rdr[0]))));
+                        Group group = new Group(Convert.ToInt32(rdr[0]));
+
+                        groups.Add(new SmallGroupPlacemark(group));
                     }
                     catch { }
                 }
