@@ -3,50 +3,41 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
-using System.Web.Script.Serialization;
 using System.Xml;
 using System.Xml.Serialization;
 
-using Arena.Core;
-
+using Arena.Organization;
 
 namespace Arena.Custom.HDC.GoogleMaps.Maps
 {
     /// <summary>
-    /// This class defines the information needed to identify a family unit on
-    /// the map as a placemark.
+    /// Identifies a church campus on the map.
     /// </summary>
     [Serializable]
-    public class FamilyPlacemark : Placemark
+    public class CampusPlacemark : Placemark
     {
         #region Properties
 
-        private Family _family = null;
+        private Campus _campus;
 
         #endregion
 
 
         #region Constructors
 
-        /// <summary>
-        /// Create a new FamilyPlacemark for the given family record. If the family does not have
-        /// a valid geocoded address then an exception is thrown.
-        /// </summary>
-        /// <param name="p">The Arena person to create a placemark for.</param>
-        /// <returns>A new PersonPlacemark object.</returns>
-        public FamilyPlacemark(Family f)
+        public CampusPlacemark(Campus c)
             : base()
         {
-            if (f.FamilyHead.PrimaryAddress == null || (f.FamilyHead.PrimaryAddress.Latitude == 0 && f.FamilyHead.PrimaryAddress.Longitude == 0))
-                throw new ArgumentException("Family " + f.FamilyID.ToString() + " has not been properly geocoded.");
+            if (c.Address == null || (c.Address.Latitude == 0 && c.Address.Longitude == 0))
+                throw new ArgumentException("Campus " + c.Name + " has not been properly geocoded.");
 
-            this.javascriptClassName = "FamilyMarker";
-            this.Name = f.FamilyName;
-            this.Unique = f.FamilyID.ToString();
-            this.PinImage = "Images/Map/" + (String.IsNullOrEmpty(f.FamilyHead.MemberStatus.Qualifier) ? "pin_grey.png" : f.FamilyHead.MemberStatus.Qualifier);
-            this.Latitude = f.FamilyHead.PrimaryAddress.Latitude;
-            this.Longitude = f.FamilyHead.PrimaryAddress.Longitude;
-            this._family = f;
+            this.javascriptClassName = "GenericPlacemark";
+            this.Name = c.Name;
+            this.Unique = c.CampusId.ToString();
+            this.PinImage = "UserControls/Custom/HDC/GoogleMaps/Images/chapel.png";
+            this.Latitude = c.Address.Latitude;
+            this.Longitude = c.Address.Longitude;
+            this._campus = c;
         }
 
         #endregion
@@ -54,14 +45,14 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
 
         #region Serialization
 
-        protected FamilyPlacemark(SerializationInfo info, StreamingContext context)
+        protected CampusPlacemark(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
             if (info == null)
                 throw new ArgumentNullException("info");
 
-            if (info.GetInt32("Family") != -1)
-                this._family = new Family(info.GetInt32("Family"));
+            if (info.GetInt32("Campus") != -1)
+                this._campus = new Campus(info.GetInt32("Campus"));
         }
 
 
@@ -69,10 +60,10 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
         {
             base.GetObjectData(info, context);
 
-            if (_family == null)
-                info.AddValue("Family", -1);
+            if (_campus == null)
+                info.AddValue("Campus", -1);
             else
-                info.AddValue("Family", _family.FamilyID);
+                info.AddValue("Campus", _campus.CampusId);
         }
 
         #endregion
@@ -86,7 +77,7 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
         /// <returns>An XmlElement or null if this placemark cannot exist in KML.</returns>
         public override XmlElement KMLPlacemark(KML kml)
         {
-            XmlElement placemark, name, point, styleUrl, coordinates, description;
+            XmlElement placemark, name, point, styleUrl, coordinates;
             string style;
 
 
@@ -103,18 +94,9 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
             placemark.AppendChild(name);
 
             //
-            // Store the description information.
-            //
-            description = kml.xml.CreateElement("description");
-            description.InnerXml = "<![CDATA[" +
-                kml.Google.FamilyDetailsPopup(_family, true) +
-                "]]>";
-            placemark.AppendChild(description);
-
-            //
             // Create the style tag.
             //
-            style = kml.RegisterPinStyle(PinImage, 0.65, null);
+            style = kml.RegisterPinStyle(PinImage, 0.75, null);
             styleUrl = kml.xml.CreateElement("styleUrl");
             styleUrl.AppendChild(kml.xml.CreateTextNode(style));
             placemark.AppendChild(styleUrl);

@@ -349,21 +349,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             //
             foreach (Placemark placemark in Placemarks)
             {
-                if (typeof(PersonPlacemark).IsInstanceOfType(placemark))
-                {
-                    kml.AddPersonPlacemark(new Person(new Guid(((PersonPlacemark)placemark).Unique)));
-                }
-                else if (typeof(FamilyPlacemark).IsInstanceOfType(placemark))
-                {
-                    kml.AddFamilyPlacemark(new Family(Convert.ToInt32(((FamilyPlacemark)placemark).Unique)));
-                }
-                else if (typeof(SmallGroupPlacemark).IsInstanceOfType(placemark))
-                {
-                    kml.AddSmallGroupPlacemark(new SmallGroup.Group(Convert.ToInt32(((SmallGroupPlacemark)placemark).Unique)));
-                }
-                else
-                {
-                }
+                kml.AddPlacemark(placemark);
             }
 
             //
@@ -371,36 +357,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             //
             foreach (RadiusLoader loader in RadiusLoaders)
             {
-                if (loader.LoaderType == RadiusLoaderType.Individuals)
-                {
-                    List<PersonPlacemark> items;
-
-                    items = google.PersonPlacemarksInRadius(loader.Latitude, loader.Longitude, loader.Distance, 0, Int32.MaxValue);
-                    foreach (PersonPlacemark p in items)
-                    {
-                        kml.AddPersonPlacemark(new Person(new Guid(p.Unique)));
-                    }
-                }
-                else if (loader.LoaderType == RadiusLoaderType.Families)
-                {
-                    List<FamilyPlacemark> items;
-
-                    items = google.FamilyPlacemarksInRadius(loader.Latitude, loader.Longitude, loader.Distance, 0, Int32.MaxValue);
-                    foreach (FamilyPlacemark f in items)
-                    {
-                        kml.AddFamilyPlacemark(new Family(Convert.ToInt32(f.Unique)));
-                    }
-                }
-                else if (loader.LoaderType == RadiusLoaderType.SmallGroups)
-                {
-                    List<SmallGroupPlacemark> items;
-
-                    items = google.SmallGroupPlacemarksInRadius(loader.Latitude, loader.Longitude, loader.Distance, 0, Int32.MaxValue);
-                    foreach (SmallGroupPlacemark sg in items)
-                    {
-                        kml.AddSmallGroupPlacemark(new SmallGroup.Group(Convert.ToInt32(sg.Unique)));
-                    }
-                }
+                kml.AddLoader(loader);
             }
 
             //
@@ -410,7 +367,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             {
                 foreach (Campus c in ArenaContext.Current.Organization.Campuses)
                 {
-                    kml.AddCampusPlacemark(c);
+                    kml.AddPlacemark(new CampusPlacemark(c));
                 }
             }
 
@@ -469,25 +426,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         {
             foreach (Placemark placemark in _Placemarks)
             {
-                string ClassName = "";
-
-                if (typeof(SmallGroupPlacemark).IsInstanceOfType(placemark))
-                    ClassName = "GroupMarker";
-                else if (typeof(FamilyPlacemark).IsInstanceOfType(placemark))
-                    ClassName = "FamilyMarker";
-                else if (typeof(PersonPlacemark).IsInstanceOfType(placemark))
-                    ClassName = "PersonMarker";
-                else
-                    ClassName = "GenericMarker";
-
-                script.AppendLine("        marker = new " + ClassName + "({" +
-                    "icon: \"" + placemark.PinImage + "\"" +
-                    ",position: new google.maps.LatLng(" + placemark.Latitude.ToString() + "," + placemark.Longitude.ToString() + ")" +
-                    ",map: " + this.ClientObject + ".map" +
-                    ",title: \"" + placemark.Name.Replace("\"", "\\\"") + "\"" +
-                    "}, '" + placemark.Unique + "');");
-                if (!String.IsNullOrEmpty(placemark.GetAddedHandler()))
-                    script.AppendLine("        " + placemark.GetAddedHandler() + "(" + this.ClientObject + ",marker);");
+                script.Append(placemark.JavascriptCode(this.ClientObject, "marker"));
             }
         }
 
@@ -501,30 +440,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         {
             foreach (RadiusLoader loader in _RadiusLoaders)
             {
-                if (loader.LoaderType == RadiusLoaderType.Families)
-                {
-                    //
-                    // This RadiusLoader is loading family units.
-                    //
-                    script.AppendLine("        " + this.ClientObject + ".LoadFamiliesInGeoRadius(" +
-                        "new GeoAddress(" + loader.Latitude.ToString() + "," + loader.Longitude.ToString() + ")," + loader.Distance.ToString() + ",null);");
-                }
-                else if (loader.LoaderType == RadiusLoaderType.Individuals)
-                {
-                    //
-                    // This RadiusLoader is loading individuals.
-                    //
-                    script.AppendLine("        " + this.ClientObject + ".LoadPeopleInGeoRadius(" +
-                        "new GeoAddress(" + loader.Latitude.ToString() + "," + loader.Longitude.ToString() + ")," + loader.Distance.ToString() + ",null);");
-                }
-                else if (loader.LoaderType == RadiusLoaderType.SmallGroups)
-                {
-                    //
-                    // This RadiusLoader is loading small groups.
-                    //
-                    script.AppendLine("        " + this.ClientObject + ".LoadGroupsInGeoRadius(" +
-                        "new GeoAddress(" + loader.Latitude.ToString() + "," + loader.Longitude.ToString() + ")," + loader.Distance.ToString() + ",null);");
-                }
+                script.Append(loader.AjaxLoadPopulation(this.ClientObject));
             }
         }
 

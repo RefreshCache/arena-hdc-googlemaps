@@ -351,35 +351,14 @@ namespace Arena.Custom.HDC.GoogleMaps
             Person head = f.FamilyHead;
 
 
-            personInfo = "<div style=\"font-size: 12px;\">";
-            foreach (Person p in f.FamilyMembers)
-            {
-                String info, phones;
-
-                //
-                // Build up the person information and phone numbers.
-                //
-                info = PersonInfo(p, true, true);
-
-                if (personInfo.Length > 0)
-                    personInfo += "<hr width=\"75%\"/>";
-                personInfo += info;
-
-                if (useSecurity == false || PersonFieldOperationAllowed(PersonFields.Profile_Phones, OperationType.View))
-                {
-                    phones = PersonPhoneNumbers(p, false);
-                    if (phones.Length > 0)
-                        personInfo += phones;
-                }
-            }
+            personInfo = "<div style=\"font-size: 12px;\"><div style=\"text-align: center; margin-bottom: 4px;\"><b>" + f.FamilyName + "</b></div>";
 
             //
             // Store address information.
             //
             if (useSecurity == false || PersonFieldOperationAllowed(PersonFields.Profile_Addresses, OperationType.View))
             {
-                personInfo += "<hr />" +
-                    head.PrimaryAddress.StreetLine1 + "<br />" +
+                personInfo += head.PrimaryAddress.StreetLine1 + "<br />" +
                     (String.IsNullOrEmpty(head.PrimaryAddress.StreetLine2) ? "" : head.PrimaryAddress.StreetLine2 + "<br />") +
                     head.PrimaryAddress.City + ", " + head.PrimaryAddress.State + " " + head.PrimaryAddress.PostalCode + "<br />";
             }
@@ -389,6 +368,24 @@ namespace Arena.Custom.HDC.GoogleMaps
             //
             if (useSecurity == false || PersonFieldOperationAllowed(PersonFields.Profile_Phones, OperationType.View))
                 personInfo += FamilyPhoneNumbers(f);
+
+            foreach (Person p in f.FamilyMembers)
+            {
+                String phones;
+
+                //
+                // Build up the person information and phone numbers.
+                //
+                personInfo += "<hr width=\"75%\"/>";
+                personInfo += PersonInfo(p, true, true);
+
+                if (useSecurity == false || PersonFieldOperationAllowed(PersonFields.Profile_Phones, OperationType.View))
+                {
+                    phones = PersonPhoneNumbers(p, false);
+                    if (phones.Length > 0)
+                        personInfo += phones;
+                }
+            }
 
             personInfo += "</div>";
 
@@ -411,14 +408,15 @@ namespace Arena.Custom.HDC.GoogleMaps
             //
             info = "<div style=\"font-size: 12px;\">";
             info += String.Format("<p style=\"text-align: center;\"><b>{0}</b></p>", g.Name);
-            if (!String.IsNullOrEmpty(g.PictureUrl))
-                info += String.Format("<p><img src=\"{0}\" /></p>", g.PictureUrl);
+            if (g.ImageBlob != null && g.ImageBlob.BlobID != -1)
+                info += String.Format("<p align=\"center\"><img src=\"{0}\" /></p>", ArenaUrl + "CachedBlob.aspx?guid=" + g.ImageBlob.GUID.ToString() + "&width=100&height=100");
 
             //
             // Load in the basic group details.
             //
             info += "<table>";
             info += String.Format("<tr><td>{0}:</td><td>{1}</td></tr>", g.ClusterType.Category.MeetingDayCaption, g.MeetingDay);
+            info += String.Format("<tr><td>{0}:</td><td>{1}</td></tr>", g.ClusterType.Category.TypeCaption, g.GroupType.ToString());
             info += String.Format("<tr><td>{0}:</td><td>{1}</td></tr>", g.ClusterType.Category.TopicCaption, g.Topic);
             info += String.Format("<tr><td>{0}:</td><td>{1}</td></tr>", "Average Age", g.AverageAge.ToString());
             if (!String.IsNullOrEmpty(g.Notes))
@@ -459,7 +457,7 @@ namespace Arena.Custom.HDC.GoogleMaps
             if (useSecurity == false || PersonFieldOperationAllowed(PersonFields.Profile_Marital_Status, OperationType.View))
                 personInfo += "<tr><td>Marital Status:</td><td>" + p.MaritalStatus.Value + "</td></tr>";
             if (useSecurity == false || PersonFieldOperationAllowed(PersonFields.Profile_Age, OperationType.View))
-                personInfo += "<tr><td>Age:</td><td>" + p.Age.ToString() + "</td></tr>";
+                personInfo += "<tr><td>Age:</td><td>" + (p.Age != -1 ? p.Age.ToString() : "<i>Unknown</i>") + "</td></tr>";
 
             personInfo += "</table>";
 

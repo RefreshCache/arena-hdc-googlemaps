@@ -9,6 +9,7 @@ using System.Xml;
 using Arena.Core;
 using Arena.Organization;
 using Arena.SmallGroup;
+using Arena.Custom.HDC.GoogleMaps.Maps;
 
 namespace Arena.Custom.HDC.GoogleMaps
 {
@@ -20,7 +21,8 @@ namespace Arena.Custom.HDC.GoogleMaps
         private XmlNode kmlRoot, kmlDocument;
         private String[] areaColorList;
         private int currentAreaColor;
-        private bool pinStylesRegistered = false;
+        private Dictionary<String, String> pinStyles = null;
+        private int nextPinStyle = 0;
 
         /// <summary>
         /// The Google API interface we will use to generate information.
@@ -50,9 +52,10 @@ namespace Arena.Custom.HDC.GoogleMaps
 
 
             //
-            // Prepare the url.
+            // Save the google reference as we will need it later.
             //
             this.Google = google;
+            pinStyles = new Dictionary<string, string>();
 
             //
             // Initialize the XML document object.
@@ -79,7 +82,7 @@ namespace Arena.Custom.HDC.GoogleMaps
         #endregion
 
 
-        #region Private Pin and Color Registration
+        #region Pin and Color Registration
 
         /// <summary>
         /// Setup all the color tables that will be used when cycling
@@ -95,51 +98,43 @@ namespace Arena.Custom.HDC.GoogleMaps
         }
 
         /// <summary>
-        /// Create a style for each membership type. Detect common pin colors
-        /// and define the pins with those colors.
-        /// </summary>
-        private void RegisterPinStyles()
-        {
-            LookupCollection lc;
-
-
-            if (pinStylesRegistered == true)
-                return;
-
-            lc = new LookupCollection(new Guid("0B4532DB-3188-40F5-B188-E7E6E4448C85"));
-            foreach (Lookup l in lc)
-            {
-                if (!String.IsNullOrEmpty(l.Qualifier))
-                {
-                    RegisterPinStyle("p" + l.Value, Google.ArenaUrl + "Images/Map/" + l.Qualifier, 0.6, null);
-                    RegisterPinStyle("f" + l.Value, Google.ArenaUrl + "Images/Map/" + l.Qualifier, 0.6, null);
-                }
-                else
-                {
-                    RegisterPinStyle("p" + l.Value, Google.ArenaUrl + "Images/Map/pin_grey.png", 0.6, null);
-                    RegisterPinStyle("f" + l.Value, Google.ArenaUrl + "Images/Map/pin_grey.png", 0.6, null);
-                }
-            }
-
-            RegisterPinStyle("smallgroup", "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=glyphish_group|4040FF|000000", 0.75, null);
-            RegisterPinStyle("campus", Google.ArenaUrl + "UserControls/Custom/HDC/GoogleMaps/Images/chapel.png", 1, null);
-
-            pinStylesRegistered = true;
-        }
-
-        /// <summary>
         /// Add all the style information for a new pin color.
         /// </summary>
         /// <param name="styleName">The name for this style tag.</param>
         /// <param name="link">The hyperlink to use for the base image.</param>
         /// <param name="color">The color as a google color string, #aabbggrr (aa=alpha, bb=blue, gg=green, rr=red).</param>
-        private void RegisterPinStyle(String styleName, String link, Double scale, String color)
+        public string RegisterPinStyle(String link, Double scale, String color)
         {
             XmlNode style = xmlDoc.CreateElement("Style");
             XmlAttribute idAttrib = xmlDoc.CreateAttribute("id");
+            String styleName;
 
 
-            idAttrib.Value = styleName;
+            //
+            // If the link does not include a "://", assume it is relative to the Arena URL.
+            //
+            if (link.Contains("://") == false)
+            {
+                if (link[0] == '/')
+                    link = Google.ArenaUrl + link.Substring(1);
+                else
+                    link = Google.ArenaUrl + link;
+            }
+
+            //
+            // Check if this link has already been registered.
+            //
+            if (pinStyles.ContainsKey(link))
+                return pinStyles[link];
+
+            //
+            // Generate a new style.
+            //
+            styleName = "#s" + nextPinStyle.ToString();
+            pinStyles[link] = styleName;
+            nextPinStyle++;
+
+            idAttrib.Value = styleName.Substring(1);
             style.Attributes.Append(idAttrib);
             kmlDocument.AppendChild(style);
             style.InnerXml = "<IconStyle>" +
@@ -147,6 +142,8 @@ namespace Arena.Custom.HDC.GoogleMaps
                 "<Icon><href>" + SecurityElement.Escape(link) + "</href></Icon>" +
                 (color != null ? "<color>" + color + "</color>" : "") +
                 "</IconStyle>";
+
+            return styleName;
         }
 
         /// <summary>
@@ -203,261 +200,38 @@ namespace Arena.Custom.HDC.GoogleMaps
         #endregion
 
 
-        #region Adding Placemarks
+        #region Adding Map Objects
 
         /// <summary>
-        /// Create a new placemark object on the map that will identify a
-        /// single person in the database.
+        /// Add a new placemark to the map. The placemark is immediately added so
+        /// you cannot add a placemark and then make changes to it.
         /// </summary>
-        /// <param name="p">The Person object to display.</param>
-        public void AddPersonPlacemark(Person p)
+        /// <param name="placemark">The placemark to add.</param>
+        public void AddPlacemark(Placemark placemark)
         {
-            XmlNode placemark, name, point, styleUrl, coordinates, description;
+            XmlElement element = null;
 
-
-            //
-            // If there is not a valid address, skip this person.
-            //
-            if (p.PrimaryAddress == null ||
-                (p.PrimaryAddress.Latitude == 0 && p.PrimaryAddress.Longitude == 0))
-                return;
-
-            //
-            // Make sure all the membership pin types are registered.
-            //
-            RegisterPinStyles();
-
-            //
-            // Create the placemark tag.
-            //
-            placemark = xmlDoc.CreateElement("Placemark");
-            kmlDocument.AppendChild(placemark);
-
-            //
-            // Create the name tag.
-            //
-            name = xmlDoc.CreateElement("name");
-            name.AppendChild(xmlDoc.CreateTextNode(p.FullName));
-            placemark.AppendChild(name);
-
-            //
-            // Create the style tag.
-            //
-            styleUrl = xmlDoc.CreateElement("styleUrl");
-            styleUrl.AppendChild(xmlDoc.CreateTextNode("#p" + p.MemberStatus.Value));
-            placemark.AppendChild(styleUrl);
-
-            //
-            // Store the description information.
-            //
-            description = xmlDoc.CreateElement("description");
-            description.InnerXml = "<![CDATA[" +
-                Google.PersonDetailsPopup(p, false, true) +
-                "]]>";
-            placemark.AppendChild(description);
-
-            //
-            // Set the coordinates and store the placemark.
-            //
-            point = xmlDoc.CreateElement("Point");
-            coordinates = xmlDoc.CreateElement("coordinates");
-            coordinates.AppendChild(xmlDoc.CreateTextNode(String.Format("{0},{1},0", p.PrimaryAddress.Longitude, p.PrimaryAddress.Latitude)));
-            point.AppendChild(coordinates);
-            placemark.AppendChild(point);
+            element = placemark.KMLPlacemark(this);
+            if (element != null)
+                kmlDocument.AppendChild(element);
         }
 
 
         /// <summary>
-        /// Create a new placemark object on the map that identifies an entire
-        /// family in the database. The family name is displayed in the placemark
-        /// and the popup will display information about each member of the family.
+        /// Add the placemarks that the given loader will want to populate us with.
         /// </summary>
-        /// <param name="f">The Family object to display.</param>
-        public void AddFamilyPlacemark(Family f)
+        /// <param name="loader">The placemark loader to use.</param>
+        public void AddLoader(Loader loader)
         {
-            XmlNode placemark, name, point, styleUrl, coordinates, description;
-            Person head = f.FamilyHead;
+            foreach (Placemark placemark in loader.LoadPlacemarks(Google))
+            {
+                XmlElement element = null;
 
-
-            //
-            // If we don't have a valid address for this family then
-            // do not display it.
-            //
-            if (head.PrimaryAddress == null ||
-                (head.PrimaryAddress.Latitude == 0 && head.PrimaryAddress.Longitude == 0))
-                return;
-
-            //
-            // Make sure all the membership pin types are registered.
-            //
-            RegisterPinStyles();
-
-            //
-            // Create the placemark tag.
-            //
-            placemark = xmlDoc.CreateElement("Placemark");
-            kmlDocument.AppendChild(placemark);
-
-            //
-            // Create the name tag.
-            //
-            name = xmlDoc.CreateElement("name");
-            name.AppendChild(xmlDoc.CreateTextNode(f.FamilyName));
-            placemark.AppendChild(name);
-
-            //
-            // Create the style tag.
-            //
-            styleUrl = xmlDoc.CreateElement("styleUrl");
-            styleUrl.AppendChild(xmlDoc.CreateTextNode("#f" + head.MemberStatus.Value));
-            placemark.AppendChild(styleUrl);
-
-            //
-            // Store the description information.
-            //
-            description = xmlDoc.CreateElement("description");
-            description.InnerXml = "<![CDATA[" +
-                Google.FamilyDetailsPopup(f, true) +
-                "]]>";
-            placemark.AppendChild(description);
-
-            //
-            // Set the coordinates and store the placemark.
-            //
-            point = xmlDoc.CreateElement("Point");
-            coordinates = xmlDoc.CreateElement("coordinates");
-            coordinates.AppendChild(xmlDoc.CreateTextNode(String.Format("{0},{1},0", head.PrimaryAddress.Longitude, head.PrimaryAddress.Latitude)));
-            point.AppendChild(coordinates);
-            placemark.AppendChild(point);
+                element = placemark.KMLPlacemark(this);
+                if (element != null)
+                    kmlDocument.AppendChild(element);
+            }
         }
-
-
-        /// <summary>
-        /// Create a new placemark object on the map that will identify a
-        /// single campus in the database.
-        /// </summary>
-        /// <param name="c">The Campus object to display.</param>
-        public void AddCampusPlacemark(Campus c)
-        {
-            XmlNode placemark, name, point, styleUrl, coordinates, description;
-
-
-            //
-            // If there is not a valid address, skip this person.
-            //
-            if (c.Address == null ||
-                (c.Address.Latitude == 0 && c.Address.Longitude == 0))
-                return;
-
-            //
-            // Make sure all the pin types are registered.
-            //
-            RegisterPinStyles();
-
-            //
-            // Create the placemark tag.
-            //
-            placemark = xmlDoc.CreateElement("Placemark");
-            kmlDocument.AppendChild(placemark);
-
-            //
-            // Create the name tag.
-            //
-            name = xmlDoc.CreateElement("name");
-            name.AppendChild(xmlDoc.CreateTextNode(c.Name));
-            placemark.AppendChild(name);
-
-            //
-            // Create the style tag.
-            //
-            styleUrl = xmlDoc.CreateElement("styleUrl");
-            styleUrl.AppendChild(xmlDoc.CreateTextNode("#campus"));
-            placemark.AppendChild(styleUrl);
-
-            //
-            // Store the description information.
-            //
-            description = xmlDoc.CreateElement("description");
-            description.InnerXml = "<![CDATA[" +
-                c.Address.StreetLine1 + "<br />" +
-                (String.IsNullOrEmpty(c.Address.StreetLine2) ? "" : c.Address.StreetLine2 + "<br />") +
-                c.Address.City + ", " + c.Address.State + " " + c.Address.PostalCode + "<br />" +
-                "]]>";
-            placemark.AppendChild(description);
-
-            //
-            // Set the coordinates and store the placemark.
-            //
-            point = xmlDoc.CreateElement("Point");
-            coordinates = xmlDoc.CreateElement("coordinates");
-            coordinates.AppendChild(xmlDoc.CreateTextNode(String.Format("{0},{1},0", c.Address.Longitude, c.Address.Latitude)));
-            point.AppendChild(coordinates);
-            placemark.AppendChild(point);
-        }
-
-
-        /// <summary>
-        /// Create a new placemark object on the map that will identify a
-        /// small group in the database.
-        /// </summary>
-        /// <param name="group">The Group object to display.</param>
-        public void AddSmallGroupPlacemark(Group group)
-        {
-            XmlNode placemark, name, point, styleUrl, coordinates, description;
-
-
-            //
-            // If there is not a valid address, skip this group.
-            //
-            if (group.TargetLocation == null ||
-                (group.TargetLocation.Latitude == 0 && group.TargetLocation.Longitude == 0))
-                return;
-
-            //
-            // Make sure all the pin types are registered.
-            //
-            RegisterPinStyles();
-
-            //
-            // Create the placemark tag.
-            //
-            placemark = xmlDoc.CreateElement("Placemark");
-            kmlDocument.AppendChild(placemark);
-
-            //
-            // Create the name tag.
-            //
-            name = xmlDoc.CreateElement("name");
-            name.AppendChild(xmlDoc.CreateTextNode(group.Name));
-            placemark.AppendChild(name);
-
-            //
-            // Create the style tag.
-            //
-            styleUrl = xmlDoc.CreateElement("styleUrl");
-            styleUrl.AppendChild(xmlDoc.CreateTextNode("#smallgroup"));
-            placemark.AppendChild(styleUrl);
-
-            //
-            // Store the description information.
-            //
-            description = xmlDoc.CreateElement("description");
-            description.InnerXml = "<![CDATA[" +
-                Google.SmallGroupDetailsPopup(group, true) +
-                "]]>";
-            placemark.AppendChild(description);
-
-            //
-            // Set the coordinates and store the placemark.
-            //
-            point = xmlDoc.CreateElement("Point");
-            coordinates = xmlDoc.CreateElement("coordinates");
-            coordinates.AppendChild(xmlDoc.CreateTextNode(String.Format("{0},{1},0", group.TargetLocation.Longitude, group.TargetLocation.Latitude)));
-            point.AppendChild(coordinates);
-            placemark.AppendChild(point);
-        }
-
-        #endregion
 
 
         /// <summary>
@@ -496,5 +270,7 @@ namespace Arena.Custom.HDC.GoogleMaps
                 "</coordinates></LinearRing></outerBoundaryIs></Polygon>",
                 a.Name, "area" + a.AreaID.ToString(), sb.ToString());
         }
+
+        #endregion
     }
 }
