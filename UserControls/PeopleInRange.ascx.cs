@@ -24,6 +24,9 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 ddlType.Items.Add(new ListItem("Families", PopulationType.Families.ToString()));
                 ddlType.Items.Add(new ListItem("Small Groups", PopulationType.SmallGroups.ToString()));
                 ddlType.SelectedIndex = 0;
+
+                myMap.Loaders.Add(new AreaLoader(12));
+                myMap.Loaders[0].PopulateWith = PopulationType.SmallGroups;
             }
         }
 
@@ -78,13 +81,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                     {
                         if (c.Address != null && c.Address.Latitude != 0 && c.Address.Longitude != 0)
                         {
-                            placemark = new Placemark();
-                            placemark.Latitude = c.Address.Latitude;
-                            placemark.Longitude = c.Address.Longitude;
-                            placemark.Unique = c.Name;
-                            placemark.PinImage = "http://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=home|FFFF00";
-                            placemark.Name = c.Name + "\\n" + c.Address.StreetLine1 + "\\n" + c.Address.City + ", " + c.Address.State + " " + c.Address.PostalCode;
-                            myMap.Placemarks.Add(placemark);
+                            myMap.Placemarks.Add(new CampusPlacemark(c));
                         }
                     }
                 }
@@ -97,7 +94,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 loader.Longitude = address.Longitude;
                 loader.Distance = Convert.ToDouble(txtDistance.Text);
                 loader.PopulateWith = (PopulationType)Enum.Parse(typeof(PopulationType), ddlType.SelectedValue);
-                myMap.RadiusLoaders.Add(loader);
+                myMap.Loaders.Add(loader);
 
                 //
                 // Set the center point for the map.

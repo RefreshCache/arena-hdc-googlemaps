@@ -25,6 +25,19 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
 
         #region Constructors
 
+        /// <summary>
+        /// Generic constructor for Serialization.
+        /// </summary>
+        protected CampusPlacemark()
+            : base()
+        {
+            this.javascriptClassName = "GenericPlacemark";
+        }
+
+        /// <summary>
+        /// Create a new CampusPlacemark from the given Campus object.
+        /// </summary>
+        /// <param name="c"></param>
         public CampusPlacemark(Campus c)
             : base()
         {

@@ -120,6 +120,8 @@ namespace Arena.Custom.HDC.GoogleMaps
         }
 
 
+        #region Load In Radius
+
         /// <summary>
         /// Request that the given address be geocoded. If the address cannot be geocoded then the latitude
         /// and longitude are returned as 0,0.
@@ -156,8 +158,6 @@ namespace Arena.Custom.HDC.GoogleMaps
             return geocoded;
         }
 
-
-        #region Load In Radius
 
         /// <summary>
         /// Retrieve a list of people who are inside the radius of the given latitude
@@ -224,6 +224,73 @@ namespace Arena.Custom.HDC.GoogleMaps
             google = new Google(ArenaContext.Current.User, HttpContext.Current.Request.ApplicationPath);
 
             return google.SmallGroupPlacemarksInRadius(latitude, longitude, distance,
+                (String.IsNullOrEmpty(start) ? 0 : Convert.ToInt32(start)),
+                (String.IsNullOrEmpty(count) ? Int32.MaxValue : Convert.ToInt32(count)));
+        }
+
+        #endregion
+
+
+        #region Load In Area
+
+        /// <summary>
+        /// Retrieve a list of people who are inside the Arena Area.
+        /// </summary>
+        /// <param name="areaid">The Arena Area ID to load people from.</param>
+        /// <param name="start">The starting index of the records to retrieve. To retrieve all records pass 0.</param>
+        /// <param name="count">The number of records to retrieve. To retrieve all records pass an empty string. Due to a limitation in Microsofts JSON implementation you should not retrieve more than 100 records at a time.</param>
+        /// <returns>A list of PersonPlcemark objects that can be placed on the map.</returns>
+        [WebMethod]
+        public List<PersonPlacemark> LoadPeopleInArea(int areaid, String start, String count)
+        {
+            Google google;
+
+
+            google = new Google(ArenaContext.Current.User, HttpContext.Current.Request.ApplicationPath);
+
+            return google.PersonPlacemarksInArea(areaid,
+                (String.IsNullOrEmpty(start) ? 0 : Convert.ToInt32(start)),
+                (String.IsNullOrEmpty(count) ? Int32.MaxValue : Convert.ToInt32(count)));
+        }
+
+
+        /// <summary>
+        /// Load a collection of families who are in the small group area.
+        /// </summary>
+        /// <param name="areaid">The Area ID of the small group area.</param>
+        /// <param name="start">The starting index of the records to retrieve. To retrieve all records pass 0.</param>
+        /// <param name="count">The number of records to retrieve. Pass an empty string for all records. Due to a limitation in Microsofts JSON implementation you should not retrieve more than 100 records at a time.</param>
+        /// <returns>A list of FamilyPlacemarks that can be placed on a google map.</returns>
+        [WebMethod]
+        public List<FamilyPlacemark> LoadFamiliesInArea(int areaid, String start, String count)
+        {
+            Google google;
+
+
+            google = new Google(ArenaContext.Current.User, HttpContext.Current.Request.ApplicationPath);
+
+            return google.FamilyPlacemarksInArea(areaid,
+                (String.IsNullOrEmpty(start) ? 0 : Convert.ToInt32(start)),
+                (String.IsNullOrEmpty(count) ? Int32.MaxValue : Convert.ToInt32(count)));
+        }
+
+
+        /// <summary>
+        /// Load a collection of small groups who are in the small group area.
+        /// </summary>
+        /// <param name="areaid">The latitude coordinate of the center point to search from.</param>
+        /// <param name="start">The starting index of the records to retrieve. To retrieve all records pass 0.</param>
+        /// <param name="count">The number of records to retrieve. Pass an empty string for all records. Due to a limitation in Microsofts JSON implementation you should not retrieve more than 100 records at a time.</param>
+        /// <returns>A list of SmallGroupPlacemarks that can be placed on a google map.</returns>
+        [WebMethod]
+        public List<SmallGroupPlacemark> LoadGroupsInArea(int areaid, String start, String count)
+        {
+            Google google;
+
+
+            google = new Google(ArenaContext.Current.User, HttpContext.Current.Request.ApplicationPath);
+
+            return google.SmallGroupPlacemarksInArea(areaid,
                 (String.IsNullOrEmpty(start) ? 0 : Convert.ToInt32(start)),
                 (String.IsNullOrEmpty(count) ? Int32.MaxValue : Convert.ToInt32(count)));
         }

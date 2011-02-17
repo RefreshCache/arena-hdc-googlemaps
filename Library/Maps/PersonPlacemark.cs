@@ -29,6 +29,16 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
         #region Constructors
 
         /// <summary>
+        /// Generic constructor for Serialization.
+        /// </summary>
+        protected PersonPlacemark()
+            : base()
+        {
+            this.javascriptClassName = "PersonPlacemark";
+        }
+
+
+        /// <summary>
         /// Create a new PersonPlacemark for the given person record. If the person does not have
         /// a valid geocoded address then an exception is thrown.
         /// </summary>
