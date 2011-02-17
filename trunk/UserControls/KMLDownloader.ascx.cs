@@ -30,6 +30,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 	using Arena.Portal;
 	using Arena.SmallGroup;
     using Arena.Custom.HDC.GoogleMaps;
+    using Arena.Custom.HDC.GoogleMaps.Maps;
 
 	public partial class KMLDownloader : PortalControl
 	{
@@ -106,7 +107,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                     {
                         if (p.Status.Qualifier != "D")
                         {
-                            kml.AddPersonPlacemark(p);
+                            kml.AddPlacemark(new PersonPlacemark(p));
                         }
                     }
 				}
@@ -130,7 +131,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				{
                     if (rdr["person_id"] != null)
                     {
-                        kml.AddPersonPlacemark(new Person(Convert.ToInt32(rdr["person_id"])));
+                        kml.AddPlacemark(new PersonPlacemark(new Person(Convert.ToInt32(rdr["person_id"]))));
                     }
 				}
 
@@ -178,11 +179,11 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				{
 					Group g = new Group(Convert.ToInt32(groupString));
 
-					kml.AddPersonPlacemark(g.Leader);
+					kml.AddPlacemark(new PersonPlacemark(g.Leader));
 					foreach (GroupMember p in g.Members)
 					{
 						if (p.Active == true)
-							kml.AddPersonPlacemark(p);
+							kml.AddPlacemark(new PersonPlacemark(p));
 					}
 				}
 
@@ -198,7 +199,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			{
 				foreach (Campus c in ArenaContext.Current.Organization.Campuses)
 				{
-					kml.AddCampusPlacemark(c);
+					kml.AddPlacemark(new CampusPlacemark(c));
 				}
 
 				dumpXml = true;
@@ -214,7 +215,12 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			}
 		}
 
-		/// <summary>
+        #endregion
+
+
+        #region Support Methods
+
+        /// <summary>
 		/// Populate the KML data stream with all the small groups that are
 		/// a direct or indirect descendant of the given GroupCluster.
 		/// </summary>
@@ -233,16 +239,16 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			{
 				if (includeGroups)
 				{
-					kml.AddSmallGroupPlacemark(g);
+					kml.AddPlacemark(new SmallGroupPlacemark(g));
 				}
 
 				if (includePeople)
 				{
-					kml.AddPersonPlacemark(g.Leader);
+					kml.AddPlacemark(new PersonPlacemark(g.Leader));
 
 					foreach (Person p in g.Members)
 					{
-						kml.AddPersonPlacemark(p);
+						kml.AddPlacemark(new PersonPlacemark(p));
 					}
 				}
 			}
@@ -262,12 +268,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			pc.LoadByArea(areaID);
 			foreach (Person p in pc)
 			{
-				kml.AddFamilyPlacemark(p.Family());
+				kml.AddPlacemark(new FamilyPlacemark(p.Family()));
 			}
 		}
 		
-		#endregion
-
         /// <summary>
         /// Retrieve the base url (the portion of the URL without the last path
         /// component, that is the filename and query string) of the current
@@ -291,5 +295,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
             return url.ToString();
         }
+
+        #endregion
     }
 }

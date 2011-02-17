@@ -20,9 +20,9 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         {
             if (!IsPostBack)
             {
-                ddlType.Items.Add(new ListItem("People", RadiusLoaderType.Individuals.ToString()));
-                ddlType.Items.Add(new ListItem("Families", RadiusLoaderType.Families.ToString()));
-                ddlType.Items.Add(new ListItem("Small Groups", RadiusLoaderType.SmallGroups.ToString()));
+                ddlType.Items.Add(new ListItem("People", PopulationType.Individuals.ToString()));
+                ddlType.Items.Add(new ListItem("Families", PopulationType.Families.ToString()));
+                ddlType.Items.Add(new ListItem("Small Groups", PopulationType.SmallGroups.ToString()));
                 ddlType.SelectedIndex = 0;
             }
         }
@@ -96,7 +96,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 loader.Latitude = address.Latitude;
                 loader.Longitude = address.Longitude;
                 loader.Distance = Convert.ToDouble(txtDistance.Text);
-                loader.LoaderType = (RadiusLoaderType)Enum.Parse(typeof(RadiusLoaderType), ddlType.SelectedValue);
+                loader.PopulateWith = (PopulationType)Enum.Parse(typeof(PopulationType), ddlType.SelectedValue);
                 myMap.RadiusLoaders.Add(loader);
 
                 //
