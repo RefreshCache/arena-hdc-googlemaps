@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Linq;
 using System.Text;
+using System.Xml;
 
 
 namespace Arena.Custom.HDC.GoogleMaps.Maps
@@ -12,7 +14,7 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
     /// generic unique identifier.
     /// </summary>
     [Serializable]
-    public class Placemark
+    public class Placemark : ISerializable
     {
         #region Properties
 
@@ -44,7 +46,7 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
         /// </summary>
         public String PinImage;
 
-        private String _AddedHandler;
+        protected String _AddedHandler, javascriptClassName;
 
         #endregion
 
@@ -56,6 +58,7 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
         /// </summary>
         public Placemark()
         {
+            this.javascriptClassName = "GenericMarker";
             this.Name = "";
             this.Unique = "";
             this.Latitude = 0;
@@ -85,6 +88,43 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
         #endregion
 
 
+        #region Serialization
+
+        protected Placemark(SerializationInfo info, StreamingContext context)
+        {
+            this.Name = info.GetString("Name");
+            this.Unique = info.GetString("Unique");
+            this.Latitude = info.GetDouble("Latitude");
+            this.Longitude = info.GetDouble("Longitude");
+            this.PinImage = info.GetString("PinImage");
+            this._AddedHandler = info.GetString("AddedHandler");
+            this.javascriptClassName = info.GetString("javascriptClassName");
+        }
+
+
+        protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("Name", Name);
+            info.AddValue("Unique", Unique);
+            info.AddValue("Latitude", Latitude);
+            info.AddValue("Longitude", Longitude);
+            info.AddValue("PinImage", PinImage);
+            info.AddValue("AddedHandler", _AddedHandler);
+            info.AddValue("javascriptClassName", javascriptClassName);
+        }
+
+
+        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            if (info == null)
+                throw new ArgumentNullException("info");
+
+            GetObjectData(info, context);
+        }
+
+        #endregion
+
+
         /// <summary>
         /// Sets the Javascript method to call when the placemark is added
         /// to the map. This is only used when the placemark is being added
@@ -104,6 +144,73 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
         public String GetAddedHandler()
         {
             return _AddedHandler;
+        }
+
+
+        /// <summary>
+        /// Generates the Javascript code needed to create this placemark directly in
+        /// the code as opposed to dynamically loading it via an AJAX request.
+        /// </summary>
+        /// <param name="javascriptObject">The ClientObject of the GoogleMap control to put this placemark on.</param>
+        /// <param name="javascriptVariable">The javascript variable name to use when creating this placemark.</param>
+        /// <returns>A string of javascript code that can be executed by the web browser.</returns>
+        public string JavascriptCode(string javascriptObject, string javascriptVariable)
+        {
+            StringBuilder sb = new StringBuilder();
+
+
+            sb.AppendLine(javascriptVariable + " = new " + javascriptClassName + "({" +
+                "icon: \"" + PinImage + "\"" +
+                ",position: new google.maps.LatLng(" + Latitude.ToString() + "," + Longitude.ToString() + ")" +
+                ",map: " + javascriptObject + ".map" +
+                ",title: \"" + Name.Replace("\"", "\\\"") + "\"" +
+                "}, '" + Unique + "');");
+            if (!String.IsNullOrEmpty(_AddedHandler))
+                sb.AppendLine(GetAddedHandler() + "(" + javascriptObject + "," + javascriptVariable + ");");
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Generate an XML element that has all the information needed for this placemark to
+        /// exist on a Google Earth KML document.
+        /// </summary>
+        /// <param name="kml">The KML object that will be used for generating this KML.</param>
+        /// <returns>An XmlElement or null if this placemark cannot exist in KML.</returns>
+        public virtual XmlElement KMLPlacemark(KML kml)
+        {
+            XmlElement placemark, name, point, styleUrl, coordinates;
+
+
+            //
+            // Create the placemark tag.
+            //
+            placemark = kml.xml.CreateElement("Placemark");
+
+            //
+            // Create the name tag.
+            //
+            name = kml.xml.CreateElement("name");
+            name.AppendChild(kml.xml.CreateTextNode(Name.Replace("\\n", ", ")));
+            placemark.AppendChild(name);
+
+            //
+            // Create the style tag.
+            //
+            styleUrl = kml.xml.CreateElement("styleUrl");
+            styleUrl.AppendChild(kml.xml.CreateTextNode(kml.RegisterPinStyle(PinImage, 1, null)));
+            placemark.AppendChild(styleUrl);
+
+            //
+            // Set the coordinates and store the placemark.
+            //
+            point = kml.xml.CreateElement("Point");
+            coordinates = kml.xml.CreateElement("coordinates");
+            coordinates.AppendChild(kml.xml.CreateTextNode(String.Format("{0},{1},0", Longitude, Latitude)));
+            point.AppendChild(coordinates);
+            placemark.AppendChild(point);
+
+            return placemark;
         }
     }
 }

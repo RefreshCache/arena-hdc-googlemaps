@@ -79,6 +79,8 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="KML.cs" />
+    <Compile Include="Loader.cs" />
+    <Compile Include="Maps\CampusPlacemark.cs" />
     <Compile Include="Maps\FamilyPlacemark.cs" />
     <Compile Include="Maps\PersonPlacemark.cs" />
     <Compile Include="Maps\Placemark.cs" />
