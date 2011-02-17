@@ -81,13 +81,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				{
 					AreaCollection ac = new AreaCollection(ArenaContext.Current.Organization.OrganizationID);
 
-					foreach (Area a in ac)
-						PopulateKmlFromArea(kml, a.AreaID);
+                    foreach (Area a in ac)
+                        kml.AddLoader(new AreaLoader(a.AreaID));
 				}
 				else
 				{
-					foreach (String areaString in Request.Params["populateAreaID"].Split(','))
-						PopulateKmlFromArea(kml, Convert.ToInt32(areaString));
+                    foreach (String areaString in Request.Params["populateAreaID"].Split(','))
+                        kml.AddLoader(new AreaLoader(Convert.ToInt32(areaString)));
 				}
 
 				filename = "ArenaAreas.kml";
@@ -254,24 +254,6 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			}
 		}
 
-		/// <summary>
-		/// Populate people from a given AreaID. A single placemark
-		/// will consist of an entire family rather than individuals.
-		/// </summary>
-		/// <param name="kml">The KML object to populate.</param>
-		/// <param name="areaID">The ID of the Area to populate from.</param>
-		private void PopulateKmlFromArea(KML kml, int areaID)
-		{
-			PersonCollection pc = new PersonCollection();
-
-
-			pc.LoadByArea(areaID);
-			foreach (Person p in pc)
-			{
-				kml.AddPlacemark(new FamilyPlacemark(p.Family()));
-			}
-		}
-		
         /// <summary>
         /// Retrieve the base url (the portion of the URL without the last path
         /// component, that is the filename and query string) of the current

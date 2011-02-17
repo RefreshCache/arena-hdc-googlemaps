@@ -96,8 +96,8 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         /// <summary>
         /// A list of RadiusLoader objects that will be used to populate the map with placemarks.
         /// </summary>
-        public List<RadiusLoader> RadiusLoaders { get { return _RadiusLoaders; } }
-        private List<RadiusLoader> _RadiusLoaders;
+        public List<PlacemarkLoader> Loaders { get { return _Loaders; } }
+        private List<PlacemarkLoader> _Loaders;
 
         /// <summary>
         /// The Javascript object that can be used to interact with the Google Map.
@@ -133,7 +133,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             this.Width = 480;
             this.Height = 360;
             this._Placemarks = new List<Placemark>();
-            this._RadiusLoaders = new List<RadiusLoader>();
+            this._Loaders = new List<PlacemarkLoader>();
             this.Center = new GeocodedAddress();
             this.Center.Latitude = ArenaContext.Current.Organization.Address.Latitude;
             this.Center.Longitude = ArenaContext.Current.Organization.Address.Longitude;
@@ -226,7 +226,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             // Render in all the other elements.
             //
             RenderPlacemarks(script);
-            RenderRadiusLoaders(script);
+            RenderLoaders(script);
 
             //
             // Generate the final sequence of the script.
@@ -280,7 +280,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             base.LoadViewState(savedState);
 
             this.Center = (GeocodedAddress)ViewState["Center"];
-            this._RadiusLoaders = (List<RadiusLoader>)ViewState["RadiusLoaders"];
+            this._Loaders = (List<PlacemarkLoader>)ViewState["Loaders"];
             this._Placemarks = (List<Placemark>)ViewState["Placemarks"];
             this.HideControls = (Boolean)ViewState["HideControls"];
             this.HideDownload = (Boolean)ViewState["HideDownload"];
@@ -313,7 +313,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             ViewState["HideDownload"] = this.HideDownload;
             ViewState["HideControls"] = this.HideControls;
             ViewState["Placemarks"] = this._Placemarks;
-            ViewState["RadiusLoaders"] = this._RadiusLoaders;
+            ViewState["Loaders"] = this._Loaders;
             ViewState["Center"] = this.Center;
 
             return base.SaveViewState();
@@ -355,7 +355,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             //
             // Run through each RadiusLoader and process it.
             //
-            foreach (RadiusLoader loader in RadiusLoaders)
+            foreach (PlacemarkLoader loader in Loaders)
             {
                 kml.AddLoader(loader);
             }
@@ -436,9 +436,9 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         /// render multiple placemarks based on distance from a central address.
         /// </summary>
         /// <param name="script">The script string to append our JS to.</param>
-        private void RenderRadiusLoaders(StringBuilder script)
+        private void RenderLoaders(StringBuilder script)
         {
-            foreach (RadiusLoader loader in _RadiusLoaders)
+            foreach (PlacemarkLoader loader in _Loaders)
             {
                 script.Append(loader.AjaxLoadPopulation(this.ClientObject));
             }
@@ -576,7 +576,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         public void ClearContent()
         {
             this.Placemarks.Clear();
-            this.RadiusLoaders.Clear();
+            this.Loaders.Clear();
         }
 
         #endregion

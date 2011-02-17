@@ -4,35 +4,24 @@ using System.Linq;
 using System.Text;
 
 using Arena.Core;
-using Arena.Custom.HDC.GoogleMaps.Maps;
+using Arena.SmallGroup;
 
-namespace Arena.Custom.HDC.GoogleMaps
+namespace Arena.Custom.HDC.GoogleMaps.Maps
 {
     /// <summary>
-    /// This class defines a group of people that will be loaded and placed on a
-    /// GoogleMap when the page is rendered. It uses a center point and distance
-    /// from that point to determine which people to place on the map.
+    /// This class defines a group of placemarks that will be loaded and placed on a
+    /// GoogleMap when the page is rendered. It uses an Arena AreaID to locate the
+    /// population.
     /// </summary>
     [Serializable]
-    public class RadiusLoader : PlacemarkLoader
+    public class AreaLoader : PlacemarkLoader
     {
         #region Properties
 
         /// <summary>
-        /// The latitude of the center point to use.
+        /// The ID of the Arena Small Group Area to use when populating.
         /// </summary>
-        public Double Latitude;
-
-        /// <summary>
-        /// The longitude of the center point to use.
-        /// </summary>
-        public Double Longitude;
-
-        /// <summary>
-        /// The distance, in miles, from the center point that people should be
-        /// loaded.
-        /// </summary>
-        public Double Distance;
+        public Int32 AreaID;
 
         #endregion
 
@@ -42,12 +31,22 @@ namespace Arena.Custom.HDC.GoogleMaps
         /// <summary>
         /// Default constructor, create an empty loader.
         /// </summary>
-        public RadiusLoader()
+        public AreaLoader()
             : base()
         {
-            this.Latitude = 0;
-            this.Longitude = 0;
-            this.Distance = 0;
+            this.AreaID = -1;
+            this.PopulateWith = PopulationType.Individuals;
+        }
+
+
+        /// <summary>
+        /// Create a new AreaLoader with the given area ID.
+        /// </summary>
+        /// <param name="areaid">The ID number of the small group Area to load from.</param>
+        public AreaLoader(Int32 areaid)
+            : this()
+        {
+            this.AreaID = areaid;
             this.PopulateWith = PopulationType.Individuals;
         }
 
@@ -57,7 +56,7 @@ namespace Arena.Custom.HDC.GoogleMaps
         #region Loader methods
 
         /// <summary>
-        /// Load all the placemark objects that are within the specified radius.
+        /// Load all the placemark objects that are within the specified area.
         /// </summary>
         /// <param name="google">The Google helper class that does the database leg-work.</param>
         /// <returns>A collection of Placemark objects inside the radius.</returns>
@@ -68,21 +67,21 @@ namespace Arena.Custom.HDC.GoogleMaps
 
             if (PopulateWith == PopulationType.Individuals)
             {
-                foreach (Placemark p in google.PersonPlacemarksInRadius(Latitude, Longitude, Distance, 0, Int32.MaxValue))
+                foreach (Placemark p in google.PersonPlacemarksInArea(AreaID, 0, Int32.MaxValue))
                 {
                     items.Add(p);
                 }
             }
             else if (PopulateWith == PopulationType.Families)
             {
-                foreach (Placemark p in google.FamilyPlacemarksInRadius(Latitude, Longitude, Distance, 0, Int32.MaxValue))
+                foreach (Placemark p in google.FamilyPlacemarksInArea(AreaID, 0, Int32.MaxValue))
                 {
                     items.Add(p);
                 }
             }
             else if (PopulateWith == PopulationType.SmallGroups)
             {
-                foreach (Placemark p in google.SmallGroupPlacemarksInRadius(Latitude, Longitude, Distance, 0, Int32.MaxValue))
+                foreach (Placemark p in google.SmallGroupPlacemarksInArea(AreaID, 0, Int32.MaxValue))
                 {
                     items.Add(p);
                 }
@@ -104,24 +103,21 @@ namespace Arena.Custom.HDC.GoogleMaps
                 //
                 // This RadiusLoader is loading family units.
                 //
-                return "        " + javascriptObject + ".LoadFamiliesInGeoRadius(" +
-                    "new GeoAddress(" + Latitude.ToString() + "," + Longitude.ToString() + ")," + Distance.ToString() + ",null);\n";
+                return "        " + javascriptObject + ".LoadFamiliesInArea(" + AreaID.ToString() + ",null);\n";
             }
             else if (PopulateWith == PopulationType.Individuals)
             {
                 //
                 // This RadiusLoader is loading individuals.
                 //
-                return "        " + javascriptObject + ".LoadPeopleInGeoRadius(" +
-                    "new GeoAddress(" + Latitude.ToString() + "," + Longitude.ToString() + ")," + Distance.ToString() + ",null);\n";
+                return "        " + javascriptObject + ".LoadPeopleInArea(" + AreaID.ToString() + ",null);\n";
             }
             else if (PopulateWith == PopulationType.SmallGroups)
             {
                 //
                 // This RadiusLoader is loading small groups.
                 //
-                return "        " + javascriptObject + ".LoadGroupsInGeoRadius(" +
-                    "new GeoAddress(" + Latitude.ToString() + "," + Longitude.ToString() + ")," + Distance.ToString() + ",null);\n";
+                return "        " + javascriptObject + ".LoadGroupsInArea(" + AreaID.ToString() + ",null);\n";
             }
             else
                 return "";

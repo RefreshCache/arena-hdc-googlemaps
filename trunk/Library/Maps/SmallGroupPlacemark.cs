@@ -30,7 +30,7 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
         /// <summary>
         /// Empty constructor for use with serialization.
         /// </summary>
-        public SmallGroupPlacemark()
+        protected SmallGroupPlacemark()
             : base()
         {
             this.javascriptClassName = "GroupMarker";

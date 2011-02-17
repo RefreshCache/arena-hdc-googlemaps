@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.Text;
 
 using Arena.Core;
+using Arena.DataLayer.Core;
 using Arena.SmallGroup;
 using Arena.Security;
 using Arena.Custom.HDC.GoogleMaps.Maps;
@@ -62,7 +63,7 @@ namespace Arena.Custom.HDC.GoogleMaps
         #endregion
 
 
-        #region Common API Methods
+        #region ProfileLoader Methods
 
         /// <summary>
         /// Load a list of person placemark objects from the given profile ID. The
@@ -99,6 +100,11 @@ namespace Arena.Custom.HDC.GoogleMaps
             return people;
         }
 
+        #endregion
+
+
+        #region RadiusLoader Methods
+
         /// <summary>
         /// Retrieve a list of PersonPlacemark objects that are in the designated radius of the given
         /// latitude and longitude coordinates. Possibly retrieve only a subset of those individuals.
@@ -111,11 +117,10 @@ namespace Arena.Custom.HDC.GoogleMaps
         /// <returns>List of PersonPlacemarks that identify people in range.</returns>
         public List<PersonPlacemark> PersonPlacemarksInRadius(Double latitude, Double longitude, Double radius, int start, int count)
         {
-            List<PersonPlacemark> people = new List<PersonPlacemark>();
+            List<PersonPlacemark> people;
             SqlConnection con;
             SqlDataReader rdr;
             SqlCommand cmd;
-            int i;
 
 
             if (latitude == 0 && longitude == 0)
@@ -129,8 +134,10 @@ namespace Arena.Custom.HDC.GoogleMaps
             cmd = con.CreateCommand();
             cmd.CommandText = "SELECT DISTINCT(cpa.person_id) FROM core_person_address AS cpa" +
                 " LEFT JOIN core_address AS ca ON ca.address_id = cpa.address_id" +
+                " LEFT JOIN core_person AS cp ON cp.person_id = cpa.person_id" +
                 " WHERE cpa.primary_address = 1" +
                 " AND dbo.cust_hdc_googlemaps_funct_distance_between(@LatFrom, @LongFrom, ca.Latitude, ca.Longitude) < @Distance" +
+                " AND cp.record_status = 0" +
                 " ORDER BY cpa.person_id";
             cmd.Parameters.Add(new SqlParameter("@LatFrom", latitude));
             cmd.Parameters.Add(new SqlParameter("@LongFrom", longitude));
@@ -140,22 +147,7 @@ namespace Arena.Custom.HDC.GoogleMaps
             // Execute the reader and process all results.
             //
             rdr = cmd.ExecuteReader();
-            try
-            {
-                i = 0;
-                while (rdr.Read() && people.Count < count)
-                {
-                    if (i++ < start)
-                        continue;
-
-                    try
-                    {
-                        people.Add(new PersonPlacemark(new Person(Convert.ToInt32(rdr[0]))));
-                    }
-                    catch { }
-                }
-            }
-            catch { }
+            people = PersonPlacemarksFromReader(rdr, start, count);
             rdr.Close();
 
             return people;
@@ -173,11 +165,10 @@ namespace Arena.Custom.HDC.GoogleMaps
         /// <returns>List of FamilyPlacemarks that identify families in range.</returns>
         public List<FamilyPlacemark> FamilyPlacemarksInRadius(Double latitude, Double longitude, Double radius, int start, int count)
         {
-            List<FamilyPlacemark> families = new List<FamilyPlacemark>();
+            List<FamilyPlacemark> families;
             SqlConnection con;
             SqlDataReader rdr;
             SqlCommand cmd;
-            int i;
 
 
             if (latitude == 0 && longitude == 0)
@@ -192,8 +183,10 @@ namespace Arena.Custom.HDC.GoogleMaps
             cmd.CommandText = "SELECT DISTINCT(cfm.family_id) FROM core_family_member AS cfm" +
                 " LEFT JOIN core_person_address AS cpa ON cpa.person_id = cfm.person_id" +
                 " LEFT JOIN core_address AS ca ON ca.address_id = cpa.address_id" +
+                " LEFT JOIN core_person AS cp ON cp.person_id = cfm.person_id" +
                 " WHERE cpa.primary_address = 1" +
                 " AND dbo.cust_hdc_googlemaps_funct_distance_between(@LatFrom, @LongFrom, ca.Latitude, ca.Longitude) < @Distance" +
+                " AND cp.record_status = 0" +
                 " ORDER BY cfm.family_id";
             cmd.Parameters.Add(new SqlParameter("@LatFrom", latitude));
             cmd.Parameters.Add(new SqlParameter("@LongFrom", longitude));
@@ -202,22 +195,7 @@ namespace Arena.Custom.HDC.GoogleMaps
             //
             // Execute the reader and process all results.
             rdr = cmd.ExecuteReader();
-            try
-            {
-                i = 0;
-                while (rdr.Read() && families.Count < count)
-                {
-                    if (i++ < start)
-                        continue;
-
-                    try
-                    {
-                        families.Add(new FamilyPlacemark(new Family(Convert.ToInt32(rdr[0]))));
-                    }
-                    catch { }
-                }
-            }
-            catch { }
+            families = FamilyPlacemarksFromReader(rdr, start, count);
             rdr.Close();
 
             return families;
@@ -235,11 +213,10 @@ namespace Arena.Custom.HDC.GoogleMaps
         /// <returns>List of SmallGroupPlacemarks that identify groups in range.</returns>
         public List<SmallGroupPlacemark> SmallGroupPlacemarksInRadius(Double latitude, Double longitude, Double radius, int start, int count)
         {
-            List<SmallGroupPlacemark> groups = new List<SmallGroupPlacemark>();
+            List<SmallGroupPlacemark> groups;
             SqlConnection con;
             SqlDataReader rdr;
             SqlCommand cmd;
-            int i;
 
 
             if (latitude == 0 && longitude == 0)
@@ -257,6 +234,7 @@ namespace Arena.Custom.HDC.GoogleMaps
                 " WHERE cpa.primary_address = 1" +
                 " AND dbo.cust_hdc_googlemaps_funct_distance_between(@LatFrom, @LongFrom, ca.Latitude, ca.Longitude) < @Distance" +
                 " AND sg.is_group_private = 0" +
+                " AND sg.active = 1" +
                 " ORDER BY sg.group_id";
             cmd.Parameters.Add(new SqlParameter("@LatFrom", latitude));
             cmd.Parameters.Add(new SqlParameter("@LongFrom", longitude));
@@ -265,28 +243,127 @@ namespace Arena.Custom.HDC.GoogleMaps
             //
             // Execute the reader and process all results.
             rdr = cmd.ExecuteReader();
-            try
-            {
-                i = 0;
-                while (rdr.Read() && groups.Count < count)
-                {
-                    if (i++ < start)
-                        continue;
-
-                    try
-                    {
-                        Group group = new Group(Convert.ToInt32(rdr[0]));
-
-                        groups.Add(new SmallGroupPlacemark(group));
-                    }
-                    catch { }
-                }
-            }
-            catch { }
+            groups = SmallGroupPlacemarksFromReader(rdr, start, count);
             rdr.Close();
 
             return groups;
         }
+
+        #endregion
+
+
+        #region AreaLoader Methods
+
+        /// <summary>
+        /// Retrieve a list of PersonPlacemark objects that are in the designated Arena Area.
+        /// Possibly retrieve only a subset of those individuals.
+        /// </summary>
+        /// <param name="areaid">The ID number of the Arena Area.</param>
+        /// <param name="start">The 0-based starting index of the records to retrieve.</param>
+        /// <param name="count">The maximum number of records to retrieve. If the returned number is less than this number then no more records are available.</param>
+        /// <returns>List of PersonPlacemarks that identify people in range.</returns>
+        public List<PersonPlacemark> PersonPlacemarksInArea(int areaid, int start, int count)
+        {
+            List<PersonPlacemark> people;
+            SqlDataReader rdr;
+
+
+            //
+            // Execute the reader and process all results.
+            //
+            rdr = new PersonData().GetPersonByArea(areaid);
+            people = PersonPlacemarksFromReader(rdr, start, count);
+            rdr.Close();
+
+            return people;
+        }
+
+        /// <summary>
+        /// Retrieve a list of FamilyPlacemark objects that are in the designated Arena Area.
+        /// Possibly retrieve only a subet of those individuals.
+        /// </summary>
+        /// <param name="areaid">The Arena area to load from.</param>
+        /// <param name="start">The 0-based starting index of the records to retrieve.</param>
+        /// <param name="count">The maximum number of records to retrieve. If the returned number is less than this number then no more records are available.</param>
+        /// <returns>List of FamilyPlacemarks that identify families in range.</returns>
+        public List<FamilyPlacemark> FamilyPlacemarksInArea(int areaid, int start, int count)
+        {
+            List<FamilyPlacemark> families;
+            SqlConnection con;
+            SqlDataReader rdr;
+            SqlCommand cmd;
+
+
+            //
+            // Prepare the SQL query to request all people within a radius of an address.
+            //
+            con = new Arena.DataLib.SqlDbConnection().GetDbConnection();
+            con.Open();
+            cmd = con.CreateCommand();
+            cmd.CommandText = "SELECT DISTINCT(cfm.family_id) FROM core_family_member AS cfm" +
+                " LEFT JOIN core_person_address AS cpa ON cpa.person_id = cfm.person_id" +
+                " LEFT JOIN core_address AS ca ON ca.address_id = cpa.address_id" +
+                " LEFT JOIN core_person AS cp ON cp.person_id = cfm.person_id" +
+                " WHERE cpa.primary_address = 1" +
+                " AND ca.area_id = @AreaID" +
+                " AND cp.record_status = 0" +
+                " ORDER BY cfm.family_id";
+            cmd.Parameters.Add(new SqlParameter("@AreaID", areaid));
+
+            //
+            // Execute the reader and process all results.
+            rdr = cmd.ExecuteReader();
+            families = FamilyPlacemarksFromReader(rdr, start, count);
+            rdr.Close();
+
+            return families;
+        }
+
+        /// <summary>
+        /// Retrieve a list of SmallGroupPlacemark objects that are in the designated Arena Area.
+        /// Possibly retrieve only a subet of those.
+        /// </summary>
+        /// <param name="areaid">The Area Id to load from.</param>
+        /// <param name="start">The 0-based starting index of the records to retrieve.</param>
+        /// <param name="count">The maximum number of records to retrieve. If the returned number is less than this number then no more records are available.</param>
+        /// <returns>List of SmallGroupPlacemarks that identify groups in range.</returns>
+        public List<SmallGroupPlacemark> SmallGroupPlacemarksInArea(int areaid, int start, int count)
+        {
+            List<SmallGroupPlacemark> groups;
+            SqlConnection con;
+            SqlDataReader rdr;
+            SqlCommand cmd;
+
+
+            //
+            // Prepare the SQL query to request all small groups within a radius of an address.
+            //
+            con = new Arena.DataLib.SqlDbConnection().GetDbConnection();
+            con.Open();
+            cmd = con.CreateCommand();
+            cmd.CommandText = "SELECT DISTINCT(sg.group_id) FROM smgp_group AS sg" +
+                " LEFT JOIN core_person_address AS cpa ON cpa.person_id = sg.target_location_person_id" +
+                " LEFT JOIN core_address AS ca ON ca.address_id = cpa.address_id" +
+                " WHERE cpa.primary_address = 1" +
+                " AND ca.area_id = @AreaID" +
+                " AND sg.is_group_private = 0" +
+                " AND sg.active = 1" +
+                " ORDER BY sg.group_id";
+            cmd.Parameters.Add(new SqlParameter("@AreaID", areaid));
+
+            //
+            // Execute the reader and process all results.
+            rdr = cmd.ExecuteReader();
+            groups = SmallGroupPlacemarksFromReader(rdr, start, count);
+            rdr.Close();
+
+            return groups;
+        }
+
+        #endregion
+
+
+        #region Placemark Details
 
         /// <summary>
         /// Retrieve the full HTML used for a pin-popup in Maps or Earth for a single person.
@@ -546,6 +623,113 @@ namespace Arena.Custom.HDC.GoogleMaps
             }
 
             return phoneStrings.ToString();
+        }
+
+        #endregion
+
+
+        #region Private Support Methods
+
+        /// <summary>
+        /// Load a collection of PersonPlacemark objects from the SqlDataReader object. Only read
+        /// 'count' items starting at 'start' index.
+        /// </summary>
+        /// <param name="rdr">The SqlDataReader to use.</param>
+        /// <param name="start">The starting index to load placemarks.</param>
+        /// <param name="count">The maximum number of placemarks to load.</param>
+        /// <returns>A collection of PersonPlacemark objects.</returns>
+        private List<PersonPlacemark> PersonPlacemarksFromReader(SqlDataReader rdr, int start, int count)
+        {
+            List<PersonPlacemark> people = new List<PersonPlacemark>();
+            int i;
+
+            
+            try
+            {
+                i = 0;
+                while (rdr.Read() && people.Count < count)
+                {
+                    if (i++ < start)
+                        continue;
+
+                    try
+                    {
+                        people.Add(new PersonPlacemark(new Person(Convert.ToInt32(rdr["person_id"]))));
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+
+            return people;
+        }
+
+        /// <summary>
+        /// Load a collection of FamilyPlacemark objects from the SqlDataReader object. Only read
+        /// 'count' items starting at 'start' index.
+        /// </summary>
+        /// <param name="rdr">The SqlDataReader to use.</param>
+        /// <param name="start">The starting index to load placemarks.</param>
+        /// <param name="count">The maximum number of placemarks to load.</param>
+        /// <returns>A collection of FamilyPlacemark objects.</returns>
+        private List<FamilyPlacemark> FamilyPlacemarksFromReader(SqlDataReader rdr, int start, int count)
+        {
+            List<FamilyPlacemark> families = new List<FamilyPlacemark>();
+            int i;
+
+
+            try
+            {
+                i = 0;
+                while (rdr.Read() && families.Count < count)
+                {
+                    if (i++ < start)
+                        continue;
+
+                    try
+                    {
+                        families.Add(new FamilyPlacemark(new Family(Convert.ToInt32(rdr["family_id"]))));
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+
+            return families;
+        }
+
+        /// <summary>
+        /// Load a collection of SmallGroupPlacemark objects from the SqlDataReader object. Only read
+        /// 'count' items starting at 'start' index.
+        /// </summary>
+        /// <param name="rdr">The SqlDataReader to use.</param>
+        /// <param name="start">The starting index to load placemarks.</param>
+        /// <param name="count">The maximum number of placemarks to load.</param>
+        /// <returns>A collection of SmallGroupPlacemark objects.</returns>
+        private List<SmallGroupPlacemark> SmallGroupPlacemarksFromReader(SqlDataReader rdr, int start, int count)
+        {
+            List<SmallGroupPlacemark> groups = new List<SmallGroupPlacemark>();
+            int i;
+
+
+            try
+            {
+                i = 0;
+                while (rdr.Read() && groups.Count < count)
+                {
+                    if (i++ < start)
+                        continue;
+
+                    try
+                    {
+                        groups.Add(new SmallGroupPlacemark(new Group(Convert.ToInt32(rdr["group_id"]))));
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+
+            return groups;
         }
 
         #endregion

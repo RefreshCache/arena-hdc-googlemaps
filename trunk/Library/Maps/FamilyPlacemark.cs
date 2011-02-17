@@ -29,6 +29,15 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
         #region Constructors
 
         /// <summary>
+        /// Generic constructor for Serialization.
+        /// </summary>
+        protected FamilyPlacemark()
+            : base()
+        {
+            this.javascriptClassName = "FamilyPlacemark";
+        }
+
+        /// <summary>
         /// Create a new FamilyPlacemark for the given family record. If the family does not have
         /// a valid geocoded address then an exception is thrown.
         /// </summary>
