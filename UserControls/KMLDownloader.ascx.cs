@@ -114,20 +114,8 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			//
 			if (Request.Params["populateReportID"] != null)
 			{
-				ListReport report = new ListReport(Convert.ToInt32(Request.Params["populateReportID"]));
-				SqlDataReader rdr;
+				kml.AddLoader(new ReportLoader(Convert.ToInt32(Request.Params["populateReportID"])));
 
-
-				rdr = new Arena.DataLayer.Organization.OrganizationData().ExecuteReader(report.Query);
-				while (rdr.Read())
-				{
-                    if (rdr["person_id"] != null)
-                    {
-                        kml.AddPlacemark(new PersonPlacemark(new Person(Convert.ToInt32(rdr["person_id"]))));
-                    }
-				}
-
-				filename = report.Name + ".kml";
 				dumpXml = true;
 			}
 
