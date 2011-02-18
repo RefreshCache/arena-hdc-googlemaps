@@ -25,8 +25,8 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 ddlType.Items.Add(new ListItem("Small Groups", PopulationType.SmallGroups.ToString()));
                 ddlType.SelectedIndex = 0;
 
-                myMap.Loaders.Add(new AreaLoader(12));
-                myMap.Loaders[0].PopulateWith = PopulationType.SmallGroups;
+                myMap.Loaders.Add(new ProfileLoader(874));
+                myMap.Loaders[0].PopulateWith = PopulationType.Individuals;
             }
         }
 

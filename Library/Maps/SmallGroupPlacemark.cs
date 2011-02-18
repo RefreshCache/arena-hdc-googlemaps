@@ -115,7 +115,7 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
             //
             description = kml.xml.CreateElement("description");
             description.InnerXml = "<![CDATA[" +
-                kml.Google.SmallGroupDetailsPopup(_group, true) +
+                kml.Google.SmallGroupDetailsPopup(_group, false, true) +
                 "]]>";
             placemark.AppendChild(description);
 

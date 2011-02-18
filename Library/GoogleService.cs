@@ -69,7 +69,7 @@ namespace Arena.Custom.HDC.GoogleMaps
             //
             f = new Family(Convert.ToInt32(familyID));
 
-            return google.FamilyDetailsPopup(f, true);
+            return google.FamilyDetailsPopup(f, true, true);
         }
 
 
@@ -92,11 +92,13 @@ namespace Arena.Custom.HDC.GoogleMaps
             //
             g = new Group(Convert.ToInt32(groupID));
 
-            return google.SmallGroupDetailsPopup(g, true);
+            return google.SmallGroupDetailsPopup(g, true, true);
         }
 
         #endregion
 
+
+        #region Load In Profile
 
         /// <summary>
         /// Get a list of people in the given profile ID, constraining the list to a specified
@@ -107,17 +109,19 @@ namespace Arena.Custom.HDC.GoogleMaps
         /// <param name="count">The maximum number of people to load.</param>
         /// <returns>An array of PersonPlacemark objects which identify the members of the profile.</returns>
         [WebMethod]
-        public List<PersonPlacemark> LoadPeopleFromProfile(String profileID, String start, String count)
+        public List<PersonPlacemark> LoadPeopleInProfile(String profileid, String start, String count)
         {
             Google google;
 
 
             google = new Google(ArenaContext.Current.User, HttpContext.Current.Request.ApplicationPath);
 
-            return google.PersonPlacemarksFromProfile(new Profile(Convert.ToInt32(profileID)),
+            return google.PersonPlacemarksInProfile(Convert.ToInt32(profileid),
                 (String.IsNullOrEmpty(start) ? 0 : Convert.ToInt32(start)),
                 (String.IsNullOrEmpty(count) ? Int32.MaxValue : Convert.ToInt32(count)));
         }
+
+        #endregion
 
 
         #region Load In Radius
