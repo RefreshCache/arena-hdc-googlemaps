@@ -73,16 +73,18 @@ namespace Arena.Custom.HDC.GoogleMaps
         /// <param name="start">The member index to start loading from.</param>
         /// <param name="count">The maximum number of people to load, pass Int32.MaxValue for complete load.</param>
         /// <returns>A list of PersonPlacemark objects.</returns>
-        public List<PersonPlacemark> PersonPlacemarksFromProfile(Profile profile, int start, int count)
+        public List<PersonPlacemark> PersonPlacemarksInProfile(int profileid, int start, int count)
         {
             List<PersonPlacemark> people = new List<PersonPlacemark>();
             ProfileMember p;
+            Profile profile;
             int i;
 
 
-            if (PermissionsOperationAllowed(new PermissionCollection(ObjectType.Tag, profile.ProfileID), OperationType.View) == false)
+            if (PermissionsOperationAllowed(new PermissionCollection(ObjectType.Tag, profileid), OperationType.View) == false)
                 return people;
 
+            profile = new Profile(profileid);
             for (i = start; i < profile.Members.Count && people.Count < count; i++)
             {
                 p = profile.Members[i];
@@ -427,13 +429,15 @@ namespace Arena.Custom.HDC.GoogleMaps
         /// <param name="f">The Family object to retrieve information about.</param>
         /// <param name="useSecurity">If security should be enforced.</param>
         /// <returns>An HTML formatted string.</returns>
-        public string FamilyDetailsPopup(Family f, Boolean useSecurity)
+        public string FamilyDetailsPopup(Family f, Boolean includeName, Boolean useSecurity)
         {
             String personInfo;
             Person head = f.FamilyHead;
 
 
-            personInfo = "<div style=\"font-size: 12px;\"><div style=\"text-align: center; margin-bottom: 4px;\"><b>" + f.FamilyName + "</b></div>";
+            personInfo = "<div style=\"font-size: 12px;\">";
+            if (includeName)
+                personInfo += "<div style=\"text-align: center; margin-bottom: 4px;\"><b>" + f.FamilyName + "</b></div>";
 
             //
             // Store address information.
@@ -480,7 +484,7 @@ namespace Arena.Custom.HDC.GoogleMaps
         /// <param name="f">The Family object to retrieve information about.</param>
         /// <param name="useSecurity">If security should be enforced.</param>
         /// <returns>An HTML formatted string.</returns>
-        public string SmallGroupDetailsPopup(Group g, Boolean useSecurity)
+        public string SmallGroupDetailsPopup(Group g, Boolean includeName, Boolean useSecurity)
         {
             String info;
 
@@ -489,7 +493,8 @@ namespace Arena.Custom.HDC.GoogleMaps
             // Load in the group name and picture, if available.
             //
             info = "<div style=\"font-size: 12px;\">";
-            info += String.Format("<p style=\"text-align: center;\"><b>{0}</b></p>", g.Name);
+            if (includeName)
+                info += String.Format("<p style=\"text-align: center;\"><b>{0}</b></p>", g.Name);
             if (g.ImageBlob != null && g.ImageBlob.BlobID != -1)
                 info += String.Format("<p align=\"center\"><img src=\"{0}\" /></p>", ArenaUrl + "CachedBlob.aspx?guid=" + g.ImageBlob.GUID.ToString() + "&width=100&height=100");
 
