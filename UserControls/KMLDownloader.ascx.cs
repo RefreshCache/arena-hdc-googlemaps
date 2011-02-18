@@ -101,15 +101,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			{
 				foreach (String profileString in Request.Params["populateProfileID"].Split(','))
 				{
-					Profile tag = new Profile(Convert.ToInt32(profileString));
-
-                    foreach (ProfileMember p in tag.Members)
-                    {
-                        if (p.Status.Qualifier != "D")
-                        {
-                            kml.AddPlacemark(new PersonPlacemark(p));
-                        }
-                    }
+                    kml.AddLoader(new ProfileLoader(Convert.ToInt32(profileString)));
 				}
 
 				if (Request.Params["populateProfileID"].Split(',').Length == 1)

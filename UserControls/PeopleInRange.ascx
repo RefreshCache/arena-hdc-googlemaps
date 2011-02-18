@@ -11,6 +11,4 @@ Populate with: <asp:DropDownList runat="server" ID="ddlType" /> <asp:CheckBox ru
 <asp:Literal runat="server" ID="ltError" Text="" />
 </p>
 
-<p>
 <GMap:GoogleMap ID="myMap" runat="server" Width="640" Height="480" />
-</p>
