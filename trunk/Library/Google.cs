@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.Text;
 
 using Arena.Core;
+using Arena.List;
 using Arena.DataLayer.Core;
 using Arena.SmallGroup;
 using Arena.Security;
@@ -69,7 +70,7 @@ namespace Arena.Custom.HDC.GoogleMaps
         /// Load a list of person placemark objects from the given profile ID. The
         /// list is constrained to the start and count parameters.
         /// </summary>
-        /// <param name="profile">The Arena Profile to generate a list of people from, only active members are returned.</param>
+        /// <param name="profileid">The Arena Profile to generate a list of people from, only active members are returned.</param>
         /// <param name="start">The member index to start loading from.</param>
         /// <param name="count">The maximum number of people to load, pass Int32.MaxValue for complete load.</param>
         /// <returns>A list of PersonPlacemark objects.</returns>
@@ -105,6 +106,38 @@ namespace Arena.Custom.HDC.GoogleMaps
         #endregion
 
 
+        #region ReportLoader Methods
+
+        /// <summary>
+        /// Load a list of person placemark objects from the given report ID. The
+        /// list is constrained to the start and count parameters.
+        /// </summary>
+        /// <param name="reportid">The Arena Report to generate a list of people from.</param>
+        /// <param name="start">The member index to start loading from.</param>
+        /// <param name="count">The maximum number of people to load, pass Int32.MaxValue for complete load.</param>
+        /// <returns>A list of PersonPlacemark objects.</returns>
+        public List<PersonPlacemark> PersonPlacemarksInReport(int reportid, int start, int count)
+        {
+            List<PersonPlacemark> people = new List<PersonPlacemark>();
+            SqlDataReader rdr;
+            ListReport report;
+            int i;
+
+
+            if (PersonFieldOperationAllowed(PersonFields.Profile_Name, OperationType.View) == false)
+                return people;
+
+            report = new ListReport(reportid);
+            rdr = new Arena.DataLayer.Organization.OrganizationData().ExecuteReader(report.Query);
+            people = PersonPlacemarksFromReader(rdr, start, count);
+            rdr.Close();
+
+            return people;
+        }
+
+        #endregion
+
+
         #region RadiusLoader Methods
 
         /// <summary>
@@ -124,6 +157,9 @@ namespace Arena.Custom.HDC.GoogleMaps
             SqlDataReader rdr;
             SqlCommand cmd;
 
+
+            if (PersonFieldOperationAllowed(PersonFields.Profile_Name, OperationType.View) == false)
+                return new List<PersonPlacemark>();
 
             if (latitude == 0 && longitude == 0)
                 throw new ArgumentException("Address has not been geocoded.");
@@ -172,6 +208,9 @@ namespace Arena.Custom.HDC.GoogleMaps
             SqlDataReader rdr;
             SqlCommand cmd;
 
+
+            if (PersonFieldOperationAllowed(PersonFields.Profile_Name, OperationType.View) == false)
+                return new List<FamilyPlacemark>();
 
             if (latitude == 0 && longitude == 0)
                 throw new ArgumentException("Address has not been geocoded.");
@@ -270,6 +309,9 @@ namespace Arena.Custom.HDC.GoogleMaps
             SqlDataReader rdr;
 
 
+            if (PersonFieldOperationAllowed(PersonFields.Profile_Name, OperationType.View) == false)
+                return new List<PersonPlacemark>();
+
             //
             // Execute the reader and process all results.
             //
@@ -295,6 +337,9 @@ namespace Arena.Custom.HDC.GoogleMaps
             SqlDataReader rdr;
             SqlCommand cmd;
 
+
+            if (PersonFieldOperationAllowed(PersonFields.Profile_Name, OperationType.View) == false)
+                return new List<FamilyPlacemark>();
 
             //
             // Prepare the SQL query to request all people within a radius of an address.
