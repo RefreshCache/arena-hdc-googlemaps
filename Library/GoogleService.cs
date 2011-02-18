@@ -124,6 +124,32 @@ namespace Arena.Custom.HDC.GoogleMaps
         #endregion
 
 
+        #region Load In Report
+
+        /// <summary>
+        /// Get a list of people in the given report ID, constraining the list to a specified
+        /// subset of people.
+        /// </summary>
+        /// <param name="profileID">The ID number of the report.</param>
+        /// <param name="start">The starting 0-based index to begin loading at.</param>
+        /// <param name="count">The maximum number of people to load.</param>
+        /// <returns>An array of PersonPlacemark objects which identify the members of the profile.</returns>
+        [WebMethod]
+        public List<PersonPlacemark> LoadPeopleInReport(String reportid, String start, String count)
+        {
+            Google google;
+
+
+            google = new Google(ArenaContext.Current.User, HttpContext.Current.Request.ApplicationPath);
+
+            return google.PersonPlacemarksInReport(Convert.ToInt32(reportid),
+                (String.IsNullOrEmpty(start) ? 0 : Convert.ToInt32(start)),
+                (String.IsNullOrEmpty(count) ? Int32.MaxValue : Convert.ToInt32(count)));
+        }
+
+        #endregion
+
+
         #region Load In Radius
 
         /// <summary>
