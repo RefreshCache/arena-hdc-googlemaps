@@ -14,7 +14,7 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
     /// Identifies a church campus on the map.
     /// </summary>
     [Serializable]
-    public class CampusPlacemark : Placemark
+    public class CampusPlacemark : Placemark, IEquatable<CampusPlacemark>
     {
         #region Properties
 
@@ -124,6 +124,21 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
             placemark.AppendChild(point);
 
             return placemark;
+        }
+
+
+        /// <summary>
+        /// Determines if this campus placemark is the same as another. Two campus placemark objects
+        /// are considered equal if they have the same campus ID.
+        /// </summary>
+        /// <param name="other">The CampusPlacemark object to compare this object against.</param>
+        /// <returns>true if the two objects are equal, false otherwise.</returns>
+        public bool Equals(CampusPlacemark other)
+        {
+            if (this._campus == null || other._campus == null)
+                return false;
+
+            return (this._campus.CampusId == other._campus.CampusId);
         }
     }
 }

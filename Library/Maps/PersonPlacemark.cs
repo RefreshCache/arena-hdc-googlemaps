@@ -17,7 +17,7 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
     /// on the map as a placemark object.
     /// </summary>
     [Serializable]
-    public class PersonPlacemark : Placemark
+    public class PersonPlacemark : Placemark, IEquatable<PersonPlacemark>
     {
         #region Properties
 
@@ -139,6 +139,21 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
             placemark.AppendChild(point);
 
             return placemark;
+        }
+
+
+        /// <summary>
+        /// Determines if this person placemark is the same as another. Two person placemark objects
+        /// are considered equal if they have the same person ID.
+        /// </summary>
+        /// <param name="other">The PersonPlacemark object to compare this object against.</param>
+        /// <returns>true if the two objects are equal, false otherwise.</returns>
+        public bool Equals(PersonPlacemark other)
+        {
+            if (this._person == null || other._person == null)
+                return false;
+
+            return (this._person.PersonID == other._person.PersonID);
         }
     }
 }

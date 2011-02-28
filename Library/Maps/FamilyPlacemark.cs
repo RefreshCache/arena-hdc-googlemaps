@@ -17,7 +17,7 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
     /// the map as a placemark.
     /// </summary>
     [Serializable]
-    public class FamilyPlacemark : Placemark
+    public class FamilyPlacemark : Placemark, IEquatable<FamilyPlacemark>
     {
         #region Properties
 
@@ -138,6 +138,21 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
             placemark.AppendChild(point);
 
             return placemark;
+        }
+
+
+        /// <summary>
+        /// Determines if this family placemark is the same as another. Two family placemark objects
+        /// are considered equal if they have the same family ID.
+        /// </summary>
+        /// <param name="other">The FamilyPlacemark object to compare this object against.</param>
+        /// <returns>true if the two objects are equal, false otherwise.</returns>
+        public bool Equals(FamilyPlacemark other)
+        {
+            if (this._family == null || other._family == null)
+                return false;
+
+            return (this._family.FamilyID == other._family.FamilyID);
         }
     }
 }

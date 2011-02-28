@@ -16,7 +16,7 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
     /// on a map.
     /// </summary>
     [Serializable]
-    public class SmallGroupPlacemark : Placemark, ISerializable
+    public class SmallGroupPlacemark : Placemark, ISerializable, IEquatable<SmallGroupPlacemark>
     {
         #region Properties
 
@@ -137,6 +137,21 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
             placemark.AppendChild(point);
 
             return placemark;
+        }
+
+
+        /// <summary>
+        /// Determines if this small group placemark is the same as another. Two small group
+        /// placemark objects are considered equal if they have the same small group ID.
+        /// </summary>
+        /// <param name="other">The SmallGroupPlacemark object to compare this object against.</param>
+        /// <returns>true if the two objects are equal, false otherwise.</returns>
+        public bool Equals(SmallGroupPlacemark other)
+        {
+            if (this._group == null || other._group == null)
+                return false;
+
+            return (this._group.GroupID == other._group.GroupID);
         }
     }
 }
