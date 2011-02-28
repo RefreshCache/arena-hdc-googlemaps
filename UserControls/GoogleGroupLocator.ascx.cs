@@ -306,7 +306,8 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 "    LEFT JOIN smgp_group_cluster AS sgc ON sgc.group_cluster_id = sg.group_cluster_id" +
                 "    LEFT JOIN smgp_cluster_type AS sgt ON sgt.cluster_type_id = sgc.cluster_type_id" +
                 "    WHERE sgt.category_id = @CategoryID" +
-                "      AND sg.is_group_private = 0";
+                "      AND sg.is_group_private = 0" +
+                "      AND sg.active = 1";
             cmd.Parameters.Add(new SqlParameter("@CategoryID", CategorySetting.CategoryID));
 
             //
