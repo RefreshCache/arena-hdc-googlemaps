@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Principal;
 using System.Data.SqlClient;
 using System.Text;
+using System.Threading;
 
 using Arena.Core;
 using Arena.List;
@@ -98,6 +99,154 @@ namespace Arena.Custom.HDC.GoogleMaps
                     }
                     catch { }
                 }
+            }
+
+            return people;
+        }
+
+        #endregion
+
+
+        #region CategoryLoader Methods
+
+        /// <summary>
+        /// Load a list of person placemark objects from the given category ID. The
+        /// list is constrained to the start and count parameters.
+        /// </summary>
+        /// <param name="categoryid">The Arena Category to generate a list of people from, only active members are returned.</param>
+        /// <param name="start">The member index to start loading from.</param>
+        /// <param name="count">The maximum number of people to load, pass Int32.MaxValue for complete load.</param>
+        /// <returns>A list of PersonPlacemark objects.</returns>
+        public List<PersonPlacemark> PersonPlacemarksInCategory(int categoryid, int start, int count)
+        {
+            GroupClusterCollection gcc;
+            List<PersonPlacemark> people = new List<PersonPlacemark>();
+            int i, p;
+
+
+            gcc = new GroupClusterCollection(categoryid, ArenaContext.Current.Organization.OrganizationID);
+            for (i = 0; i < gcc.Count && people.Count < count; i++)
+            {
+                List<PersonPlacemark> list = PersonPlacemarksInCluster(gcc[i].GroupClusterID, 0, Int32.MaxValue);
+
+                for (p = 0; p < list.Count && people.Count < count; p++)
+                {
+                    if (people.Contains(list[p]))
+                        continue;
+
+                    if (start-- > 0)
+                        continue;
+
+                    people.Add(list[p]);
+                }
+            }
+
+            return people;
+        }
+
+        #endregion
+
+
+        #region ClusterLoader Methods
+
+        /// <summary>
+        /// Load a list of person placemark objects from the given cluster ID. The
+        /// list is constrained to the start and count parameters.
+        /// </summary>
+        /// <param name="clusterid">The Arena Cluster to generate a list of people from, only active members are returned.</param>
+        /// <param name="start">The member index to start loading from.</param>
+        /// <param name="count">The maximum number of people to load, pass Int32.MaxValue for complete load.</param>
+        /// <returns>A list of PersonPlacemark objects.</returns>
+        public List<PersonPlacemark> PersonPlacemarksInCluster(int clusterid, int start, int count)
+        {
+            List<PersonPlacemark> people = new List<PersonPlacemark>();
+            List<Int32> peopleids = new List<Int32>();
+            GroupCluster cluster;
+            int i;
+
+
+            if (PermissionsOperationAllowed(new PermissionCollection(ObjectType.Group_Cluster, clusterid), OperationType.View) == false)
+                return people;
+
+            cluster = new GroupCluster(clusterid);
+
+            //
+            // This is one ugly method, but someday God will grace us with his presence and
+            // say "thou shalt not use they Small Group Structure."
+            //
+            cluster.PopulateDescendents();
+            Thread.Sleep(2000);
+            while (cluster.WaitingForCount)
+                Thread.Sleep(50);
+
+            foreach (Person p in cluster.ActiveChildGroupLeaders)
+            {
+                if (peopleids.Contains(p.PersonID) == false)
+                    peopleids.Add(p.PersonID);
+            }
+            foreach (GroupMember gm in cluster.ActiveChildGroupMembers)
+            {
+                if (peopleids.Contains(gm.PersonID) == false)
+                    peopleids.Add(gm.PersonID);
+            }
+
+            for (i = start; i < peopleids.Count && people.Count < count; i++)
+            {
+                try
+                {
+                    people.Add(new PersonPlacemark(new Person(peopleids[i])));
+                }
+                catch { }
+            }
+
+            return people;
+        }
+
+        #endregion
+
+
+        #region GroupLoader Methods
+
+        /// <summary>
+        /// Load a list of person placemark objects from the given group ID. The
+        /// list is constrained to the start and count parameters.
+        /// </summary>
+        /// <param name="groupid">The Arena Group to generate a list of people from, only active members are returned.</param>
+        /// <param name="start">The member index to start loading from.</param>
+        /// <param name="count">The maximum number of people to load, pass Int32.MaxValue for complete load.</param>
+        /// <returns>A list of PersonPlacemark objects.</returns>
+        public List<PersonPlacemark> PersonPlacemarksInGroup(int groupid, int start, int count)
+        {
+            List<PersonPlacemark> people = new List<PersonPlacemark>();
+            List<Int32> peopleids = new List<Int32>();
+            Group group;
+            int i;
+
+
+            group = new Group(groupid);
+
+            if (PermissionsOperationAllowed(new PermissionCollection(ObjectType.Group_Cluster, group.GroupClusterID), OperationType.View) == false)
+                return people;
+
+            //
+            // Add in the leader of this group.
+            //
+            if (group.Leader != null && group.Leader.PersonID != -1)
+            {
+                try
+                {
+                    people.Add(new PersonPlacemark(group.Leader));
+                }
+                catch { }
+            }
+
+            for (i = start; i < group.Members.Count && people.Count < count; i++)
+            {
+                try
+                {
+                    people.Add(new PersonPlacemark(group.Members[i]));
+                }
+                catch { }
             }
 
             return people;

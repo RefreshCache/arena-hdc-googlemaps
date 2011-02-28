@@ -124,6 +124,84 @@ namespace Arena.Custom.HDC.GoogleMaps
         #endregion
 
 
+        #region Load In Category
+
+        /// <summary>
+        /// Get a list of people in the given category ID, constraining the list to a specified
+        /// subset of people.
+        /// </summary>
+        /// <param name="profileID">The ID number of the category.</param>
+        /// <param name="start">The starting 0-based index to begin loading at.</param>
+        /// <param name="count">The maximum number of people to load.</param>
+        /// <returns>An array of PersonPlacemark objects which identify the members of the profile.</returns>
+        [WebMethod]
+        public List<PersonPlacemark> LoadPeopleInCategory(String categoryid, String start, String count)
+        {
+            Google google;
+
+
+            google = new Google(ArenaContext.Current.User, HttpContext.Current.Request.ApplicationPath);
+
+            return google.PersonPlacemarksInCategory(Convert.ToInt32(categoryid),
+                (String.IsNullOrEmpty(start) ? 0 : Convert.ToInt32(start)),
+                (String.IsNullOrEmpty(count) ? Int32.MaxValue : Convert.ToInt32(count)));
+        }
+
+        #endregion
+
+
+        #region Load In Cluster
+
+        /// <summary>
+        /// Get a list of people in the given cluster ID, constraining the list to a specified
+        /// subset of people.
+        /// </summary>
+        /// <param name="clusterid">The ID number of the cluster.</param>
+        /// <param name="start">The starting 0-based index to begin loading at.</param>
+        /// <param name="count">The maximum number of people to load.</param>
+        /// <returns>An array of PersonPlacemark objects which identify the members of the cluster.</returns>
+        [WebMethod]
+        public List<PersonPlacemark> LoadPeopleInCluster(String clusterid, String start, String count)
+        {
+            Google google;
+
+
+            google = new Google(ArenaContext.Current.User, HttpContext.Current.Request.ApplicationPath);
+
+            return google.PersonPlacemarksInCluster(Convert.ToInt32(clusterid),
+                (String.IsNullOrEmpty(start) ? 0 : Convert.ToInt32(start)),
+                (String.IsNullOrEmpty(count) ? Int32.MaxValue : Convert.ToInt32(count)));
+        }
+
+        #endregion
+
+
+        #region Load In Group
+
+        /// <summary>
+        /// Get a list of people in the given group ID, constraining the list to a specified
+        /// subset of people.
+        /// </summary>
+        /// <param name="groupid">The ID number of the group.</param>
+        /// <param name="start">The starting 0-based index to begin loading at.</param>
+        /// <param name="count">The maximum number of people to load.</param>
+        /// <returns>An array of PersonPlacemark objects which identify the members of the group.</returns>
+        [WebMethod]
+        public List<PersonPlacemark> LoadPeopleInGroup(String groupid, String start, String count)
+        {
+            Google google;
+
+
+            google = new Google(ArenaContext.Current.User, HttpContext.Current.Request.ApplicationPath);
+
+            return google.PersonPlacemarksInGroup(Convert.ToInt32(groupid),
+                (String.IsNullOrEmpty(start) ? 0 : Convert.ToInt32(start)),
+                (String.IsNullOrEmpty(count) ? Int32.MaxValue : Convert.ToInt32(count)));
+        }
+
+        #endregion
+
+
         #region Load In Report
 
         /// <summary>
