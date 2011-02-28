@@ -31,7 +31,7 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
         protected CampusPlacemark()
             : base()
         {
-            this.javascriptClassName = "GenericPlacemark";
+            this.javascriptClassName = "GenericMarker";
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
             if (c.Address == null || (c.Address.Latitude == 0 && c.Address.Longitude == 0))
                 throw new ArgumentException("Campus " + c.Name + " has not been properly geocoded.");
 
-            this.javascriptClassName = "GenericPlacemark";
+            this.javascriptClassName = "GenericMarker";
             this.Name = c.Name;
             this.Unique = c.CampusId.ToString();
             this.PinImage = "UserControls/Custom/HDC/GoogleMaps/Images/chapel.png";

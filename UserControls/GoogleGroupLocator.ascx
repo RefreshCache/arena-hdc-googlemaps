@@ -42,16 +42,16 @@
     <p>
         Street: <asp:TextBox runat="server" ID="txtAddress" Width="240" /> City: <asp:TextBox runat="server" ID="txtCity" Width="140" /><br />
         State: <asp:TextBox runat="server" ID="txtState" Width="25" /> Zipcode: <asp:TextBox runat="server" ID="txtPostal" Width="60" /><br />
-        <Arena:ArenaButton runat="server" ID="btnUpdate" Text="Center" OnClick="btnCenter_Click" />
+        <Arena:ArenaButton runat="server" ID="btnUpdate" Text="Center Map" OnClick="btnCenter_Click" />
     </p>
 </asp:Panel>
 
 <asp:Panel ID="pnlFilter" runat="server">
     <asp:HiddenField runat="server" ID="hfFilterVisible" Value="0" />
-    <div>
+    <div style="margin-bottom: 3px;">
         <span ID="toggleFilter" runat="server" style="color: blue; text-decoration: underline; cursor: pointer;" class="smallText">Show Filter</span>
     </div>
-    <div id="divFilter" runat="server" style="display: none;">
+    <div id="divFilter" runat="server" style="display: none; margin-bottom: 8px;">
         <table border="0">
             <tr runat="server" id="trCampus">
                 <td style="text-align: right;"><%= CampusCaption %>:</td>
@@ -82,6 +82,6 @@
                 <td><asp:DropDownList runat="server" ID="ddlArea"></asp:DropDownList></td>
             </tr>
         </table>
-        <Arena:ArenaButton runat="server" ID="btnFilter" Text="Filter" OnClick="btnFilter_Click" />
+        <Arena:ArenaButton runat="server" ID="btnFilter" Text="Apply Filter" OnClick="btnFilter_Click" />
     </div>
 </asp:Panel>

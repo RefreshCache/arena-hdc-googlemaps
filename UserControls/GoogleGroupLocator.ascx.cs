@@ -32,6 +32,9 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
         #region Module Settings
 
+        [BooleanSetting("Show Campuses", "Shows the campus locations on the map.", false, true)]
+        public Boolean ShowCampusesSetting { get { return Convert.ToBoolean(Setting("ShowCampuses", "treu", false)); } }
+
         [NumericSetting("Map Width", "The width in pixels to make the map. Default is 480.", false)]
         public int MapWidthSetting { get { return Convert.ToInt32(Setting("MapWidth", "480", false)); } }
 
@@ -75,6 +78,15 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         [PageSetting("Registration Page", "The page to redirect to when somebody wishes to join a small group.", true)]
         public int RegistrationPageSetting { get { return Convert.ToInt32(Setting("RegistrationPage", "", true)); } }
 
+        [BooleanSetting("Address On Top", "Show the center-on-address fields above the map instead of below.", false, false)]
+        public Boolean AddressOnTopSetting { get { return Convert.ToBoolean(Setting("AddressOnTop", "false", false)); } }
+
+        [BooleanSetting("Filter On Top", "Show the filter fields above the map instead of below.", false, false)]
+        public Boolean FilterOnTopSetting { get { return Convert.ToBoolean(Setting("FilterOnTop", "false", false)); } }
+
+        [ClusterTypeSetting("Limit To Cluster Type", "Limit the results to the selected cluster type, as defined in the small group structure.", false)]
+        public int LimitToClusterTypeSetting { get { return Convert.ToInt32(Setting("LimitToClusterType", "-1", false)); } }
+
         #endregion
 
 
@@ -101,7 +113,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 map.Height = MapHeightSetting;
                 map.Center.Latitude = ArenaContext.Current.Organization.Address.Latitude;
                 map.Center.Longitude = ArenaContext.Current.Organization.Address.Longitude;
-                AddCenterPlacemark();
+                AddCampusPlacemarks();
 
                 //
                 // Hide the filter if it is not available.
@@ -118,16 +130,37 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             //
             // Generate the start of the script needed to populate the map.
             //
+            StringBuilder script = new StringBuilder();
+            
+            script.AppendLine("<script language=\"javascript\" type=\"text/javascript\">");
+
+            //
+            // Put the address on top if that is what they want.
+            //
+            if (AddressOnTopSetting)
+            {
+                script.AppendLine("$(document).ready(function() {");
+                script.AppendLine("    $('#" + pnlAddress.ClientID + "').insertBefore('#" + map.ClientID + "');");
+                script.AppendLine("});");
+            }
+
+            //
+            // Put the filter on top if that is what they want.
+            //
+            if (FilterOnTopSetting)
+            {
+                script.AppendLine("$(document).ready(function() {");
+                script.AppendLine("    $('#" + pnlFilter.ClientID + "').insertBefore('#" + map.ClientID + "');");
+                script.AppendLine("});");
+            }
+
             if (pnlFilter.Visible == true)
             {
-                StringBuilder script = new StringBuilder();
-
                 if (hfFilterVisible.Value == "1")
                 {
                     divFilter.Style.Remove("display");
                     toggleFilter.InnerText = "Hide Filter";
                 }
-                script.AppendLine("<script language=\"javascript\" type=\"text/javascript\">");
                 script.AppendLine("$(document).ready(function() {");
                 script.AppendLine("  $('#" + toggleFilter.ClientID + "').click(function() {");
                 script.AppendLine("    if ($('#" + divFilter.ClientID + "').css('display') != 'none') {");
@@ -141,9 +174,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 script.AppendLine("    $('#" + divFilter.ClientID + "').slideToggle('fast');");
                 script.AppendLine("  });");
                 script.AppendLine("});");
-                script.AppendLine("</script>");
-                Page.ClientScript.RegisterStartupScript(typeof(Page), this.ClientID, script.ToString());
             }
+
+            script.AppendLine("</script>");
+            Page.ClientScript.RegisterStartupScript(typeof(Page), this.ClientID, script.ToString());
         }
 
 
@@ -202,6 +236,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         public void btnFilter_Click(object sender, EventArgs e)
         {
             map.ClearContent();
+            AddCampusPlacemarks();
             AddCenterPlacemark();
             AddFilteredGroups();
         }
@@ -219,6 +254,18 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         {
             Placemark placemark = null;
 
+
+            //
+            // Only add the center placemark if it is not on the same location as a campus.
+            //
+            if (ShowCampusesSetting)
+            {
+                foreach (Campus c in ArenaContext.Current.Organization.Campuses)
+                {
+                    if (c.Address != null && map.Center.Latitude == c.Address.Latitude && map.Center.Longitude == c.Address.Longitude)
+                        return;
+                }
+            }
 
             foreach (Placemark p in map.Placemarks)
             {
@@ -241,6 +288,25 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         }
 
 
+        /// <summary>
+        /// Add the campus placemarks on the map.
+        /// </summary>
+        private void AddCampusPlacemarks()
+        {
+            if (ShowCampusesSetting)
+            {
+                foreach (Campus c in ArenaContext.Current.Organization.Campuses)
+                {
+                    map.Placemarks.Add(new CampusPlacemark(c));
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Go through the loaded small groups and apply the filter to the list and then
+        /// add everything remaining to the map.
+        /// </summary>
         private void AddFilteredGroups()
         {
             Placemark placemark;
@@ -308,7 +374,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 "    WHERE sgt.category_id = @CategoryID" +
                 "      AND sg.is_group_private = 0" +
                 "      AND sg.active = 1";
+            if (LimitToClusterTypeSetting != -1)
+                cmd.CommandText += "      AND sgc.cluster_type_id = @ClusterTypeID";
             cmd.Parameters.Add(new SqlParameter("@CategoryID", CategorySetting.CategoryID));
+            cmd.Parameters.Add(new SqlParameter("@ClusterTypeID", LimitToClusterTypeSetting));
 
             //
             // Execute the reader and process all results.
