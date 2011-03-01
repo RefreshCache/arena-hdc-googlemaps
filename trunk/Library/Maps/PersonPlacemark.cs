@@ -155,5 +155,15 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
 
             return (this._person.PersonID == other._person.PersonID);
         }
+
+
+        /// <summary>
+        /// Retrieve the Person object associated with this placemark.
+        /// </summary>
+        /// <returns>Returns a valid Person object or null if this person is unknown.</returns>
+        public Person GetPerson()
+        {
+            return _person;
+        }
     }
 }
