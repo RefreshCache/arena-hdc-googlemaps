@@ -311,7 +311,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             this._Placemarks = (List<Placemark>)ViewState["Placemarks"];
             this.HideControls = (Boolean)ViewState["HideControls"];
             this.HideDownload = (Boolean)ViewState["HideDownload"];
-            this.HideAddToTag = (Boolean)ViewState["HideAddtoTag"];
+            this.HideAddToTag = (Boolean)ViewState["HideAddToTag"];
             this.Height = (Int32)ViewState["Height"];
             this.Width = (Int32)ViewState["Width"];
             this.StaticMap = (Boolean)ViewState["StaticMap"];
