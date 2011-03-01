@@ -154,5 +154,15 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
 
             return (this._family.FamilyID == other._family.FamilyID);
         }
+
+
+        /// <summary>
+        /// Retrieve the associated Family record for this placemark.
+        /// </summary>
+        /// <returns>Either a valid Family object or null if the family is unknown.</returns>
+        public Family GetFamily()
+        {
+            return _family;
+        }
     }
 }

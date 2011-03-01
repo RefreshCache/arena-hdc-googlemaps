@@ -128,6 +128,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         //
         // These controls comprise the Add To Tag commands.
         //
+        private LinkButton createTagButton;
         private HtmlGenericControl profileDiv;
         private TextBox profileName;
         private ProfilePicker profilePicker;
@@ -292,7 +293,9 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             //
             // Create the "Add To Tag" button below the map.
             //
-            if (HideAddToTag == false)
+            if (HideAddToTag == false &&
+                !String.IsNullOrEmpty(ArenaContext.Current.Organization.Settings["GoogleMaps_ProfileSource"]) &&
+                !String.IsNullOrEmpty(ArenaContext.Current.Organization.Settings["GoogleMaps_ProfileStatus"]))
             {
                 CreateProfileControls();
             }
@@ -429,16 +432,52 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         /// </summary>
         void createTagButton_Click(object sender, EventArgs e)
         {
-            Profile p = new Profile();
+            Profile profile;
+            Google google;
 
 
+            google = new Google(ArenaContext.Current.User, BaseUrl());
+            EnsureChildControls();
+
             //
-            // Create the personal tag.
+            // Determine the profile to work with.
             //
-            p.ProfileType = Enums.ProfileType.Personal;
-            p.Name = "test";
-            p.Active = true;
-            p.Save(ArenaContext.Current.User.Identity.Name);
+            if (profilePicker.ProfileID != -1)
+                profile = new Profile(profilePicker.ProfileID);
+            else if (!String.IsNullOrEmpty(profileName.Text))
+            {
+                //
+                // Create the personal tag.
+                //
+                profile = new Profile();
+                profile.OrganizationID = ArenaContext.Current.Organization.OrganizationID;
+                profile.Owner = ArenaContext.Current.Person;
+                profile.ProfileType = Enums.ProfileType.Personal;
+                profile.Name = profileName.Text;
+                profile.Active = true;
+                profile.Save(ArenaContext.Current.User.Identity.Name);
+            }
+            else
+                return;
+
+            //
+            // Add each individual placemark to the profile.
+            //
+            foreach (Placemark p in Placemarks)
+            {
+                AddPlacemarkToProfile(p, profile);
+            }
+
+            //
+            // Add all the placemarks from each loader to the profile.
+            //
+            foreach (PlacemarkLoader pl in Loaders)
+            {
+                foreach (Placemark p in pl.LoadPlacemarks(google))
+                {
+                    AddPlacemarkToProfile(p, profile);
+                }
+            }
         }
 
 
@@ -488,7 +527,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             downloadShow = new HtmlGenericControl("SPAN");
             downloadShow.InnerText = "Download...";
             downloadShow.Attributes.Add("class", "smallText");
-            downloadShow.Attributes.Add("cursor", "pointer");
+            downloadShow.Style.Add("cursor", "pointer");
             downloadShow.Attributes.Add("onclick", this.ClientID + "_ShowDownload();");
             commandDiv.Controls.Add(downloadShow);
 
@@ -550,7 +589,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             downloadDiv.Controls.Add(downloadCancel);
             downloadCancel.InnerText = "Cancel";
             downloadCancel.Attributes.Add("class", "smallText");
-            downloadCancel.Attributes.Add("cursor", "pointer");
+            downloadCancel.Style.Add("cursor", "pointer");
             downloadCancel.Attributes.Add("onclick", this.ClientID + "_HideDownload();");
 
             //
@@ -585,7 +624,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             profileShow = new HtmlGenericControl("SPAN");
             profileShow.InnerText = "Create Tag...";
             profileShow.Attributes.Add("class", "smallText");
-            profileShow.Attributes.Add("cursor", "pointer");
+            profileShow.Style.Add("cursor", "pointer");
             profileShow.Attributes.Add("onclick", this.ClientID + "_ShowProfile();");
             if (commandDiv.Controls.Count > 0)
             {
@@ -641,15 +680,33 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             lt.Text = "<br />";
             profileDiv.Controls.Add(lt);
 
-//            downloadIncludeCampus = new CheckBox();
-//            downloadDiv.Controls.Add(downloadIncludeCampus);
-//            downloadIncludeCampus.ID = "downloadIncludeCampus";
-//            downloadIncludeCampus.Text = "Include Campus Locations";
-//            downloadIncludeCampus.ToolTip = "This will cause your KML download to include pins which identify the various campuses defined in your organization.";
-//            downloadIncludeCampus.CssClass = "smallText";
-//            lt = new Literal();
-//            lt.Text = "<br />";
-//            downloadDiv.Controls.Add(lt);
+            //
+            // Add the "only adults" check box.
+            //
+            profileOnlyAdults = new CheckBox();
+            profileDiv.Controls.Add(profileOnlyAdults);
+            profileOnlyAdults.ID = "profileOnlyAdults";
+            profileOnlyAdults.Text = "Only include adults";
+            profileOnlyAdults.ToolTip = "This will only add adults to the tag you have selected, no children will be added.";
+            profileOnlyAdults.CssClass = "smallText";
+            lt = new Literal();
+            lt.Text = "<br />";
+            profileDiv.Controls.Add(lt);
+
+            //
+            // Create the button that triggers a download action.
+            //
+            createTagButton = new LinkButton();
+            profileDiv.Controls.Add(createTagButton);
+            createTagButton.CssClass = "smallText";
+            createTagButton.ID = "createTag";
+            createTagButton.Text = "Add to tag";
+            createTagButton.OnClientClick = this.ClientID + "_HideProfile();";
+            createTagButton.Click += new EventHandler(createTagButton_Click);
+            lt = new Literal();
+            lt.Text = "&nbsp;&nbsp;&nbsp;";
+            profileDiv.Controls.Add(lt);
+
             //
             // Create the "cancel" link that will hide the download controls.
             //
@@ -657,7 +714,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             profileDiv.Controls.Add(profileCancel);
             profileCancel.InnerText = "Cancel";
             profileCancel.Attributes.Add("class", "smallText");
-            profileCancel.Attributes.Add("cursor", "pointer");
+            profileCancel.Style.Add("cursor", "pointer");
             profileCancel.Attributes.Add("onclick", this.ClientID + "_HideProfile();");
 
             //
@@ -674,6 +731,87 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
                 "}\n" +
                 "</script>\n");
             Page.ClientScript.RegisterStartupScript(typeof(Page), this.ClientID + "_Profile", script.ToString());
+        }
+
+
+        /// <summary>
+        /// Add a placemark object to a profile. If the placemark is a PersonPlacemark
+        /// then the associated person record is used. If it is a FamilyPlacemark then
+        /// all the members of the family are used. Otherwise the placemark is ignored.
+        /// This method only adds individuals who are not already a member of the tag.
+        /// </summary>
+        /// <param name="placemark">The placemark to add to the profile.</param>
+        /// <param name="profile">The profile to add the members to.</param>
+        private void AddPlacemarkToProfile(Placemark placemark, Profile profile)
+        {
+            List<Person> people = new List<Person>();
+
+
+            //
+            // Convert the placemark into a list of people that should be added.
+            //
+            if (placemark.GetType() == typeof(PersonPlacemark))
+            {
+                people.Add(((PersonPlacemark)placemark).GetPerson());
+            }
+            else if (placemark.GetType() == typeof(FamilyPlacemark))
+            {
+                foreach (Person p in ((FamilyPlacemark)placemark).GetFamily().FamilyMembersActive)
+                {
+                    people.Add(p);
+                }
+            }
+
+            //
+            // For each person found, verify that they should be added and then
+            // add them if they are not already in the profile.
+            //
+            foreach (Person p in people)
+            {
+                ProfileMember pm;
+
+                //
+                // Verify they are an adult if the user wants only adults.
+                //
+                if (profileOnlyAdults.Checked == true)
+                {
+                    FamilyMember fm = new FamilyMember(p.FamilyId, p.PersonID);
+
+                    if (!fm.FamilyRole.Guid.ToString().Equals("e410e1a6-8715-4bfb-bf03-1cd18051f815", StringComparison.InvariantCultureIgnoreCase))
+                        continue;
+                }
+
+                //
+                // Verify they are not already in the profile.
+                //
+                pm = new ProfileMember(profile.ProfileID, p);
+                if (pm.ProfileID == -1)
+                {
+                    pm = new ProfileMember();
+
+                    //
+                    // Add them to the profile.
+                    //
+                    pm.ProfileID = profile.ProfileID;
+                    pm.PersonID = p.PersonID;
+                    pm.Source = new Lookup(Convert.ToInt32(ArenaContext.Current.Organization.Settings["GoogleMaps_ProfileSource"]));
+                    pm.Status = new Lookup(Convert.ToInt32(ArenaContext.Current.Organization.Settings["GoogleMaps_ProfileStatus"]));
+                    pm.DateActive = DateTime.Now;
+                    pm.Save(ArenaContext.Current.User.Identity.Name);
+
+                    //
+                    // If this is a serving profile, we need a little more information.
+                    //
+                    if (profile.ProfileType == Enums.ProfileType.Serving)
+                    {
+                        ServingProfile sp = new ServingProfile(profile.ProfileID);
+                        ServingProfileMember spm = new ServingProfileMember(pm.ProfileID, pm.PersonID);
+
+                        spm.HoursPerWeek = sp.DefaultHoursPerWeek;
+                        spm.Save(ArenaContext.Current.User.Identity.Name);
+                    }
+                }
+            }
         }
 
 

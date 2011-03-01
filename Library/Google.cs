@@ -270,7 +270,6 @@ namespace Arena.Custom.HDC.GoogleMaps
             List<PersonPlacemark> people = new List<PersonPlacemark>();
             SqlDataReader rdr;
             ListReport report;
-            int i;
 
 
             if (PersonFieldOperationAllowed(PersonFields.Profile_Name, OperationType.View) == false)
