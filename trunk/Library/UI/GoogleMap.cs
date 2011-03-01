@@ -11,6 +11,7 @@ using System.Web.UI.HtmlControls;
 
 using Arena.Core;
 using Arena.Organization;
+using Arena.Portal.UI;
 using Arena.Custom.HDC.GoogleMaps;
 using Arena.Custom.HDC.GoogleMaps.Maps;
 
@@ -34,6 +35,11 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         [DefaultValue(false)]
         [Description("Whether or not to hide the download link under the map.")]
         public Boolean HideDownload { get; set; }
+
+        [Category("Appearance")]
+        [DefaultValue(false)]
+        [Description("Whether or not to hide the add-to-tag link under the map.")]
+        public Boolean HideAddToTag { get; set; }
 
         [Category("Appearance")]
         [DefaultValue(480)]
@@ -119,6 +125,14 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         private CheckBox downloadIncludeCampus;
         private CheckBox downloadIncludeAreaOverlays;
 
+        //
+        // These controls comprise the Add To Tag commands.
+        //
+        private HtmlGenericControl profileDiv;
+        private TextBox profileName;
+        private ProfilePicker profilePicker;
+        private CheckBox profileOnlyAdults;
+
         #endregion
 
 
@@ -145,6 +159,8 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             this.ShowPanControls = true;
             this.ShowZoomControls = true;
             this.ShowMapType = true;
+            this.HideAddToTag = false;
+            this.HideDownload = false;
         }
 
         #endregion
@@ -246,6 +262,10 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             {
                 downloadDiv.RenderControl(output);
             }
+            if (HideAddToTag == false)
+            {
+                profileDiv.RenderControl(output);
+            }
         }
 
 
@@ -261,13 +281,20 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             Controls.Add(commandDiv);
             commandDiv.ID = "commandArea";
 
-
             //
             // Create the download button below the map.
             //
             if (HideDownload == false)
             {
                 CreateDownloadControls();
+            }
+
+            //
+            // Create the "Add To Tag" button below the map.
+            //
+            if (HideAddToTag == false)
+            {
+                CreateProfileControls();
             }
         }
 
@@ -284,6 +311,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             this._Placemarks = (List<Placemark>)ViewState["Placemarks"];
             this.HideControls = (Boolean)ViewState["HideControls"];
             this.HideDownload = (Boolean)ViewState["HideDownload"];
+            this.HideAddToTag = (Boolean)ViewState["HideAddtoTag"];
             this.Height = (Int32)ViewState["Height"];
             this.Width = (Int32)ViewState["Width"];
             this.StaticMap = (Boolean)ViewState["StaticMap"];
@@ -310,6 +338,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             ViewState["StaticMap"] = this.StaticMap;
             ViewState["Width"] = this.Width;
             ViewState["Height"] = this.Height;
+            ViewState["HideAddToTag"] = this.HideAddToTag;
             ViewState["HideDownload"] = this.HideDownload;
             ViewState["HideControls"] = this.HideControls;
             ViewState["Placemarks"] = this._Placemarks;
@@ -456,11 +485,11 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             //
             // Create the "download..." link that will show the download controls.
             //
-            downloadShow = new HtmlGenericControl("A");
+            downloadShow = new HtmlGenericControl("SPAN");
             downloadShow.InnerText = "Download...";
             downloadShow.Attributes.Add("class", "smallText");
-            downloadShow.Attributes.Add("href", "#");
-            downloadShow.Attributes.Add("onclick", this.ClientID + "_ShowDownload(); return false;");
+            downloadShow.Attributes.Add("cursor", "pointer");
+            downloadShow.Attributes.Add("onclick", this.ClientID + "_ShowDownload();");
             commandDiv.Controls.Add(downloadShow);
 
             //
@@ -517,12 +546,12 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             //
             // Create the "cancel" link that will hide the download controls.
             //
-            downloadCancel = new HtmlGenericControl("A");
+            downloadCancel = new HtmlGenericControl("SPAN");
             downloadDiv.Controls.Add(downloadCancel);
             downloadCancel.InnerText = "Cancel";
             downloadCancel.Attributes.Add("class", "smallText");
-            downloadCancel.Attributes.Add("href", "#");
-            downloadCancel.Attributes.Add("onclick", this.ClientID + "_HideDownload(); return false;");
+            downloadCancel.Attributes.Add("cursor", "pointer");
+            downloadCancel.Attributes.Add("onclick", this.ClientID + "_HideDownload();");
 
             //
             // Generate all the javascript needed.
@@ -538,6 +567,113 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
                 "}\n" +
                 "</script>\n");
             Page.ClientScript.RegisterStartupScript(typeof(Page), this.ClientID + "_Download", script.ToString());
+        }
+
+
+        /// <summary>
+        /// Create all the controls necessary for the user to be able to add
+        /// the placemarks into a personal tag.
+        /// </summary>
+        private void CreateProfileControls()
+        {
+            HtmlGenericControl profileCancel, profileShow, span;
+            Literal lt;
+
+            //
+            // Create the "Create Tag..." link that will show the download controls.
+            //
+            profileShow = new HtmlGenericControl("SPAN");
+            profileShow.InnerText = "Create Tag...";
+            profileShow.Attributes.Add("class", "smallText");
+            profileShow.Attributes.Add("cursor", "pointer");
+            profileShow.Attributes.Add("onclick", this.ClientID + "_ShowProfile();");
+            if (commandDiv.Controls.Count > 0)
+            {
+                lt = new Literal();
+                lt.Text = "&nbsp;&nbsp;&nbsp;";
+                commandDiv.Controls.Add(lt);
+            }
+            commandDiv.Controls.Add(profileShow);
+
+            //
+            // Create the profile controls area.
+            //
+            profileDiv = new HtmlGenericControl("DIV");
+            Controls.Add(profileDiv);
+            profileDiv.ID = "profileDiv";
+            profileDiv.Style.Add("display", "none");
+            lt = new Literal();
+            lt.Text = "<br />";
+            profileDiv.Controls.Add(lt);
+
+            //
+            // Create the "new tag" text field.
+            //
+            span = new HtmlGenericControl("SPAN");
+            span.Attributes.Add("class", "smallText");
+            span.InnerText = "Add to new tag: ";
+            profileDiv.Controls.Add(span);
+            profileName = new TextBox();
+            profileDiv.Controls.Add(profileName);
+            profileName.ID = "profileName";
+            profileName.Width = Unit.Pixel(150);
+            lt = new Literal();
+            lt.Text = "<br />";
+            profileDiv.Controls.Add(lt);
+
+            //
+            // Create the "Existing tag" selection.
+            //
+            span = new HtmlGenericControl("SPAN");
+            span.Attributes.Add("class", "smallText");
+            span.InnerText = "Or existing tag: ";
+            profileDiv.Controls.Add(span);
+            profilePicker = new ProfilePicker();
+            profileDiv.Controls.Add(profilePicker);
+            profilePicker.ID = "profilePicker";
+            profilePicker.AllowRemove = true;
+            profilePicker.IncludeEvents = false;
+            profilePicker.SelectableRoots = false;
+            profilePicker.ProfileType = Enums.ProfileType.Ministry;
+            profilePicker.ProfileID = -1;
+            profilePicker.AllowedPermission = (short)Arena.Security.OperationType.Edit_People;
+            lt = new Literal();
+            lt.Text = "<br />";
+            profileDiv.Controls.Add(lt);
+
+//            downloadIncludeCampus = new CheckBox();
+//            downloadDiv.Controls.Add(downloadIncludeCampus);
+//            downloadIncludeCampus.ID = "downloadIncludeCampus";
+//            downloadIncludeCampus.Text = "Include Campus Locations";
+//            downloadIncludeCampus.ToolTip = "This will cause your KML download to include pins which identify the various campuses defined in your organization.";
+//            downloadIncludeCampus.CssClass = "smallText";
+//            lt = new Literal();
+//            lt.Text = "<br />";
+//            downloadDiv.Controls.Add(lt);
+            //
+            // Create the "cancel" link that will hide the download controls.
+            //
+            profileCancel = new HtmlGenericControl("SPAN");
+            profileDiv.Controls.Add(profileCancel);
+            profileCancel.InnerText = "Cancel";
+            profileCancel.Attributes.Add("class", "smallText");
+            profileCancel.Attributes.Add("cursor", "pointer");
+            profileCancel.Attributes.Add("onclick", this.ClientID + "_HideProfile();");
+
+            //
+            // Generate all the javascript needed.
+            //
+            StringBuilder script = new StringBuilder();
+
+            script.Append("<script language=\"javascript\" type=\"text/javascript\">\n" +
+                "function " + this.ClientID + "_ShowProfile() {\n" +
+                "  $('#" + commandDiv.ClientID + "').hide('fast', function() { $('#" + profileDiv.ClientID + "').show(); });\n" +
+                "}\n" +
+                "function " + this.ClientID + "_HideProfile() {\n" +
+                "  $('#" + profileDiv.ClientID + "').hide('fast', function() { $('#" + commandDiv.ClientID + "').show(); });\n" +
+                "}\n" +
+                "</script>\n");
+            Page.ClientScript.RegisterStartupScript(typeof(Page), this.ClientID + "_Profile", script.ToString());
         }
 
 
