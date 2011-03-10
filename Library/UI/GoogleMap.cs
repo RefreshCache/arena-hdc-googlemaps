@@ -24,7 +24,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
     /// </summary>
     public class GoogleMap : WebControl, INamingContainer
     {
-        #region Properties
+        #region WebControl Properties
 
         [Category("Appearance")]
         [DefaultValue(false)]
@@ -91,6 +91,11 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         [Description("Shows the map type controls (i.e. street, satellite, etc.) on the map.")]
         public Boolean ShowMapType { get; set; }
 
+        #endregion
+
+
+        #region Properties
+
         /// <summary>
         /// A list of Placemark objects that will be placed on the map at load time. This should only
         /// be used for showing things like addresses. People or any other bulk list of items should
@@ -116,6 +121,66 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         public GeocodedAddress Center;
 
         private HtmlGenericControl commandDiv;
+
+        /// <summary>
+        /// The Lookup of the ProfileSource to use when adding a person
+        /// to a tag.
+        /// </summary>
+        public Lookup ProfileSource
+        {
+            get
+            {
+                if (_ProfileSource == null)
+                {
+                    if (!String.IsNullOrEmpty(ArenaContext.Current.Organization.Settings["GoogleMaps_ProfileSource"]))
+                        _ProfileSource = new Lookup(Convert.ToInt32(ArenaContext.Current.Organization.Settings["GoogleMaps_ProfileSource"]));
+                    else
+                    {
+                        foreach (Lookup l in new LookupCollection(SystemLookupType.ProfileSource))
+                        {
+                            if (l.Active)
+                            {
+                                _ProfileSource = l;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                return _ProfileSource;
+            }
+        }
+        private Lookup _ProfileSource;
+
+        /// <summary>
+        /// The Lookup of the Profile Status to use when adding a person
+        /// to a tag.
+        /// </summary>
+        public Lookup ProfileStatus
+        {
+            get
+            {
+                if (_ProfileStatus == null)
+                {
+                    if (!String.IsNullOrEmpty(ArenaContext.Current.Organization.Settings["GoogleMaps_ProfileStatus"]))
+                        _ProfileStatus = new Lookup(Convert.ToInt32(ArenaContext.Current.Organization.Settings["GoogleMaps_ProfileStatus"]));
+                    else
+                    {
+                        foreach (Lookup l in new LookupCollection(SystemLookupType.TagMemberStatus))
+                        {
+                            if (l.Active)
+                            {
+                                _ProfileStatus = l;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                return _ProfileStatus;
+            }
+        }
+        private Lookup _ProfileStatus;
 
         //
         // These controls comprise the Download commands.
@@ -293,9 +358,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             //
             // Create the "Add To Tag" button below the map.
             //
-            if (HideAddToTag == false &&
-                !String.IsNullOrEmpty(ArenaContext.Current.Organization.Settings["GoogleMaps_ProfileSource"]) &&
-                !String.IsNullOrEmpty(ArenaContext.Current.Organization.Settings["GoogleMaps_ProfileStatus"]))
+            if (HideAddToTag == false)
             {
                 CreateProfileControls();
             }
@@ -794,8 +857,8 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
                     //
                     pm.ProfileID = profile.ProfileID;
                     pm.PersonID = p.PersonID;
-                    pm.Source = new Lookup(Convert.ToInt32(ArenaContext.Current.Organization.Settings["GoogleMaps_ProfileSource"]));
-                    pm.Status = new Lookup(Convert.ToInt32(ArenaContext.Current.Organization.Settings["GoogleMaps_ProfileStatus"]));
+                    pm.Source = ProfileSource;
+                    pm.Status = ProfileStatus;
                     pm.DateActive = DateTime.Now;
                     pm.Save(ArenaContext.Current.User.Identity.Name);
 
