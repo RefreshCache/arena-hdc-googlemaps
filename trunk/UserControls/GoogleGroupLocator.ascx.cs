@@ -33,7 +33,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         #region Module Settings
 
         [BooleanSetting("Show Campuses", "Shows the campus locations on the map.", false, true)]
-        public Boolean ShowCampusesSetting { get { return Convert.ToBoolean(Setting("ShowCampuses", "treu", false)); } }
+        public Boolean ShowCampusesSetting { get { return Convert.ToBoolean(Setting("ShowCampuses", "true", false)); } }
 
         [NumericSetting("Map Width", "The width in pixels to make the map. Default is 480.", false)]
         public int MapWidthSetting { get { return Convert.ToInt32(Setting("MapWidth", "480", false)); } }
