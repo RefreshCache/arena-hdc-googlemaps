@@ -254,5 +254,23 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::Arena.Portal.UI.ArenaButton btnFilter;
+        
+        /// <summary>
+        /// pnlListResults control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlListResults;
+        
+        /// <summary>
+        /// dgResults control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DataGrid dgResults;
     }
 }

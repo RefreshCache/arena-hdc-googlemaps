@@ -8,7 +8,7 @@ State: <asp:TextBox runat="server" ID="txtState" Width="25" /> Zipcode: <asp:Tex
 Populate with: <asp:DropDownList runat="server" ID="ddlType" /> <asp:CheckBox runat="server" ID="cbShowHome" Text="Show Address" Checked="true" /><br />
 <asp:CheckBox runat="server" ID="cbShowCampus" Text="Show Campuses" /><br />
 <asp:Button runat="server" ID="btnPopulate" OnClick="btnPopulate_Click" Text="Populate" /><br />
-<asp:Literal runat="server" ID="ltError" Text="" />
+<asp:Literal runat="server" ID="ltError" Text="Could not geocode address, please try entering it again." Visible="false" />
 </p>
 
 <GMap:GoogleMap ID="myMap" runat="server" Width="640" Height="480" />
