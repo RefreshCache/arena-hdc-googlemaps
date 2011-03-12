@@ -51,6 +51,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 //
                 // Clear the map.
                 //
+                ltError.Visible = false;
                 myMap.ClearContent();
 
                 //
@@ -101,7 +102,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             }
             else
             {
-                ltError.Text = "Could not geocode address, please try entering it again.";
+                ltError.Visible = true;
             }
         }
     }

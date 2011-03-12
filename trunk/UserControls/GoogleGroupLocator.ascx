@@ -2,6 +2,14 @@
 <%@ Register TagPrefix="Arena" Namespace="Arena.Portal.UI" Assembly="Arena.Portal.UI" %>
 <%@ Register TagPrefix="GMap" Namespace="Arena.Custom.HDC.GoogleMaps.UI" Assembly="Arena.Custom.HDC.GoogleMaps" %>
 
+<style type="text/css">
+    tr.sglRow:hover, tr.over td { background-color: #C8C8C8; cursor: pointer; }
+    tr.sglHeader { background-color: #761C1C; color: #E7E7DB; font-size: small; }
+    tr.sglRow { font-size: small; }
+    tr.sglAlternateRow { font-size: small; background-color: #EAE4E4; }
+    tr.sglAlternateRow:hover, tr.over td { background-color: #C8C8C8; cursor: pointer; }
+</style>
+
 <script language="javascript" type="text/javascript">
     function RegisterSmallGroup(gm, marker) {
         marker.googlemap = gm;
@@ -14,7 +22,7 @@
 
         if (g.infowindow != null)
             g.infowindow.close();
-        g.infowindow = new google.maps.InfoWindow({ content: '<div style="text-align: center"><img src="' + GoogleMapRoot + 'ajax-spin.gif" style="border: none;" /></div>' });
+        g.infowindow = new google.maps.InfoWindow({ content: '<div style="text-align: center"><img src="' + GoogleMapRoot + 'ajax-spin.gif" style="border: none;" /></div>', maxWidth: 350 });
         g.infowindow.open(this.map, this);
 
         $.ajax({
@@ -27,7 +35,9 @@
                 g.infowindow.setContent(data.d + '<div style="text-align: center"><hr width="75%" /><a href="default.aspx?page=<%= RegistrationPageSetting %>&group=' + id + '">Register for this group</a></div>');
             },
             error: function () {
+                g.infowindow.close();
                 g.infowindow.setContent('Failed to load details.');
+                g.infowindow.open(this.map, this);
             }
         });
     }
@@ -84,4 +94,20 @@
         </table>
         <Arena:ArenaButton runat="server" ID="btnFilter" Text="Apply Filter" OnClick="btnFilter_Click" />
     </div>
+</asp:Panel>
+
+<asp:Panel ID="pnlListResults" runat="server" Visible="true">
+    <asp:DataGrid ID="dgResults" runat="server" CellPadding="5" AllowPaging="false" AutoGenerateColumns="false" GridLines="Horizontal" HeaderStyle-Font-Bold="true" OnItemDataBound="dgResults_ItemDataBound" HeaderStyle-CssClass="sglHeader">
+        <ItemStyle CssClass="sglRow" />
+        <AlternatingItemStyle CssClass="sglAlternateRow" />
+        <Columns>
+            <asp:BoundColumn HeaderText="Group" Visible="true" DataField="Name"></asp:BoundColumn>
+            <asp:BoundColumn HeaderText="Meeting Day" Visible="true" ItemStyle-Wrap="false" DataField="MeetingDay"></asp:BoundColumn>
+            <asp:BoundColumn HeaderText="Type" Visible="true" ItemStyle-Wrap="false" DataField="Type"></asp:BoundColumn>
+            <asp:BoundColumn HeaderText="Topic" Visible="true" ItemStyle-Wrap="false" DataField="Topic"></asp:BoundColumn>
+            <asp:BoundColumn HeaderText="Avg Age" Visible="true" ItemStyle-Wrap="false" DataField="AverageAge"></asp:BoundColumn>
+            <asp:BoundColumn HeaderText="Notes" Visible="false" DataField="Notes"></asp:BoundColumn>
+            <asp:BoundColumn HeaderText="Distance" Visible="false" DataField="Distance"></asp:BoundColumn>
+        </Columns>
+    </asp:DataGrid>
 </asp:Panel>

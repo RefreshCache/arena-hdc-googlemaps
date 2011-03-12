@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -87,6 +88,9 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         [ClusterTypeSetting("Limit To Cluster Type", "Limit the results to the selected cluster type, as defined in the small group structure.", false)]
         public int LimitToClusterTypeSetting { get { return Convert.ToInt32(Setting("LimitToClusterType", "-1", false)); } }
 
+        [BooleanSetting("Show List Results", "Shows the results in list-view below the map.", false, false)]
+        public Boolean ShowListResultsSetting { get { return Convert.ToBoolean(Setting("ShowListResults", "false", false)); } }
+
         #endregion
 
 
@@ -121,6 +125,12 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 if (FilterOptionsSetting.Count == 0)
                     pnlFilter.Visible = false;
                 hfFilterVisible.Value = (FilterExpandedSetting == true ? "1" : "0");
+
+                //
+                // Hide the list results if they don't want them shown.
+                //
+                if (ShowListResultsSetting == false)
+                    pnlListResults.Visible = false;
 
                 SetupCaptions();
                 SetupFilters();
@@ -217,14 +227,32 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 }
                 else
                     pAddressError.Visible = true;
+
+                //
+                // Show the distance column.
+                //
+                foreach (DataGridColumn dc in dgResults.Columns)
+                {
+                    if (dc.HeaderText == "Distance")
+                        dc.Visible = true;
+                }
             }
             else
             {
                 map.Center.Latitude = ArenaContext.Current.Organization.Address.Latitude;
                 map.Center.Longitude = ArenaContext.Current.Organization.Address.Longitude;
+
+                //
+                // Hide the distance column.
+                //
+                foreach (DataGridColumn dc in dgResults.Columns)
+                {
+                    if (dc.HeaderText == "Distance")
+                        dc.Visible = false;
+                }
             }
 
-            AddCenterPlacemark();
+            btnFilter_Click(sender, e);
         }
 
 
@@ -239,6 +267,20 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             AddCampusPlacemarks();
             AddCenterPlacemark();
             AddFilteredGroups();
+        }
+
+
+        /// <summary>
+        /// A row has been bound in the datagrid, update it's attributes.
+        /// </summary>
+        protected void dgResults_ItemDataBound(object sender, DataGridItemEventArgs e)
+        {
+            if (e.Item.ItemType == ListItemType.Header ||
+                e.Item.ItemType == ListItemType.Footer ||
+                e.Item.ItemType == ListItemType.Pager)
+                return;
+            else
+                e.Item.Attributes["onclick"] = "window.location = 'default.aspx?page=" + RegistrationPageSetting.ToString() + "&group=" + ((DataRowView)e.Item.DataItem).Row["ID"].ToString() + "'";
         }
 
         #endregion
@@ -309,16 +351,62 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         /// </summary>
         private void AddFilteredGroups()
         {
+            SqlConnection con;
+            SqlDataReader rdr;
+            List<Group> groups = new List<Group>();
+            SqlCommand cmd;
             Placemark placemark;
+            DataTable dt = new DataTable();
+            DataRow dr;
 
 
             //
-            // Process each small group and filter.
+            // Setup the data table.
             //
-            foreach (Group g in LoadGroups())
+            dt.Columns.Add(new DataColumn("ID", typeof(Int32)));
+            dt.Columns.Add(new DataColumn("Name", typeof(String)));
+            dt.Columns.Add(new DataColumn("MeetingDay", typeof(String)));
+            dt.Columns.Add(new DataColumn("Type", typeof(String)));
+            dt.Columns.Add(new DataColumn("Topic", typeof(String)));
+            dt.Columns.Add(new DataColumn("AverageAge", typeof(Int32)));
+            dt.Columns.Add(new DataColumn("Notes", typeof(String)));
+            dt.Columns.Add(new DataColumn("Distance", typeof(Double)));
+
+            //
+            // Build a SQL query to enumerate groups in these categories.
+            //
+            con = new Arena.DataLib.SqlDbConnection().GetDbConnection();
+            con.Open();
+            cmd = con.CreateCommand();
+            cmd.CommandText = "SELECT sg.group_id,dbo.cust_hdc_googlemaps_funct_distance_between(@LatFrom, @LongFrom, ca.Latitude, ca.Longitude) AS 'distance'" +
+                "    FROM smgp_group AS sg" +
+                "    LEFT OUTER JOIN core_person_address AS cpa ON cpa.person_id = sg.target_location_person_id" +
+                "    LEFT OUTER JOIN core_address AS ca ON ca.address_id = cpa.address_id" +
+                "    LEFT JOIN smgp_group_cluster AS sgc ON sgc.group_cluster_id = sg.group_cluster_id" +
+                "    LEFT JOIN smgp_cluster_type AS sgt ON sgt.cluster_type_id = sgc.cluster_type_id" +
+                "    WHERE sgt.category_id = @CategoryID" +
+                "      AND sg.is_group_private = 0" +
+                "      AND sg.active = 1";
+            if (LimitToClusterTypeSetting != -1)
+                cmd.CommandText += "      AND sgc.cluster_type_id = @ClusterTypeID";
+            cmd.Parameters.Add(new SqlParameter("@CategoryID", CategorySetting.CategoryID));
+            cmd.Parameters.Add(new SqlParameter("@ClusterTypeID", LimitToClusterTypeSetting));
+            cmd.Parameters.Add(new SqlParameter("@LatFrom", map.Center.Latitude));
+            cmd.Parameters.Add(new SqlParameter("@LongFrom", map.Center.Longitude));
+
+            //
+            // Execute the reader and process all results.
+            //
+            rdr = cmd.ExecuteReader();
+            while (rdr.Read())
             {
+                //
+                // Process each small group.
+                //
                 try
                 {
+                    Group g = new Group(Convert.ToInt32(rdr[0]));
+
                     if (ddlMeetingDay.SelectedValue != "-1" && g.MeetingDay.LookupID != Convert.ToInt32(ddlMeetingDay.SelectedValue))
                         continue;
 
@@ -340,60 +428,33 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                     if (ddlCampus.SelectedValue != "-1" && g.Leader.Campus.CampusId != Convert.ToInt32(ddlCampus.SelectedValue))
                         continue;
 
+                    //
+                    // Add the group to the map.
+                    //
                     placemark = new SmallGroupPlacemark(g);
                     placemark.SetAddedHandler("RegisterSmallGroup");
                     map.Placemarks.Add(placemark);
-                }
-                catch { }
-            }
-        }
 
-
-        /// <summary>
-        /// Load all possible small groups that should be displayed on the map. If no
-        /// filter is active then all these groups should be displayed.
-        /// </summary>
-        /// <returns></returns>
-        private List<Group> LoadGroups()
-        {
-            SqlConnection con;
-            SqlDataReader rdr;
-            List<Group> groups = new List<Group>();
-            SqlCommand cmd;
-
-            
-            //
-            // Build a SQL query to enumerate groups in these categories.
-            //
-            con = new Arena.DataLib.SqlDbConnection().GetDbConnection();
-            con.Open();
-            cmd = con.CreateCommand();
-            cmd.CommandText = "SELECT sg.group_id FROM smgp_group AS sg" +
-                "    LEFT JOIN smgp_group_cluster AS sgc ON sgc.group_cluster_id = sg.group_cluster_id" +
-                "    LEFT JOIN smgp_cluster_type AS sgt ON sgt.cluster_type_id = sgc.cluster_type_id" +
-                "    WHERE sgt.category_id = @CategoryID" +
-                "      AND sg.is_group_private = 0" +
-                "      AND sg.active = 1";
-            if (LimitToClusterTypeSetting != -1)
-                cmd.CommandText += "      AND sgc.cluster_type_id = @ClusterTypeID";
-            cmd.Parameters.Add(new SqlParameter("@CategoryID", CategorySetting.CategoryID));
-            cmd.Parameters.Add(new SqlParameter("@ClusterTypeID", LimitToClusterTypeSetting));
-
-            //
-            // Execute the reader and process all results.
-            //
-            rdr = cmd.ExecuteReader();
-            while (rdr.Read())
-            {
-                try
-                {
-                    groups.Add(new Group(Convert.ToInt32(rdr[0])));
+                    //
+                    // Add the group to the list results.
+                    //
+                    dr = dt.NewRow();
+                    dr["ID"] = g.GroupID;
+                    dr["Name"] = g.Name;
+                    dr["MeetingDay"] = g.MeetingDay.Value;
+                    dr["Type"] = g.GroupType.Value;
+                    dr["Topic"] = g.Topic.Value;
+                    dr["AverageAge"] = Convert.ToInt32(g.AverageAge);
+                    dr["Notes"] = g.Notes;
+                    dr["Distance"] = Math.Round(Convert.ToDouble(rdr[1]), 2);
+                    dt.Rows.Add(dr);
                 }
                 catch { }
             }
             rdr.Close();
 
-            return groups;
+            dgResults.DataSource = new DataView(dt);
+            dgResults.DataBind();
         }
 
 
