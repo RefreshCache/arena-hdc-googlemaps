@@ -265,7 +265,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             //
             script.Append("<script language=\"javascript\" type=\"text/javascript\">\n" +
                 "    var " + this.ClientObject + " = null;\n" +
-                "    $(document).ready(function() {\n" +
+                "    $(window).load(function() {\n" +
                 "        var o = {};\n");
             script.AppendLine("        o.zoom = " + ZoomLevel.ToString() + ";");
             if (MinZoomLevel != -1)
