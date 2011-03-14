@@ -387,7 +387,8 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 "    WHERE sgt.category_id = @CategoryID" +
                 "      AND sg.is_group_private = 0" +
                 "      AND sg.active = 1" +
-                "      AND dbo.cust_hdc_googlemaps_funct_distance_between(@LatFrom, @LongFrom, ca.Latitude, ca.Longitude) <= " + Convert.ToInt32(ddlDistance.SelectedValue).ToString() +
+                "      AND ISNULL(cpa.primary_address, 1) = 1" +
+                "      AND ISNULL(dbo.cust_hdc_googlemaps_funct_distance_between(@LatFrom, @LongFrom, ca.Latitude, ca.Longitude), -1) <= " + Convert.ToInt32(ddlDistance.SelectedValue).ToString() +
                 "    ORDER BY 'distance'";
             if (LimitToClusterTypeSetting != -1)
                 cmd.CommandText += "      AND sgc.cluster_type_id = @ClusterTypeID";
@@ -448,7 +449,14 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                     dr["Topic"] = g.Topic.Value;
                     dr["AverageAge"] = Convert.ToInt32(g.AverageAge);
                     dr["Notes"] = g.Notes;
-                    dr["Distance"] = Math.Round(Convert.ToDouble(rdr[1]), 2);
+                    try
+                    {
+                        dr["Distance"] = Math.Round(Convert.ToDouble(rdr[1]), 2);
+                    }
+                    catch
+                    {
+                        dr["Distance"] = -1.0f;
+                    }
                     dt.Rows.Add(dr);
                 }
                 catch { }
