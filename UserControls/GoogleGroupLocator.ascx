@@ -2,28 +2,38 @@
 <%@ Register TagPrefix="Arena" Namespace="Arena.Portal.UI" Assembly="Arena.Portal.UI" %>
 <%@ Register TagPrefix="GMap" Namespace="Arena.Custom.HDC.GoogleMaps.UI" Assembly="Arena.Custom.HDC.GoogleMaps" %>
 
-<style type="text/css">
-    tr.sglRow:hover, tr.over td { background-color: #C8C8C8; cursor: pointer; }
-    tr.sglHeader { background-color: #761C1C; color: #E7E7DB; font-size: small; }
-    tr.sglRow { font-size: small; }
-    tr.sglAlternateRow { font-size: small; background-color: #EAE4E4; }
-    tr.sglAlternateRow:hover, tr.over td { background-color: #C8C8C8; cursor: pointer; }
-</style>
-
 <script language="javascript" type="text/javascript">
+    var SGLMarkers = [];
+
     function RegisterSmallGroup(gm, marker) {
+        SGLMarkers.push(marker);
         marker.googlemap = gm;
         google.maps.event.addListener(marker, 'click', ShowGroupPopup);
     }
 
     function ShowGroupPopup() {
-        var g = this.googlemap;
-        var id = this.groupID;
+        _ShowGroupPopup(this, null);
+    }
+
+    function _ShowGroupPopup(marker, groupID) {
+        var g, id;
+
+        if (marker == null) {
+            for (i = 0; i < SGLMarkers.length; i++) {
+                if (SGLMarkers[i].groupID == groupID)
+                    marker = SGLMarkers[i];
+            }
+
+            $('html,body').animate({ scrollTop: ($('#<%= map.ClientID %>').offset().top - 5) }, 'medium');
+        }
+
+        g = marker.googlemap;
+        id = marker.groupID;
 
         if (g.infowindow != null)
             g.infowindow.close();
         g.infowindow = new google.maps.InfoWindow({ content: '<div style="text-align: center"><img src="' + GoogleMapRoot + 'ajax-spin.gif" style="border: none;" /></div>', maxWidth: 350 });
-        g.infowindow.open(this.map, this);
+        g.infowindow.open(g.map, marker);
 
         $.ajax({
             url: g.serviceurl + "/GroupDetailsInfoWindow",
@@ -37,10 +47,18 @@
             error: function () {
                 g.infowindow.close();
                 g.infowindow.setContent('Failed to load details.');
-                g.infowindow.open(this.map, this);
+                g.infowindow.open(g.map, marker);
             }
         });
     }
+
+    $(document).ready(function () {
+        $('.sglMapLink').click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            _ShowGroupPopup(null, $(this).find('a').attr('href'));
+        });
+    });
 </script>
 
 <GMap:GoogleMap runat="server" ID="map" HideDownload="true" HideAddtoTag="true" ShowMapType="false" ShowStreetView="false" MinZoomLevel="10" MaxZoomLevel="14" />
@@ -50,8 +68,20 @@
         Could not find address, please check address and try again.
     </p>
     <p>
-        Street: <asp:TextBox runat="server" ID="txtAddress" Width="240" /> City: <asp:TextBox runat="server" ID="txtCity" Width="140" /><br />
-        State: <asp:TextBox runat="server" ID="txtState" Width="25" /> Zipcode: <asp:TextBox runat="server" ID="txtPostal" Width="60" /><br />
+        Street: <asp:TextBox runat="server" ID="txtAddress" Width="240" />
+        City: <asp:TextBox runat="server" ID="txtCity" Width="140" />
+        <br />
+        State: <asp:TextBox runat="server" ID="txtState" Width="25" />
+        Zipcode: <asp:TextBox runat="server" ID="txtPostal" Width="60" />
+        Distance:
+        <asp:DropDownList runat="server" ID="ddlDistance">
+            <asp:ListItem Text="Any" Value="9999" Selected="True" />
+            <asp:ListItem Text="10 Miles" Value="10" />
+            <asp:ListItem Text="5 Miles" Value="5" />
+            <asp:ListItem Text="3 Miles" Value="3" />
+            <asp:ListItem Text="1 Miles" Value="1" />
+        </asp:DropDownList>
+        <br />
         <Arena:ArenaButton runat="server" ID="btnUpdate" Text="Center Map" OnClick="btnCenter_Click" />
     </p>
 </asp:Panel>
@@ -108,6 +138,7 @@
             <asp:BoundColumn HeaderText="Avg Age" Visible="true" ItemStyle-Wrap="false" DataField="AverageAge"></asp:BoundColumn>
             <asp:BoundColumn HeaderText="Notes" Visible="false" DataField="Notes"></asp:BoundColumn>
             <asp:BoundColumn HeaderText="Distance" Visible="false" DataField="Distance"></asp:BoundColumn>
+            <asp:TemplateColumn HeaderText="View Map" Visible="true" ItemStyle-Wrap="false" ItemStyle-CssClass="sglMapLink"><ItemTemplate><a href="<%# DataBinder.Eval(Container.DataItem, "ID") %>">View Map</a></ItemTemplate></asp:TemplateColumn>
         </Columns>
     </asp:DataGrid>
 </asp:Panel>

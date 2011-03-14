@@ -386,7 +386,9 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 "    LEFT JOIN smgp_cluster_type AS sgt ON sgt.cluster_type_id = sgc.cluster_type_id" +
                 "    WHERE sgt.category_id = @CategoryID" +
                 "      AND sg.is_group_private = 0" +
-                "      AND sg.active = 1";
+                "      AND sg.active = 1" +
+                "      AND dbo.cust_hdc_googlemaps_funct_distance_between(@LatFrom, @LongFrom, ca.Latitude, ca.Longitude) <= " + Convert.ToInt32(ddlDistance.SelectedValue).ToString() +
+                "    ORDER BY 'distance'";
             if (LimitToClusterTypeSetting != -1)
                 cmd.CommandText += "      AND sgc.cluster_type_id = @ClusterTypeID";
             cmd.Parameters.Add(new SqlParameter("@CategoryID", CategorySetting.CategoryID));
