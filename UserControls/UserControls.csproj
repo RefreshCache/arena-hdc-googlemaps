@@ -62,13 +62,6 @@
     <Compile Include="GoogleGroupLocator.ascx.designer.cs">
       <DependentUpon>GoogleGroupLocator.ascx</DependentUpon>
     </Compile>
-    <Compile Include="KMLDownloader.ascx.cs">
-      <DependentUpon>KMLDownloader.ascx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="KMLDownloader.ascx.designer.cs">
-      <DependentUpon>KMLDownloader.ascx</DependentUpon>
-    </Compile>
     <Compile Include="KMLInsert.ascx.cs">
       <DependentUpon>KMLInsert.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -100,7 +93,6 @@
     <Content Include="Images\darkearth.png" />
     <Content Include="Includes\googlemaps.js" />
     <Content Include="Includes\json2.js" />
-    <Content Include="KMLDownloader.ascx" />
     <Content Include="KMLInsert.ascx" />
     <Content Include="MapViewer.ascx" />
     <Content Include="PeopleInRange.ascx" />
