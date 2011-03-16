@@ -10,6 +10,15 @@
 namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
     
     
-    public partial class KMLInsert {
+    public partial class MapViewer {
+        
+        /// <summary>
+        /// map control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::Arena.Custom.HDC.GoogleMaps.UI.GoogleMap map;
     }
 }
