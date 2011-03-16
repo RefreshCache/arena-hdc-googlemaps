@@ -51,7 +51,7 @@ function GroupMarker(opts, groupID) {
 };
 GroupMarker.prototype = new google.maps.Marker;
 
-var GoogleMapRoot = "/Custom/Website/";
+var GoogleMapRoot = "UserControls/Custom/HDC/GoogleMaps/";
 
 var GoogleMap = function(element, geo, url, options) {
     //
@@ -74,10 +74,10 @@ var GoogleMap = function(element, geo, url, options) {
     this.arenaurl = url;
     if (this.arenaurl[this.arenaurl.length - 1] != '/')
 	this.arenaurl = this.arenaurl + '/';
-    this.serviceurl = url + "Custom/Website/GoogleService.asmx";
+    this.serviceurl = url + GoogleMapRoot + "GoogleService.asmx";
     this.custompins = new Array();
     this.infowindow = null;
-    this.workingDiv = $('<div style="position: absolute; z-index: 10;"><img src="' + GoogleMapRoot + 'ajax-bar.gif" /></div>');
+    this.workingDiv = $('<div style="position: absolute; z-index: 10;"><img src="' + GoogleMapRoot + 'Images/ajax-bar.gif" /></div>');
     this.workingCount = 0;
 
     var mapDiv = $('#' + element);
@@ -540,7 +540,7 @@ var GoogleMap = function(element, geo, url, options) {
 
 	if (g.infowindow != null)
 	    g.infowindow.close();
-	g.infowindow = new google.maps.InfoWindow({content: '<div style="text-align: center"><img src="' + GoogleMapRoot + 'ajax-spin.gif" style="border: none;" /></div>', maxWidth: 350});
+	g.infowindow = new google.maps.InfoWindow({content: '<div style="text-align: center"><img src="' + GoogleMapRoot + 'Images/ajax-spin.gif" style="border: none;" /></div>', maxWidth: 350});
 	g.infowindow.open(marker.map, marker);
 
 	if (typeof(this.personID) != 'undefined')

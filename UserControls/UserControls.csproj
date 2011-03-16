@@ -94,6 +94,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="GoogleGroupLocator.ascx" />
+    <Content Include="Images\ajax-bar.gif" />
+    <Content Include="Images\ajax-spin.gif" />
     <Content Include="Images\chapel.png" />
     <Content Include="Images\darkearth.png" />
     <Content Include="Includes\googlemaps.js" />
