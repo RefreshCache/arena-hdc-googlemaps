@@ -1,0 +1,36 @@
+<ArenaPackage version="2009.2.100.1401">
+  <Readme></Readme>
+  <Modules>
+    <Module temp_module_id="-1" module_url="UserControls/Custom/HDC/GoogleMaps/KMLInsert.ascx" module_name="HDC Google Maps Insert" module_desc="A helpful module for setting up various areas of the website with links to your Google Maps Viewer page." allows_child_modules="0" image_path="" _source="UserControls/KMLInsert.ascx" _source_image="" _system="0" />
+    <Module temp_module_id="-2" module_url="UserControls/Custom/HDC/GoogleMaps/MapViewer.ascx" module_name="HDC Google Map Viewer" module_desc="Used in conjunction with the Google Maps Insert module. This module provides a place for users to interact with a Google map before downloading the information." allows_child_modules="0" image_path="" _source="UserControls/MapViewer.ascx" _source_image="" _system="0" />
+    <Module temp_module_id="-3" module_url="UserControls/Custom/HDC/GoogleMaps/GoogleGroupLocator.ascx" module_name="HDC Google Group Locator" module_desc="Small Group Locator based on a Google Map. Provides a visual map to find small groups as well as a list based upon filter criteria." allows_child_modules="0" image_path="" _source="UserControls/GoogleGroupLocator.ascx" _source_image="" _system="0" />
+    <Module temp_module_id="-4" module_url="UserControls/Custom/HDC/GoogleMaps/PeopleInRange.ascx" module_name="HDC People In Range" module_desc="This is a simple module designed to let you enter an address and distance and get a map back with all the people, families or small groups within the distance to that address." allows_child_modules="0" image_path="" _source="UserControls/PeopleInRange.ascx" _source_image="" _system="0" />
+  </Modules>
+  <Pages />
+  <Files>
+    <File path="UserControls/Custom/HDC/GoogleMaps/Images/chapel.png" _source="UserControls/Images/chapel.png" />
+    <File path="UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png" _source="UserControls/Images/darkearth.png" />
+    <File path="UserControls/Custom/HDC/GoogleMaps/Includes/googlemaps.js" _source="UserControls/Includes/googlemaps.js" />
+    <File path="UserControls/Custom/HDC/GoogleMaps/Includes/json2.js" _source="UserControls/Includes/json2.js" />
+    <File path="UserControls/Custom/HDC/GoogleMaps/Images/ajax-bar.gif" _source="UserControls/Images/ajax-bar.gif" />
+    <File path="UserControls/Custom/HDC/GoogleMaps/Images/ajax-spin.gif" _source="UserControls/Images/ajax-spin.gif" />
+  </Files>
+  <Info>
+    <Distributor>HDC</Distributor>
+    <PackageName>GoogleMaps</PackageName>
+    <Version>1.0.0</Version>
+    <Synopsis>A collection of modules and libraries to interface Arena with Google Maps</Synopsis>
+    <Description>This package consists of a set of modules that help you to interface your Arena installation with Google Maps. Information from Tags, Lists, and Small Groups can be viewed live on your website through a Google Map. The information can then be downloaded as a KML file for use with Google Earth for more interactation with the information. This currently works out of the box with Firefox and Safari, Internet Explorer users who are accessing it through SSL will get warnings they need to click through.
+
+A second portion of this package is the new GoogleMap Web Control. This control is designed to be a quick and easy drop-in to your own UserControl so that you can include Google Maps with your own development projects. For some examples of how to use it, see the GoogleGroupLocator and PeopleInRange modules.</Description>
+    <Changelog Version="2.0.0">Removed the KMLDownloader module, it has been replaced with the MapViewer module.
+New GoogleMap WebControl that can be used by other developers.
+New Small Group Locator module built on Google Maps.
+New "People In Range" module that allows you to create a list of people in range of a specific address.
+GoogleMap controls allow the end-user to view the information online, download to Google Earth or add to a tag.</Changelog>
+    <Changelog Version="1.1.0">Maintenance release to fix some minor issues, including:
+- Exporting tag members wasr including in-active members.</Changelog>
+    <Changelog Version="1.0.0">Initial public release.</Changelog>
+  </Info>
+  <Migration _source="" />
+</ArenaPackage>
