@@ -33,6 +33,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			SmallGroupClusterTabControl = 4,
 			ProfileTabControl = 5
 		}
+
 		#region Module Settings
 
 		[CustomListSetting("Module Type", "Select the type of module, also located on this page, that this KML download module will be associated with.", true,
@@ -43,17 +44,8 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 		)]
 		public KMLInsertType ModuleTypeSetting { get { return (KMLInsertType)Convert.ToInt32(Setting("ModuleType", "1", true)); } }
 
-		[PageSetting("KML Download Page", "The page that has the KML Downloader module installed on it.", true)]
+		[PageSetting("Map Viewer Page", "The page that has the Google Map Viewer module installed on it.", true)]
 		public string KMLDownloadPageIDSetting { get { return Setting("KMLDownloadPageID", "", true); } }
-
-		[BooleanSetting("Area Maps Option", "Allow the user to turn on the display of area overlay maps.", true, true)]
-		public Boolean AreaMapsSetting { get { return Convert.ToBoolean(Setting("AreaMaps", "1", true)); } }
-
-		[TextSetting("Small Group CategoryID", "Allow the user to turn on the display of small group locations in this categoryID. -1 or empty to disable.", false)]
-		public int CategoryIDSetting { get { return Convert.ToInt32(Setting("CategoryID", "-1", false)); } }
-
-		[BooleanSetting("Campus Locations Option", "Allow the user to turn on the display of campus locations.", true, true)]
-		public Boolean CampusLocationsSetting { get { return Convert.ToBoolean(Setting("CampusLocations", "true", true)); } }
 
 		#endregion
 
@@ -61,21 +53,6 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
 		private void Page_Load(object sender, System.EventArgs e)
 		{
-			//
-			// Register all the Javascript references.
-			//
-            BasePage.AddJavascriptInclude(this.Page, BasePage.JQUERY_INCLUDE);
-            BasePage.AddJavascriptInclude(this.Page, "include/scripts/jquery.jgrowl.min.js");
-            BasePage.AddJavascriptInclude(this.Page, "UserControls/Custom/HDC/GoogleMaps/includes/jqModal.js");
-            BasePage.AddJavascriptInclude(this.Page, "UserControls/Custom/HDC/GoogleMaps/includes/jquery.iphone-switch.js");
-
-			//
-			// Enable/Disable the user choices.
-			//
-			showAreaSwitchDiv.Visible = AreaMapsSetting;
-			smallGroupsSwitchDiv.Visible = (CategoryIDSetting > 0);
-			campusLocationsSwitchDiv.Visible = CampusLocationsSetting;
-
 			//
 			// Call the appropriate module handler.
 			//
@@ -91,8 +68,6 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				Module_ProfileTabControl();
 			else
 				throw new Exception("Invalid Module Type has been specified.");
-
-
 		}
 		
 		#endregion
@@ -102,11 +77,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			String script;
 
 
-			script = "$(document).ready(function() {\n" +
-				"  var container = $(\"input[title='Export Data to Excel']\").parent().get(0);\n" +
-				"  $(container).append(\"<a href=\\\"#\\\" onclick=\\\"$('#KMLDownloadDialog').jqmShow(); return false;\\\"><img src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\"></a>\");\n" +
-				"});\n" +
-				"var KMLDownloadURL = '&populateReportID=" + Request.QueryString["REPORTID"] + "';";
+            script = "$(document).ready(function() {\n" +
+                "  var container = $(\"input[title='Export Data to Excel']\").parent().get(0);\n" +
+                "  $(container).append(\"<a href=\\\"default.aspx?page=" + KMLDownloadPageIDSetting + "&populateReportID=" + Request.QueryString["REPORTID"] + "\\\"><img src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\"></a>\");\n" +
+                "});\n";
 			Page.ClientScript.RegisterStartupScript(this.GetType(), this.ClientID + "_geListReportView", script, true);
 		}
 
@@ -115,25 +89,24 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 			String script;
 
 
-			script = "$(document).ready(function() {\n" +
-				"  var download = $(\"nobr:contains('Download')\").parent().parent().parent().parent()\n" +
-				"  if (download.length == 0) {\n" +
-				"    var topGroup = $(\".TopGroup\");\n" +
-				"    var tabStrip = eval(topGroup.attr(\"id\"));\n" +
-				"    tabStrip.beginUpdate();\n" +
-				"    var topTabs = tabStrip.get_tabs();\n" +
-				"    var newTab = new ComponentArt.Web.UI.TabStripTab();\n" +
-				"    newTab.set_text('Download');\n" +
-				"    newTab.set_id('" + this.ClientID + "_geDownload');\n" +
-				"    topTabs.add(newTab);\n" +
-				"    tabStrip.endUpdate();\n" +
-				"    download = $(\"nobr:contains('Download')\").parent().parent().parent().parent()\n" +
-				"  }\n" +
-				"  download.find(\"nobr\").html(\"<img style=\\\"margin-top: -2px; margin-bottom: -4px; margin-right: 4px;\\\" src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\">Download\");\n" +
-				"  download.removeAttr(\"onclick\");\n" +
-				"  download.click(function() {$('#KMLDownloadDialog').jqmShow();});\n" +
-				"});\n" +
-				"var KMLDownloadURL = '&populateAreaID=" + Request.QueryString["AREA"] + "';";
+            script = "$(document).ready(function() {\n" +
+                "  var button = $(\"nobr:contains('Google Map')\").parent().parent().parent().parent()\n" +
+                "  if (button.length == 0) {\n" +
+                "    var topGroup = $(\".TopGroup\");\n" +
+                "    var tabStrip = eval(topGroup.attr(\"id\"));\n" +
+                "    tabStrip.beginUpdate();\n" +
+                "    var topTabs = tabStrip.get_tabs();\n" +
+                "    var newTab = new ComponentArt.Web.UI.TabStripTab();\n" +
+                "    newTab.set_text('Google Map');\n" +
+                "    newTab.set_id('" + this.ClientID + "_geView');\n" +
+                "    topTabs.add(newTab);\n" +
+                "    tabStrip.endUpdate();\n" +
+                "    button = $(\"nobr:contains('Google Map')\").parent().parent().parent().parent()\n" +
+                "  }\n" +
+                "  button.find(\"nobr\").html(\"<img style=\\\"margin-top: -2px; margin-bottom: -4px; margin-right: 4px;\\\" src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\">Download\");\n" +
+                "  button.removeAttr(\"onclick\");\n" +
+                "  button.click(function() {window.location = \"default.aspx?page=" + KMLDownloadPageIDSetting + "populateAreaID=" + Request.QueryString["AREA"] + "\"});\n" +
+                "});\n";
 			Page.ClientScript.RegisterStartupScript(this.GetType(), this.ClientID + "_geAreaDetail", script, true);
 		}
 
@@ -144,11 +117,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				String script;
 
 
-				script = "$(document).ready(function() {\n" +
-					"  var container = $(\"td.listPager[align='right']\");\n" +
-					"  container.append(\"<a href=\\\"#\\\" onclick=\\\"$('#KMLDownloadDialog').jqmShow(); return false;\\\"><img src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\"></a>\");\n" +
-					"});\n" +
-					"var KMLDownloadURL = '&populateSmallGroupID=" + Request.QueryString["GROUP"] + "';";
+                script = "$(document).ready(function() {\n" +
+                    "  var container = $(\"td.listPager[align='right']\");\n" +
+                    "  container.append(\"<a href=\\\"default.aspx?page=" + KMLDownloadPageIDSetting + "&populateSmallGroupID=" + Request.QueryString["GROUP"] + "\\\"><img src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\"></a>\");\n" +
+                    "});\n";
 				Page.ClientScript.RegisterStartupScript(this.GetType(), this.ClientID + "_geSmallGroupTabControl", script, true);
 			}
 		}
@@ -160,11 +132,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				String script;
 
 
-				script = "$(document).ready(function() {\n" +
-					"  var container = $(\"td.listPager[align='right']\");\n" +
-					"  container.append(\"<a href=\\\"#\\\" onclick=\\\"$('#KMLDownloadDialog').jqmShow(); return false;\\\"><img src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\"></a>\");\n" +
-					"});\n" +
-					"var KMLDownloadURL = '&populateClusterID=" + Request.QueryString["CLUSTER"] + "';";
+                script = "$(document).ready(function() {\n" +
+                    "  var container = $(\"td.listPager[align='right']\");\n" +
+                    "  container.append(\"<a href=\\\"default.aspx?page=" + KMLDownloadPageIDSetting + "&populateClusterID=" + Request.QueryString["CLUSTER"] + "\\\"><img src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\"></a>\");\n" +
+                    "});\n";
 				Page.ClientScript.RegisterStartupScript(this.GetType(), this.ClientID + "_geSmallGroupTabControl", script, true);
 			}
 		}
@@ -176,11 +147,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 				String script;
 
 
-				script = "$(document).ready(function() {\n" +
-					"  var container = $(\"td.listPager[align='right']\");\n" +
-					"  container.append(\"<a href=\\\"#\\\" onclick=\\\"$('#KMLDownloadDialog').jqmShow(); return false;\\\"><img src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\"></a>\");\n" +
-					"});\n" +
-					"var KMLDownloadURL = '&populateProfileID=" + Request.QueryString["PROFILE"] + "';";
+                script = "$(document).ready(function() {\n" +
+                    "  var container = $(\"td.listPager[align='right']\");\n" +
+                    "  container.append(\"<a href=\\\"default.aspx?page=" + KMLDownloadPageIDSetting + "&populateProfileID=" + Request.QueryString["PROFILE"] + "\\\"><img src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\"></a>\");\n" +
+                    "});\n";
 				Page.ClientScript.RegisterStartupScript(this.GetType(), this.ClientID + "_geProfileTabControl", script, true);
 			}
 		}
