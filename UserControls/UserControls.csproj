@@ -33,11 +33,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Arena.Framework">
-      <HintPath>..\..\..\Arena-SDK-2009.2\Arena.Framework.dll</HintPath>
+    <Reference Include="Arena.Framework, Version=2010.2.100.29814, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Arena-SDK-2010.1\Arena.Framework.dll</HintPath>
     </Reference>
-    <Reference Include="Arena.Portal.UI">
-      <HintPath>..\..\..\Arena-SDK-2009.2\Arena.Portal.UI.dll</HintPath>
+    <Reference Include="Arena.Portal.UI, Version=2010.2.100.29814, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Arena-SDK-2010.1\Arena.Portal.UI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
