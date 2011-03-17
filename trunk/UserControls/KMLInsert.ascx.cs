@@ -103,9 +103,9 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 "    tabStrip.endUpdate();\n" +
                 "    button = $(\"nobr:contains('Google Map')\").parent().parent().parent().parent()\n" +
                 "  }\n" +
-                "  button.find(\"nobr\").html(\"<img style=\\\"margin-top: -2px; margin-bottom: -4px; margin-right: 4px;\\\" src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\">Download\");\n" +
+                "  button.find(\"nobr\").html(\"<img style=\\\"margin-top: -2px; margin-bottom: -4px; margin-right: 4px;\\\" src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\">Google Map\");\n" +
                 "  button.removeAttr(\"onclick\");\n" +
-                "  button.click(function() {window.location = \"default.aspx?page=" + KMLDownloadPageIDSetting + "populateAreaID=" + Request.QueryString["AREA"] + "\"});\n" +
+                "  button.click(function() {window.location = \"default.aspx?page=" + KMLDownloadPageIDSetting + "&populateAreaID=" + Request.QueryString["AREA"] + "\"});\n" +
                 "});\n";
 			Page.ClientScript.RegisterStartupScript(this.GetType(), this.ClientID + "_geAreaDetail", script, true);
 		}
