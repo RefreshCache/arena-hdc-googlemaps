@@ -133,6 +133,7 @@
         <Columns>
             <asp:BoundColumn HeaderText="Group" Visible="true" DataField="Name"></asp:BoundColumn>
             <asp:BoundColumn HeaderText="Meeting Day" Visible="true" ItemStyle-Wrap="false" DataField="MeetingDay"></asp:BoundColumn>
+            <asp:BoundColumn HeaderText="Time" Visible="true" ItemStyle-Wrap="false" DataField="MeetingTime" DataFormatString="{0:t}"></asp:BoundColumn>
             <asp:BoundColumn HeaderText="Type" Visible="true" ItemStyle-Wrap="false" DataField="Type"></asp:BoundColumn>
             <asp:BoundColumn HeaderText="Topic" Visible="true" ItemStyle-Wrap="false" DataField="Topic"></asp:BoundColumn>
             <asp:BoundColumn HeaderText="Avg Age" Visible="true" ItemStyle-Wrap="false" DataField="AverageAge"></asp:BoundColumn>

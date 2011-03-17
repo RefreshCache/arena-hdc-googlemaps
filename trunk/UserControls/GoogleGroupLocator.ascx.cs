@@ -366,6 +366,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             dt.Columns.Add(new DataColumn("ID", typeof(Int32)));
             dt.Columns.Add(new DataColumn("Name", typeof(String)));
             dt.Columns.Add(new DataColumn("MeetingDay", typeof(String)));
+            dt.Columns.Add(new DataColumn("MeetingTime", typeof(DateTime)));
             dt.Columns.Add(new DataColumn("Type", typeof(String)));
             dt.Columns.Add(new DataColumn("Topic", typeof(String)));
             dt.Columns.Add(new DataColumn("AverageAge", typeof(Int32)));
@@ -445,6 +446,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                     dr["ID"] = g.GroupID;
                     dr["Name"] = g.Name;
                     dr["MeetingDay"] = g.MeetingDay.Value;
+                    dr["MeetingTime"] = g.MeetingStartTime;
                     dr["Type"] = g.GroupType.Value;
                     dr["Topic"] = g.Topic.Value;
                     dr["AverageAge"] = Convert.ToInt32(g.AverageAge);

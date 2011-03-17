@@ -695,7 +695,7 @@ namespace Arena.Custom.HDC.GoogleMaps
             // Load in the basic group details.
             //
             info += "<table>";
-            info += String.Format("<tr><td>{0}:</td><td>{1}</td></tr>", g.ClusterType.Category.MeetingDayCaption, g.MeetingDay);
+            info += String.Format("<tr><td>{0}:</td><td>{1} {2}</td></tr>", g.ClusterType.Category.MeetingDayCaption, g.MeetingDay, g.MeetingStartTime.ToString("t"));
             info += String.Format("<tr><td>{0}:</td><td>{1}</td></tr>", g.ClusterType.Category.TypeCaption, g.GroupType.ToString());
             info += String.Format("<tr><td>{0}:</td><td>{1}</td></tr>", g.ClusterType.Category.TopicCaption, g.Topic);
             info += String.Format("<tr><td>{0}:</td><td>{1}</td></tr>", "Average Age", g.AverageAge.ToString());
