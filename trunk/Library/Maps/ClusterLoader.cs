@@ -70,8 +70,13 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
                     items.Add(p);
                 }
             }
-            else
-                throw new NotSupportedException();
+            else if (PopulateWith == PopulationType.SmallGroups)
+            {
+                foreach (Placemark p in google.SmallGroupPlacemarksInCluster(ClusterID, 0, Int32.MaxValue))
+                {
+                    items.Add(p);
+                }
+            }
 
             return items;
         }
@@ -87,12 +92,19 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
             if (PopulateWith == PopulationType.Individuals)
             {
                 //
-                // This CategoryLoader is loading individuals.
+                // This ClusterLoader is loading individuals.
                 //
                 return "        " + javascriptObject + ".LoadPeopleInCluster(" + ClusterID.ToString() + ",null);\n";
             }
+            else if (PopulateWith == PopulationType.SmallGroups)
+            {
+                //
+                // This ClusterLoader is loading small groups.
+                //
+                return "        " + javascriptObject + ".LoadGroupsInCluster(" + ClusterID.ToString() + ",null);\n";
+            }
             else
-                throw new NotSupportedException();
+                return "";
         }
 
         #endregion

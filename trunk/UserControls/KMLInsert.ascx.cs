@@ -127,17 +127,40 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
 		void Module_SmallGroupClusterTabControl()
 		{
-			if (String.IsNullOrEmpty(Request.QueryString["CLUSTER"]) == false)
-			{
-				String script;
+            if (String.IsNullOrEmpty(Request.QueryString["CLUSTER"]) == false && Request.QueryString["CLUSTER"] != "-1")
+            {
+                String script;
 
 
                 script = "$(document).ready(function() {\n" +
                     "  var container = $(\"td.listPager[align='right']\");\n" +
                     "  container.append(\"<a href=\\\"default.aspx?page=" + KMLDownloadPageIDSetting + "&populateClusterID=" + Request.QueryString["CLUSTER"] + "\\\"><img src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\"></a>\");\n" +
                     "});\n";
-				Page.ClientScript.RegisterStartupScript(this.GetType(), this.ClientID + "_geSmallGroupTabControl", script, true);
-			}
+                Page.ClientScript.RegisterStartupScript(this.GetType(), this.ClientID + "_geSmallGroupTabControl", script, true);
+            }
+            else
+            {
+                String script;
+                Int32 catID = -1;
+
+
+                foreach (ModuleInstance mi in CurrentPortalPage.Modules)
+                {
+                    if (mi.Module.Url == "UserControls/SmallGroup/ClusterMain.ascx")
+                    {
+                        catID = Convert.ToInt32(mi.Settings["Category"].Value);
+                    }
+                }
+
+                if (catID != -1)
+                {
+                    script = "$(document).ready(function() {\n" +
+                        "  var container = $(\"td.listPager[align='right']\");\n" +
+                        "  container.append(\"<a href=\\\"default.aspx?page=" + KMLDownloadPageIDSetting + "&populateCategoryID=" + catID.ToString() + "\\\"><img src=\\\"UserControls/Custom/HDC/GoogleMaps/Images/darkearth.png\\\" width=\\\"16\\\" border=\\\"0\\\"></a>\");\n" +
+                        "});\n";
+                    Page.ClientScript.RegisterStartupScript(this.GetType(), this.ClientID + "_geSmallGroupTabControl", script, true);
+                }
+            }
 		}
 
 		void Module_ProfileTabControl()

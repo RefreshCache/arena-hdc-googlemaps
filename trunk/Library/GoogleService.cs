@@ -147,6 +147,28 @@ namespace Arena.Custom.HDC.GoogleMaps
                 (String.IsNullOrEmpty(count) ? Int32.MaxValue : Convert.ToInt32(count)));
         }
 
+
+        /// <summary>
+        /// Get a list of small groups in the given category ID, constraining the list to a specified
+        /// subset of groups.
+        /// </summary>
+        /// <param name="profileID">The ID number of the category.</param>
+        /// <param name="start">The starting 0-based index to begin loading at.</param>
+        /// <param name="count">The maximum number of groups to load.</param>
+        /// <returns>An array of SmallGroupPlacemark objects which identify the groups.</returns>
+        [WebMethod]
+        public List<SmallGroupPlacemark> LoadGroupsInCategory(String categoryid, String start, String count)
+        {
+            Google google;
+
+
+            google = new Google(ArenaContext.Current.User, HttpContext.Current.Request.ApplicationPath);
+
+            return google.SmallGroupPlacemarksInCategory(Convert.ToInt32(categoryid),
+                (String.IsNullOrEmpty(start) ? 0 : Convert.ToInt32(start)),
+                (String.IsNullOrEmpty(count) ? Int32.MaxValue : Convert.ToInt32(count)));
+        }
+
         #endregion
 
 
@@ -169,6 +191,28 @@ namespace Arena.Custom.HDC.GoogleMaps
             google = new Google(ArenaContext.Current.User, HttpContext.Current.Request.ApplicationPath);
 
             return google.PersonPlacemarksInCluster(Convert.ToInt32(clusterid),
+                (String.IsNullOrEmpty(start) ? 0 : Convert.ToInt32(start)),
+                (String.IsNullOrEmpty(count) ? Int32.MaxValue : Convert.ToInt32(count)));
+        }
+
+
+        /// <summary>
+        /// Get a list of small groups in the given cluster ID, constraining the list to a specified
+        /// subset of people.
+        /// </summary>
+        /// <param name="clusterid">The ID number of the cluster.</param>
+        /// <param name="start">The starting 0-based index to begin loading at.</param>
+        /// <param name="count">The maximum number of groups to load.</param>
+        /// <returns>An array of SmallGroupPlacemark objects which identify the members of the cluster.</returns>
+        [WebMethod]
+        public List<SmallGroupPlacemark> LoadGroupsInCluster(String clusterid, String start, String count)
+        {
+            Google google;
+
+
+            google = new Google(ArenaContext.Current.User, HttpContext.Current.Request.ApplicationPath);
+
+            return google.SmallGroupPlacemarksInCluster(Convert.ToInt32(clusterid),
                 (String.IsNullOrEmpty(start) ? 0 : Convert.ToInt32(start)),
                 (String.IsNullOrEmpty(count) ? Int32.MaxValue : Convert.ToInt32(count)));
         }

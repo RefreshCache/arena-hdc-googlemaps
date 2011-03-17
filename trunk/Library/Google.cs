@@ -144,6 +144,39 @@ namespace Arena.Custom.HDC.GoogleMaps
             return people;
         }
 
+
+        /// <summary>
+        /// Load a list of small group placemark objects from the given category ID. The
+        /// list is constrained to the start and count parameters.
+        /// </summary>
+        /// <param name="categoryid">The Arena Category to generate a list of groups from, only active groups are returned.</param>
+        /// <param name="start">The member index to start loading from.</param>
+        /// <param name="count">The maximum number of groups to load, pass Int32.MaxValue for complete load.</param>
+        /// <returns>A list of SmallGroupPlacemark objects.</returns>
+        public List<SmallGroupPlacemark> SmallGroupPlacemarksInCategory(int categoryid, int start, int count)
+        {
+            GroupClusterCollection gcc;
+            List<SmallGroupPlacemark> groups = new List<SmallGroupPlacemark>();
+            int i, g;
+
+
+            gcc = new GroupClusterCollection(categoryid, ArenaContext.Current.Organization.OrganizationID);
+            for (i = 0; i < gcc.Count && groups.Count < count; i++)
+            {
+                List<SmallGroupPlacemark> list = SmallGroupPlacemarksInCluster(gcc[i].GroupClusterID, 0, Int32.MaxValue);
+
+                for (g = 0; g < list.Count && groups.Count < count; g++)
+                {
+                    if (start-- > 0)
+                        continue;
+
+                    groups.Add(list[g]);
+                }
+            }
+
+            return groups;
+        }
+
         #endregion
 
 
@@ -172,7 +205,7 @@ namespace Arena.Custom.HDC.GoogleMaps
 
             //
             // This is one ugly method, but someday God will grace us with his presence and
-            // say "thou shalt not use they Small Group Structure."
+            // say "thou shalt not use thy Small Group Structure."
             //
             cluster.PopulateDescendents();
             Thread.Sleep(2000);
@@ -200,6 +233,50 @@ namespace Arena.Custom.HDC.GoogleMaps
             }
 
             return people;
+        }
+
+        /// <summary>
+        /// Load a list of small group placemark objects from the given cluster ID. The
+        /// list is constrained to the start and count parameters.
+        /// </summary>
+        /// <param name="clusterid">The Arena Cluster to generate a list of groups from, only active groups are returned.</param>
+        /// <param name="start">The member index to start loading from.</param>
+        /// <param name="count">The maximum number of groups to load, pass Int32.MaxValue for complete load.</param>
+        /// <returns>A list of SmallGroupPlacemark objects.</returns>
+        public List<SmallGroupPlacemark> SmallGroupPlacemarksInCluster(int clusterid, int start, int count)
+        {
+            List<SmallGroupPlacemark> groups = new List<SmallGroupPlacemark>();
+            List<Int32> groupids = new List<Int32>();
+            GroupCluster cluster;
+
+
+            if (PermissionsOperationAllowed(new PermissionCollection(ObjectType.Group_Cluster, clusterid), OperationType.View) == false)
+                return groups;
+
+            cluster = new GroupCluster(clusterid);
+
+            foreach (Group g in cluster.SmallGroups)
+            {
+                if (g.Active == true && g.Private == false)
+                {
+                    try
+                    {
+                        groups.Add(new SmallGroupPlacemark(g));
+                    }
+                    catch { }
+                }
+            }
+
+            foreach (GroupCluster gc in cluster.ChildClusters)
+            {
+                groups.AddRange(SmallGroupPlacemarksInCluster(gc.GroupClusterID, 0, Int32.MaxValue));
+            }
+
+            if (start > groups.Count)
+                start = groups.Count;
+            if (count > (groups.Count - start))
+                count = (groups.Count - start);
+            return groups.GetRange(start, count);
         }
 
         #endregion
