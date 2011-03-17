@@ -42,6 +42,16 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             }
         }
 
+
+        /// <summary>
+        /// User has changed the type of things to populate the map with, update.
+        /// </summary>
+        protected void ddlPopulateWith_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            map.ClearContent();
+            PopulateMap();
+        }
+
         #endregion
 
 
@@ -73,12 +83,22 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                     AreaCollection ac = new AreaCollection(ArenaContext.Current.Organization.OrganizationID);
 
                     foreach (Area a in ac)
-                        map.Loaders.Add(new AreaLoader(a.AreaID));
+                    {
+                        PlacemarkLoader loader = new AreaLoader(a.AreaID);
+
+                        loader.PopulateWith = (PopulationType)Convert.ToInt32(ddlPopulateWith.SelectedValue);
+                        map.Loaders.Add(loader);
+                    }
                 }
                 else
                 {
                     foreach (String areaString in Request.Params["populateAreaID"].Split(','))
-                        map.Loaders.Add(new AreaLoader(Convert.ToInt32(areaString)));
+                    {
+                        PlacemarkLoader loader = new AreaLoader(Convert.ToInt32(areaString));
+
+                        loader.PopulateWith = (PopulationType)Convert.ToInt32(ddlPopulateWith.SelectedValue);
+                        map.Loaders.Add(loader);
+                    }
                 }
             }
         }
@@ -93,7 +113,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             {
                 foreach (String profileString in Request.Params["populateProfileID"].Split(','))
                 {
-                    map.Loaders.Add(new ProfileLoader(Convert.ToInt32(profileString)));
+                    PlacemarkLoader loader = new ProfileLoader(Convert.ToInt32(profileString));
+
+                    loader.PopulateWith = (PopulationType)Convert.ToInt32(ddlPopulateWith.SelectedValue);
+                    map.Loaders.Add(loader);
                 }
             }
         }
@@ -106,7 +129,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         {
             if (Request.Params["populateReportID"] != null)
             {
-                map.Loaders.Add(new ReportLoader(Convert.ToInt32(Request.Params["populateReportID"])));
+                PlacemarkLoader loader = new ReportLoader(Convert.ToInt32(Request.Params["populateReportID"]));
+
+                loader.PopulateWith = (PopulationType)Convert.ToInt32(ddlPopulateWith.SelectedValue);
+                map.Loaders.Add(loader);
             }
         }
 
@@ -118,7 +144,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         {
             if (Request.Params["populateCategoryID"] != null)
             {
-                map.Loaders.Add(new CategoryLoader(Convert.ToInt32(Request.Params["populateCategoryID"])));
+                PlacemarkLoader loader = new CategoryLoader(Convert.ToInt32(Request.Params["populateCategoryID"]));
+
+                loader.PopulateWith = (PopulationType)Convert.ToInt32(ddlPopulateWith.SelectedValue);
+                map.Loaders.Add(loader);
             }
         }
 
@@ -132,7 +161,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             {
                 foreach (String clusterString in Request.Params["populateClusterID"].Split(','))
                 {
-                    map.Loaders.Add(new ClusterLoader(Convert.ToInt32(clusterString)));
+                    PlacemarkLoader loader = new ClusterLoader(Convert.ToInt32(clusterString));
+
+                    loader.PopulateWith = (PopulationType)Convert.ToInt32(ddlPopulateWith.SelectedValue);
+                    map.Loaders.Add(loader);
                 }
             }
         }
@@ -147,7 +179,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             {
                 foreach (String groupString in Request.Params["populateSmallGroupID"].Split(','))
                 {
-                    map.Loaders.Add(new GroupLoader(Convert.ToInt32(groupString)));
+                    PlacemarkLoader loader = new GroupLoader(Convert.ToInt32(groupString));
+
+                    loader.PopulateWith = (PopulationType)Convert.ToInt32(ddlPopulateWith.SelectedValue);
+                    map.Loaders.Add(loader);
                 }
             }
         }

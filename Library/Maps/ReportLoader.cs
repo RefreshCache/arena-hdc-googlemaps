@@ -70,8 +70,6 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
                     items.Add(p);
                 }
             }
-            else
-                throw new NotSupportedException();
 
             return items;
         }
@@ -92,7 +90,7 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
                 return "        " + javascriptObject + ".LoadPeopleInReport(" + ReportID.ToString() + ",null);\n";
             }
             else
-                throw new NotSupportedException();
+                return "";
         }
 
         #endregion
