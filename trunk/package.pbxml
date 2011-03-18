@@ -14,6 +14,7 @@
     <File path="UserControls/Custom/HDC/GoogleMaps/Includes/json2.js" _source="UserControls/Includes/json2.js" />
     <File path="UserControls/Custom/HDC/GoogleMaps/Images/ajax-bar.gif" _source="UserControls/Images/ajax-bar.gif" />
     <File path="UserControls/Custom/HDC/GoogleMaps/Images/ajax-spin.gif" _source="UserControls/Images/ajax-spin.gif" />
+    <File path="bin/Arena.Custom.HDC.GoogleMaps.dll" _source="Library/obj/Release/Arena.Custom.HDC.GoogleMaps.dll" />
   </Files>
   <Info>
     <Distributor>HDC</Distributor>
