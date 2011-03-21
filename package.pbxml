@@ -15,6 +15,7 @@
     <File path="UserControls/Custom/HDC/GoogleMaps/Images/ajax-bar.gif" _source="UserControls/Images/ajax-bar.gif" />
     <File path="UserControls/Custom/HDC/GoogleMaps/Images/ajax-spin.gif" _source="UserControls/Images/ajax-spin.gif" />
     <File path="bin/Arena.Custom.HDC.GoogleMaps.dll" _source="Library/obj/Release/Arena.Custom.HDC.GoogleMaps.dll" />
+    <File path="UserControls/Custom/HDC/GoogleMaps/GoogleService.asmx" _source="UserControls/GoogleService.asmx" />
   </Files>
   <Info>
     <Distributor>HDC</Distributor>
@@ -24,6 +25,7 @@
     <Description>This package consists of a set of modules that help you to interface your Arena installation with Google Maps. Information from Tags, Lists, and Small Groups can be viewed live on your website through a Google Map. The information can then be downloaded as a KML file for use with Google Earth for more interactation with the information. This currently works out of the box with Firefox and Safari, Internet Explorer users who are accessing it through SSL will get warnings they need to click through.
 
 A second portion of this package is the new GoogleMap Web Control. This control is designed to be a quick and easy drop-in to your own UserControl so that you can include Google Maps with your own development projects. For some examples of how to use it, see the GoogleGroupLocator and PeopleInRange modules.</Description>
+    <Changelog Version="2.0.1">Fixed the 2.0 release, it was missing a file that caused the majority of the system to not work.</Changelog>
     <Changelog Version="2.0.0">Removed the KMLDownloader module, it has been replaced with the MapViewer module.
 New GoogleMap WebControl that can be used by other developers.
 New Small Group Locator module built on Google Maps.
