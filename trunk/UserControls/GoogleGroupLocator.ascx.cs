@@ -389,10 +389,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 "      AND sg.is_group_private = 0" +
                 "      AND sg.active = 1" +
                 "      AND ISNULL(cpa.primary_address, 1) = 1" +
-                "      AND ISNULL(dbo.cust_hdc_googlemaps_funct_distance_between(@LatFrom, @LongFrom, ca.Latitude, ca.Longitude), -1) <= " + Convert.ToInt32(ddlDistance.SelectedValue).ToString() +
-                "    ORDER BY 'distance'";
+                "      AND ISNULL(dbo.cust_hdc_googlemaps_funct_distance_between(@LatFrom, @LongFrom, ca.Latitude, ca.Longitude), -1) <= " + Convert.ToInt32(ddlDistance.SelectedValue).ToString();
             if (LimitToClusterTypeSetting != -1)
                 cmd.CommandText += "      AND sgc.cluster_type_id = @ClusterTypeID";
+            cmd.CommandText += "    ORDER BY 'distance'";
             cmd.Parameters.Add(new SqlParameter("@CategoryID", CategorySetting.CategoryID));
             cmd.Parameters.Add(new SqlParameter("@ClusterTypeID", LimitToClusterTypeSetting));
             cmd.Parameters.Add(new SqlParameter("@LatFrom", map.Center.Latitude));
