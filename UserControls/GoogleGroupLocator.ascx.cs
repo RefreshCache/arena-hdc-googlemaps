@@ -164,6 +164,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 script.AppendLine("});");
             }
 
+            if (ShowListResultsSetting)
+            {
+                script.AppendLine("$(document).ready(function() {");
+                script.AppendLine("    $('#" + dgResults.ClientID + "').tablesorter({widthFixed: true, widgets: ['zebra']}).tablesorterPager({container: $('#" + dgResults.ClientID + "_pager'), positionFixed: false, size: 10});");
+                script.AppendLine("});");
+            }
+
             if (pnlFilter.Visible == true)
             {
                 if (hfFilterVisible.Value == "1")
