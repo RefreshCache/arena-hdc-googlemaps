@@ -93,8 +93,15 @@
     <Content Include="Images\ajax-spin.gif" />
     <Content Include="Images\chapel.png" />
     <Content Include="Images\darkearth.png" />
+    <Content Include="Images\first.png" />
+    <Content Include="Images\last.png" />
+    <Content Include="Images\next.png" />
+    <Content Include="Images\prev.png" />
     <Content Include="Includes\googlemaps.js" />
+    <Content Include="Includes\jquery.tablesorter.min.js" />
+    <Content Include="Includes\jquery.tablesorter.pager.js" />
     <Content Include="Includes\json2.js" />
+    <Content Include="Includes\tablesorter.css" />
     <Content Include="KMLInsert.ascx" />
     <Content Include="MapViewer.ascx" />
     <Content Include="PeopleInRange.ascx" />

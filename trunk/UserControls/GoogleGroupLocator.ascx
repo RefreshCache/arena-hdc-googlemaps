@@ -2,6 +2,10 @@
 <%@ Register TagPrefix="Arena" Namespace="Arena.Portal.UI" Assembly="Arena.Portal.UI" %>
 <%@ Register TagPrefix="GMap" Namespace="Arena.Custom.HDC.GoogleMaps.UI" Assembly="Arena.Custom.HDC.GoogleMaps" %>
 
+<script type="text/javascript" src="UserControls/Custom/HDC/GoogleMaps/Includes/jquery.tablesorter.js"></script>
+<script type="text/javascript" src="UserControls/Custom/HDC/GoogleMaps/Includes/jquery.tablesorter.pager.js"></script>
+<link rel="stylesheet" href="UserControls/Custom/HDC/GoogleMaps/Includes/tablesorter.css" type="text/css" media="print, projection, screen" />
+
 <script language="javascript" type="text/javascript">
     var SGLMarkers = [];
 
@@ -50,6 +54,9 @@
                 g.infowindow.open(g.map, marker);
             }
         });
+    }
+
+    function ApplyFilter() {
     }
 
     $(document).ready(function () {
@@ -122,12 +129,12 @@
                 <td><asp:DropDownList runat="server" ID="ddlArea"></asp:DropDownList></td>
             </tr>
         </table>
-        <Arena:ArenaButton runat="server" ID="btnFilter" Text="Apply Filter" OnClick="btnFilter_Click" />
+        <Arena:ArenaButton runat="server" ID="btnFilter" Text="Apply Filter" OnClientClick="ApplyFilter(); return false;" OnClick="btnFilter_Click" />
     </div>
 </asp:Panel>
 
 <asp:Panel ID="pnlListResults" runat="server" Visible="true">
-    <asp:DataGrid ID="dgResults" runat="server" CellPadding="5" AllowPaging="false" AutoGenerateColumns="false" GridLines="Horizontal" HeaderStyle-Font-Bold="true" OnItemDataBound="dgResults_ItemDataBound" HeaderStyle-CssClass="sglHeader">
+    <GMap:DataGridWithHeaders ID="dgResults" runat="server" CssClass="tablesorter" CellPadding="5" AllowPaging="false" AutoGenerateColumns="false" GridLines="Horizontal" HeaderStyle-Font-Bold="true" OnItemDataBound="dgResults_ItemDataBound" HeaderStyle-CssClass="sglHeader">
         <ItemStyle CssClass="sglRow" />
         <AlternatingItemStyle CssClass="sglAlternateRow" />
         <Columns>
@@ -141,5 +148,18 @@
             <asp:BoundColumn HeaderText="Distance" Visible="false" DataField="Distance"></asp:BoundColumn>
             <asp:TemplateColumn HeaderText="View Map" Visible="true" ItemStyle-Wrap="false" ItemStyle-CssClass="sglMapLink"><ItemTemplate><a href="<%# DataBinder.Eval(Container.DataItem, "ID") %>">View Map</a></ItemTemplate></asp:TemplateColumn>
         </Columns>
-    </asp:DataGrid>
+    </GMap:DataGridWithHeaders>
+
+    <div id="<%= dgResults.ClientID %>_pager" class="pager">
+		<img src="UserControls/Custom/HDC/GoogleMaps/Images/first.png" class="first"/>
+		<img src="UserControls/Custom/HDC/GoogleMaps/Images/prev.png" class="prev"/>
+		<input type="text" class="pagedisplay" readonly />
+		<img src="UserControls/Custom/HDC/GoogleMaps/Images/next.png" class="next"/>
+		<img src="UserControls/Custom/HDC/GoogleMaps/Images/last.png" class="last"/>
+		<select class="pagesize" style="display: none">
+			<option selected="selected"  value="10">10</option>
+			<option value="25">25</option>
+			<option value="50">50</option>
+		</select>
+    </div>
 </asp:Panel>

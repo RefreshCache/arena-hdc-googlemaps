@@ -280,6 +280,6 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DataGrid dgResults;
+        protected global::Arena.Custom.HDC.GoogleMaps.UI.DataGridWithHeaders dgResults;
     }
 }
