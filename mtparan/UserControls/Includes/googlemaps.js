@@ -51,6 +51,13 @@ function GroupMarker(opts, groupID) {
 };
 GroupMarker.prototype = new google.maps.Marker;
 
+function GenericPolygon(opts, uniqueID) {
+    this.setValues(opts);
+    this.uniqueID = uniqueID;
+    this.googlemap = null;
+};
+GenericPolygon.prototype = new google.maps.Polygon;
+
 var GoogleMapRoot = "UserControls/Custom/HDC/GoogleMaps/";
 
 var GoogleMap = function (element, geo, url, options) {
