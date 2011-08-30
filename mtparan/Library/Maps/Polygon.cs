@@ -34,13 +34,13 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
         /// set then no stroke is applied. The color should be in a hex-string format
         /// following the style AABBGGRR
         /// </summary>
-        public String StrokeColor = null;
+        public String StrokeColor = "ff000000";
 
         /// <summary>
         /// The width of the line to use when stroking the polygon. Defaults to 0 which
         /// means no stroke will be applied.
         /// </summary>
-        public int StrokeWidth = 0;
+        public int StrokeWidth = 2;
         
         /// <summary>
         /// Unique identifier for this placemark. This identifier is normally used by the client
@@ -51,7 +51,7 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
         /// <summary>
         /// The lines that make up this polygon.
         /// </summary>
-        List<LatLng> PolyLines = null;
+        public List<LatLng> PolyLines = null;
         
         protected String _AddedHandler, javascriptClassName;
 
@@ -267,6 +267,9 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
     }
 
 
+    /// <summary>
+    /// Small support structure to deal with latitude and longitude pairs.
+    /// </summary>
     public struct LatLng
     {
         public Double Latitude;

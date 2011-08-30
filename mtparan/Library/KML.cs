@@ -19,8 +19,6 @@ namespace Arena.Custom.HDC.GoogleMaps
 
         private XmlDocument xmlDoc;
         private XmlNode kmlRoot, kmlDocument;
-        private String[] areaColorList;
-        private int currentAreaColor;
         private Dictionary<String, String> pinStyles = null;
         private int nextPinStyle = 0;
 
@@ -75,27 +73,12 @@ namespace Arena.Custom.HDC.GoogleMaps
             //
             kmlDocument = xmlDoc.CreateElement("Document");
             kmlRoot.AppendChild(kmlDocument);
-
-            SetupColorTables();
         }
 
         #endregion
 
 
         #region Pin and Color Registration
-
-        /// <summary>
-        /// Setup all the color tables that will be used when cycling
-        /// through colors.
-        /// </summary>
-        private void SetupColorTables()
-        {
-            currentAreaColor = 0;
-            areaColorList = new String[] {	"4b0000ff", "4b00ff00", "4bff0000",
-											"8b000066", "8b006600", "8b660000",
-											"4bffff00", "4bff00ff", "4b00ffff",
-											"6b666600", "6b660066", "6b006666" };
-        }
 
         /// <summary>
         /// Add all the style information for a new pin color.
@@ -235,40 +218,17 @@ namespace Arena.Custom.HDC.GoogleMaps
 
 
         /// <summary>
-        /// Add a polygon that will highlight an Area of the map which has
-        /// been identified in the Arena database.
+        /// Add a polygon that will highlight an area of the map which has
+        /// been identified by the coordinate information in the Polygon object.
         /// </summary>
-        /// <param name="a">The Arena object to display.</param>
-        public void AddAreaPolygon(Area a)
+        /// <param name="poly">The Polygon object to display.</param>
+        public void AddPolygon(Polygon poly)
         {
-            StringBuilder sb = new StringBuilder();
-            XmlNode placemark;
+            XmlElement element = null;
 
-
-            //
-            // Build the coordinates for this area.
-            //
-            foreach (AreaCoordinate ac in a.Coordinates)
-            {
-                sb.AppendFormat("{0},{1},0 ", ac.Longitude, ac.Latitude);
-            }
-
-            //
-            // Set the color for the area.
-            //
-            AddPolyColorStyle("area" + a.AreaID.ToString(), areaColorList[currentAreaColor], "ff000000", 2);
-            if (++currentAreaColor >= areaColorList.Length)
-                currentAreaColor = 0;
-
-            //
-            // Build the element data.
-            //
-            placemark = xmlDoc.CreateElement("Placemark");
-            kmlDocument.AppendChild(placemark);
-            placemark.InnerXml = String.Format("<name>{0}</name><styleUrl>#{1}</styleUrl>" +
-                "<Polygon><tessellate>1</tessellate><outerBoundaryIs><LinearRing><coordinates>{2}" +
-                "</coordinates></LinearRing></outerBoundaryIs></Polygon>",
-                a.Name, "area" + a.AreaID.ToString(), sb.ToString());
+            element = poly.KMLPolygon(this);
+            if (element != null)
+                kmlDocument.AppendChild(element);
         }
 
         #endregion

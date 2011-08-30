@@ -82,6 +82,7 @@
     </Compile>
     <Compile Include="KML.cs" />
     <Compile Include="Maps\AreaLoader.cs" />
+    <Compile Include="Maps\AreaPolygon.cs" />
     <Compile Include="Maps\CategoryLoader.cs" />
     <Compile Include="Maps\ClusterLoader.cs" />
     <Compile Include="Maps\GroupLoader.cs" />
