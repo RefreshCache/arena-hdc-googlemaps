@@ -105,6 +105,12 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         private List<Placemark> _Placemarks;
 
         /// <summary>
+        /// A list of Polygon objects that will be overlaid on the map at load time.
+        /// </summary>
+        public List<Polygon> Polygons { get { return _Polygons; } }
+        private List<Polygon> _Polygons;
+
+        /// <summary>
         /// A list of RadiusLoader objects that will be used to populate the map with placemarks.
         /// </summary>
         public List<PlacemarkLoader> Loaders { get { return _Loaders; } }
@@ -308,6 +314,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             //
             // Render in all the other elements.
             //
+            RenderPolygons(script);
             RenderPlacemarks(script);
             RenderLoaders(script);
 
@@ -474,7 +481,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             {
                 foreach (Area a in new AreaCollection(ArenaContext.Current.Organization.OrganizationID))
                 {
-                    kml.AddAreaPolygon(a);
+                    kml.AddPolygon(new AreaPolygon(a));
                 }
             }
 
@@ -559,6 +566,19 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             foreach (Placemark placemark in _Placemarks)
             {
                 script.Append(placemark.JavascriptCode(this.ClientObject, "marker"));
+            }
+        }
+
+
+        /// <summary>
+        /// Render the Javascript needed to put specific polygons on the map.
+        /// </summary>
+        /// <param name="script">The script string to append our JS to.</param>
+        private void RenderPolygons(StringBuilder script)
+        {
+            foreach (Polygon poly in _Polygons)
+            {
+                script.Append(poly.JavascriptCode(this.ClientObject, "poly"));
             }
         }
 

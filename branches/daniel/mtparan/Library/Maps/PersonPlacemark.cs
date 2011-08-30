@@ -59,6 +59,7 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
 
             this._person = p;
         }
+
         #endregion
 
 

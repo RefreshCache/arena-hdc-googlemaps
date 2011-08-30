@@ -46,6 +46,12 @@ namespace Arena.Custom.HDC.GoogleMaps
 
         private GenericPrincipal _User;
 
+        private int currentAreaColor = 0;
+        private String[] areaColorList = new String[] {	"4b0000ff", "4b00ff00", "4bff0000",
+											"8b000066", "8b006600", "8b660000",
+											"4bffff00", "4bff00ff", "4b00ffff",
+											"6b666600", "6b660066", "6b006666" };
+
         #endregion
 
 
@@ -898,6 +904,23 @@ namespace Arena.Custom.HDC.GoogleMaps
             }
 
             return phoneStrings.ToString();
+        }
+
+        #endregion
+
+
+        #region Public Support Methods
+
+        /// <summary>
+        /// Retrieves the next in a series of colors for use in filling area polygons.
+        /// </summary>
+        /// <returns>A string in the format of AABBGGRR.</returns>
+        public String NextAreaColor()
+        {
+            if (currentAreaColor >= areaColorList.Length)
+                currentAreaColor = 0;
+
+            return areaColorList[currentAreaColor++];
         }
 
         #endregion

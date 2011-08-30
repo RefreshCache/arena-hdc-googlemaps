@@ -57,6 +57,13 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AreaPicker.ascx.cs">
+      <DependentUpon>AreaPicker.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="AreaPicker.ascx.designer.cs">
+      <DependentUpon>AreaPicker.ascx</DependentUpon>
+    </Compile>
     <Compile Include="GoogleGroupLocator.ascx.cs">
       <DependentUpon>GoogleGroupLocator.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -88,6 +95,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="AreaPicker.ascx" />
     <Content Include="GoogleGroupLocator.ascx" />
     <Content Include="Images\ajax-bar.gif" />
     <Content Include="Images\ajax-spin.gif" />
