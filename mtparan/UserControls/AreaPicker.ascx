@@ -13,4 +13,4 @@
     }
 </script>
 
-<GMap:GoogleMap ID="map" runat="server" Width="640" Height="480" HideControls="true" />
+<GMap:GoogleMap ID="map" runat="server" HideControls="true" />
