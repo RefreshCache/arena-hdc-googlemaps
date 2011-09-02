@@ -220,6 +220,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             this.Height = 360;
             this._Placemarks = new List<Placemark>();
             this._Loaders = new List<PlacemarkLoader>();
+            this._Polygons = new List<Polygon>();
             this.Center = new GeocodedAddress();
             this.Center.Latitude = ArenaContext.Current.Organization.Address.Latitude;
             this.Center.Longitude = ArenaContext.Current.Organization.Address.Longitude;
@@ -321,6 +322,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             //
             // Generate the final sequence of the script.
             //
+            script.Append("        $(document).trigger('GoogleMap_Ready', [" + this.ClientObject + "]);\n");
             script.Append("    });\n</script>");
 
             //
@@ -905,7 +907,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         /// web request.
         /// </summary>
         /// <returns>Base url as a string.</returns>
-        private string BaseUrl()
+        public string BaseUrl()
         {
             StringBuilder url = new StringBuilder();
             string[] segments;

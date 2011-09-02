@@ -159,10 +159,13 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
         public string JavascriptCode(string javascriptObject, string javascriptVariable)
         {
             StringBuilder sb = new StringBuilder();
+            char[] color;
 
 
+            color = FillColor.Substring(2).ToCharArray();
+            Array.Reverse(color);
             sb.Append(javascriptVariable + " = new " + javascriptClassName + "({" +
-                "fillColor: \"#" + FillColor.Substring(2) + "\"" +
+                "fillColor: \"#" + new String(color) + "\"" +
                 ",fillOpacity: " + Math.Round(((Double)Convert.ToInt32(FillColor.Substring(0, 2), 16) / 255.0f), 2) +
                 ",map: " + javascriptObject + ".map"
                 );
@@ -172,8 +175,10 @@ namespace Arena.Custom.HDC.GoogleMaps.Maps
             //
             if (StrokeWidth > 0 && StrokeColor != null)
             {
+                color = StrokeColor.Substring(2).ToCharArray();
+                Array.Reverse(color);
                 sb.Append(
-                    ",strokeColor: \"#" + StrokeColor.Substring(2) + "\"" +
+                    ",strokeColor: \"#" + new String(color) + "\"" +
                     ",strokeOpacity: " + Math.Round(((Double)Convert.ToInt32(StrokeColor.Substring(0, 2), 16) / 255.0f), 2) +
                     ",strokeWeight: " + StrokeWidth
                     );
