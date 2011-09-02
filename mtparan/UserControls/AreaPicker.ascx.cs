@@ -23,6 +23,9 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         [NumericSetting("Map Height", "The height of the map to use, defaults to 480 pixels.", false)]
         public int MapHeightSetting { get { return Convert.ToInt32(Setting("MapHeight", "480", false)); } }
 
+        [PageSetting("Small Group Locator Page", "The page to redirect to when an area is clicked.", true)]
+        public int SmallGroupLocatorPageSetting { get { return Convert.ToInt32(Setting("SmallGroupLocatorPage", "", true)); } }
+
         #endregion
 
 
@@ -50,17 +53,54 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         private void PopulateMap()
         {
             AreaCollection ac = new AreaCollection(ArenaContext.Current.Organization.OrganizationID);
+            AreaPolygon poly;
+            Google google = new Google(ArenaContext.Current.User, map.BaseUrl());
+            Double left = 0, right = 0, top = 0, bottom = 0;
 
             foreach (Area a in ac)
             {
-                map.Polygons.Add(new AreaPolygon(a));
+                if (a.Coordinates.Count >= 2)
+                {
+                    //
+                    // Pre-scan the coordinates to be used later for centering the map.
+                    //
+                    foreach (AreaCoordinate coord in a.Coordinates)
+                    {
+                        if (left == 0 || coord.Longitude < left)
+                            left = coord.Longitude;
+                        if (right == 0 || coord.Longitude > right)
+                            right = coord.Longitude;
+                        if (bottom == 0 || coord.Latitude < bottom)
+                            bottom = coord.Latitude;
+                        if (top == 0 || coord.Latitude > top)
+                            top = coord.Latitude;
+                    }
+
+                    //
+                    // Create the area and use the next available fill color.
+                    //
+                    poly = new AreaPolygon(a);
+                    poly.FillColor = google.NextAreaColor();
+                    poly.SetAddedHandler("AP_PolygonAdded");
+                    map.Polygons.Add(poly);
+                }
             }
 
             //
-            // TODO: Center the map automatically. Either come up with a way to auto
-            // zoom the map to the appropriate zoom level or provide a module setting
-            // to let the admin do so.
+            // Center the map in the areas shown.
             //
+            map.Center.Latitude = (bottom / 2) + (top / 2);
+            map.Center.Longitude = (right / 2) + (left / 2);
+
+            //
+            // Auto-zoom the map.
+            //
+            String script = "<script language=\"javascript\" type=\"text/javascript\">" + 
+                "$(document).bind('GoogleMap_Ready', function(event, map) {" +
+                "map.map.fitBounds(new google.maps.LatLngBounds(new google.maps.LatLng(" + bottom.ToString() + "," + left.ToString() + "), new google.maps.LatLng(" + top.ToString() + "," + right.ToString() + ")));" +
+                "});" +
+                "</script>";
+            Page.ClientScript.RegisterClientScriptBlock(typeof(Page), "autozoom", script);
         }
 
         #endregion
