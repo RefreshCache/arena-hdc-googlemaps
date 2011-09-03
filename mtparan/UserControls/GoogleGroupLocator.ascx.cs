@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using System.Xml;
+using System.Xml.XPath;
+using System.Xml.Xsl;
 
 using Arena.Core;
 using Arena.Organization;
@@ -91,6 +95,12 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         [BooleanSetting("Show List Results", "Shows the results in list-view below the map.", false, false)]
         public Boolean ShowListResultsSetting { get { return Convert.ToBoolean(Setting("ShowListResults", "false", false)); } }
 
+        [CssSetting("Style Css", "If you wish to customize the styling you can duplicate the grouplocator.css file and enter the path to it here. Defaults to UserControls/Custom/HDC/GoogleMaps/Includes/grouplocator.css", false)]
+        public String StyleCssSetting { get { return Setting("StyleCss", "UserControls/Custom/HDC/GoogleMaps/Includes/grouplocator.css", false); } }
+
+        [FileSetting("Xslt File", "The list results uses an XSLT file to display the data. Defaults to UserControls/Custom/HDC/GoogleMaps/Includes/grouplocator.xslt.", false)]
+        public String XsltFileSetting { get { return Setting("XsltFile", "UserControls/Custom/HDC/GoogleMaps/Includes/grouplocator.xslt", false); } }
+
         #endregion
 
 
@@ -111,6 +121,8 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            BasePage.AddCssLink(Page, StyleCssSetting);
+
             if (!IsPostBack)
             {
                 map.Width = MapWidthSetting;
@@ -131,6 +143,8 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 //
                 if (ShowListResultsSetting == false)
                     pnlListResults.Visible = false;
+
+                ViewState["has_distance"] = 0;
 
                 SetupCaptions();
                 SetupFilters();
@@ -161,13 +175,6 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             {
                 script.AppendLine("$(document).ready(function() {");
                 script.AppendLine("    $('#" + pnlFilter.ClientID + "').insertBefore('#" + map.ClientID + "');");
-                script.AppendLine("});");
-            }
-
-            if (ShowListResultsSetting)
-            {
-                script.AppendLine("$(document).ready(function() {");
-                script.AppendLine("    $('#" + dgResults.ClientID + "').tablesorter({widthFixed: true, widgets: ['zebra']}).tablesorterPager({container: $('#" + dgResults.ClientID + "_pager'), positionFixed: false, size: 10});");
                 script.AppendLine("});");
             }
 
@@ -236,13 +243,9 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                     pAddressError.Visible = true;
 
                 //
-                // Show the distance column.
+                // Store the fact that we have distance information available.
                 //
-                foreach (DataGridColumn dc in dgResults.Columns)
-                {
-                    if (dc.HeaderText == "Distance")
-                        dc.Visible = true;
-                }
+                ViewState["has_distance"] = 1;
             }
             else
             {
@@ -250,13 +253,9 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 map.Center.Longitude = ArenaContext.Current.Organization.Address.Longitude;
 
                 //
-                // Hide the distance column.
+                // Store the fact that we no longer have distance information available.
                 //
-                foreach (DataGridColumn dc in dgResults.Columns)
-                {
-                    if (dc.HeaderText == "Distance")
-                        dc.Visible = false;
-                }
+                ViewState["has_distance"] = 0;
             }
 
             btnFilter_Click(sender, e);
@@ -274,20 +273,6 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             AddCampusPlacemarks();
             AddCenterPlacemark();
             AddFilteredGroups();
-        }
-
-
-        /// <summary>
-        /// A row has been bound in the datagrid, update it's attributes.
-        /// </summary>
-        protected void dgResults_ItemDataBound(object sender, DataGridItemEventArgs e)
-        {
-            if (e.Item.ItemType == ListItemType.Header ||
-                e.Item.ItemType == ListItemType.Footer ||
-                e.Item.ItemType == ListItemType.Pager)
-                return;
-            else
-                e.Item.Attributes["onclick"] = "window.location = 'default.aspx?page=" + RegistrationPageSetting.ToString() + "&group=" + ((DataRowView)e.Item.DataItem).Row["ID"].ToString() + "'";
         }
 
         #endregion
@@ -358,27 +343,15 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         /// </summary>
         private void AddFilteredGroups()
         {
+            XmlDocument xdoc = new XmlDocument();
+            XmlNode xroot;
+            XmlAttribute attrib;
             SqlConnection con;
             SqlDataReader rdr;
             List<Group> groups = new List<Group>();
             SqlCommand cmd;
             Placemark placemark;
-            DataTable dt = new DataTable();
-            DataRow dr;
 
-
-            //
-            // Setup the data table.
-            //
-            dt.Columns.Add(new DataColumn("ID", typeof(Int32)));
-            dt.Columns.Add(new DataColumn("Name", typeof(String)));
-            dt.Columns.Add(new DataColumn("MeetingDay", typeof(String)));
-            dt.Columns.Add(new DataColumn("MeetingTime", typeof(DateTime)));
-            dt.Columns.Add(new DataColumn("Type", typeof(String)));
-            dt.Columns.Add(new DataColumn("Topic", typeof(String)));
-            dt.Columns.Add(new DataColumn("AverageAge", typeof(Int32)));
-            dt.Columns.Add(new DataColumn("Notes", typeof(String)));
-            dt.Columns.Add(new DataColumn("Distance", typeof(Double)));
 
             //
             // Build a SQL query to enumerate groups in these categories.
@@ -406,6 +379,26 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             cmd.Parameters.Add(new SqlParameter("@LongFrom", map.Center.Longitude));
 
             //
+            // Setup the XML document.
+            //
+            xroot = xdoc.CreateElement("groups");
+            xdoc.AppendChild(xroot);
+
+            //
+            // Add the registration page setting for use during XSLT.
+            //
+            attrib = xdoc.CreateAttribute("registration_page");
+            attrib.InnerText = RegistrationPageSetting.ToString();
+            xroot.Attributes.Append(attrib);
+            
+            //
+            // Inform the XSLT translator if we have distance calcualtions available.
+            //
+            attrib = xdoc.CreateAttribute("has_distance");
+            attrib.InnerText = ViewState["has_distance"].ToString();
+            xroot.Attributes.Append(attrib);
+
+            //
             // Execute the reader and process all results.
             //
             rdr = cmd.ExecuteReader();
@@ -417,25 +410,23 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 try
                 {
                     Group g = new Group(Convert.ToInt32(rdr[0]));
+                    double distance;
 
+                    //
+                    // Filter out any groups we don't want.
+                    //
                     if (ddlMeetingDay.SelectedValue != "-1" && g.MeetingDay.LookupID != Convert.ToInt32(ddlMeetingDay.SelectedValue))
                         continue;
-
                     if (ddlTopic.SelectedValue != "-1" && g.Topic.LookupID != Convert.ToInt32(ddlTopic.SelectedValue))
                         continue;
-
                     if (ddlMaritalPreference.SelectedValue != "-1" && g.PrimaryMaritalStatus.LookupID != Convert.ToInt32(ddlMaritalPreference.SelectedValue))
                         continue;
-
                     if (ddlAgeRange.SelectedValue != "-1" && g.PrimaryAge.LookupID != Convert.ToInt32(ddlAgeRange.SelectedValue))
                         continue;
-
                     if (ddlType.SelectedValue != "-1" && g.GroupType.LookupID != Convert.ToInt32(ddlType.SelectedValue))
                         continue;
-
                     if (ddlArea.SelectedValue != "-1" && g.AreaID != -1 && g.AreaID != Convert.ToInt32(ddlArea.SelectedValue))
                         continue;
-
                     if (ddlCampus.SelectedValue != "-1" && g.Leader.Campus.CampusId != Convert.ToInt32(ddlCampus.SelectedValue))
                         continue;
 
@@ -447,33 +438,78 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                     map.Placemarks.Add(placemark);
 
                     //
-                    // Add the group to the list results.
+                    // Calculate the distance if we can.
                     //
-                    dr = dt.NewRow();
-                    dr["ID"] = g.GroupID;
-                    dr["Name"] = g.Name;
-                    dr["MeetingDay"] = g.MeetingDay.Value;
-                    dr["MeetingTime"] = g.MeetingStartTime;
-                    dr["Type"] = g.GroupType.Value;
-                    dr["Topic"] = g.Topic.Value;
-                    dr["AverageAge"] = Convert.ToInt32(g.AverageAge);
-                    dr["Notes"] = g.Notes;
                     try
                     {
-                        dr["Distance"] = Math.Round(Convert.ToDouble(rdr[1]), 2);
+                        distance = Math.Round(Convert.ToDouble(rdr[1]), 2);
                     }
                     catch
                     {
-                        dr["Distance"] = -1.0f;
+                        distance = -1.0f;
                     }
-                    dt.Rows.Add(dr);
+
+                    //
+                    // Add the group to the XML node for translation.
+                    //
+                    xroot.AppendChild(GroupXmlNode(g, xdoc, distance));
                 }
                 catch { }
             }
             rdr.Close();
 
-            dgResults.DataSource = new DataView(dt);
-            dgResults.DataBind();
+            XPathNavigator xnav = xdoc.CreateNavigator();
+            XslCompiledTransform xtrans = new XslCompiledTransform();
+            xtrans.Load(base.Server.MapPath(XsltFileSetting));
+            StringBuilder sb = new StringBuilder();
+            xtrans.Transform((IXPathNavigable)xnav, null, new StringWriter(sb));
+            ltResultsContent.Text = sb.ToString();
+        }
+
+
+        XmlNode GroupXmlNode(Group g, XmlDocument xdoc, double distance)
+        {
+            XmlElement group = xdoc.CreateElement("group");
+            XmlAttribute attrib;
+
+
+            attrib = xdoc.CreateAttribute("id");
+            attrib.InnerText = g.GroupID.ToString();
+            group.Attributes.Append(attrib);
+
+            attrib = xdoc.CreateAttribute("name");
+            attrib.InnerText = g.Name;
+            group.Attributes.Append(attrib);
+
+            attrib = xdoc.CreateAttribute("meetingday");
+            attrib.InnerText = g.MeetingDay.Value;
+            group.Attributes.Append(attrib);
+
+            attrib = xdoc.CreateAttribute("meetingtime");
+            attrib.InnerText = g.MeetingStartTime.ToString("t");
+            group.Attributes.Append(attrib);
+
+            attrib = xdoc.CreateAttribute("type");
+            attrib.InnerText = g.GroupType.Value;
+            group.Attributes.Append(attrib);
+
+            attrib = xdoc.CreateAttribute("topic");
+            attrib.InnerText = g.Topic.Value;
+            group.Attributes.Append(attrib);
+
+            attrib = xdoc.CreateAttribute("averageage");
+            attrib.InnerText = g.AverageAge.ToString();
+            group.Attributes.Append(attrib);
+
+            attrib = xdoc.CreateAttribute("notes");
+            attrib.InnerText = g.Notes;
+            group.Attributes.Append(attrib);
+
+            attrib = xdoc.CreateAttribute("distance");
+            attrib.InnerText = distance.ToString();
+            group.Attributes.Append(attrib);
+
+            return group;
         }
 
 
@@ -515,7 +551,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             {
                 ddlCampus.Items.Add(new ListItem(c.Name, c.CampusId.ToString()));
             }
-            trCampus.Visible = FilterOptionsSetting.Contains(FilterOptions.Campus);
+            lbFilterCampus.Visible = FilterOptionsSetting.Contains(FilterOptions.Campus);
 
             //
             // Setup the Meeting Day choices.
@@ -526,7 +562,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 if (lkup.Value != "Any" && lkup.Value != "Unknown")
                     ddlMeetingDay.Items.Add(new ListItem(lkup.Value, lkup.LookupID.ToString()));
             }
-            trMeetingDay.Visible = FilterOptionsSetting.Contains(FilterOptions.MeetingDay);
+            lbFilterMeetingDay.Visible = FilterOptionsSetting.Contains(FilterOptions.MeetingDay);
 
             //
             // Setup the Topic choices.
@@ -537,7 +573,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 if (lkup.Value != "Any" && lkup.Value != "Unknown")
                     ddlTopic.Items.Add(new ListItem(lkup.Value, lkup.LookupID.ToString()));
             }
-            trTopic.Visible = FilterOptionsSetting.Contains(FilterOptions.Topic);
+            lbFilterTopic.Visible = FilterOptionsSetting.Contains(FilterOptions.Topic);
             
             //
             // Setup the Marital Preference choices.
@@ -548,7 +584,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 if (lkup.Value != "Any" && lkup.Value != "Unknown")
                     ddlMaritalPreference.Items.Add(new ListItem(lkup.Value, lkup.LookupID.ToString()));
             }
-            trMaritalPreference.Visible = FilterOptionsSetting.Contains(FilterOptions.MaritalPreference);
+            lbFilterMaritalPreference.Visible = FilterOptionsSetting.Contains(FilterOptions.MaritalPreference);
 
             //
             // Setup the Age Range choices.
@@ -559,7 +595,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 if (lkup.Value != "Any" && lkup.Value != "Unknown")
                     ddlAgeRange.Items.Add(new ListItem(lkup.Value, lkup.LookupID.ToString()));
             }
-            trAgeRange.Visible = FilterOptionsSetting.Contains(FilterOptions.AgeRange);
+            lbFilterAgeRange.Visible = FilterOptionsSetting.Contains(FilterOptions.AgeRange);
 
             //
             // Setup the Type choices.
@@ -570,7 +606,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 if (lkup.Value != "Any" && lkup.Value != "Unknown")
                     ddlType.Items.Add(new ListItem(lkup.Value, lkup.LookupID.ToString()));
             }
-            trType.Visible = FilterOptionsSetting.Contains(FilterOptions.Type);
+            lbFilterType.Visible = FilterOptionsSetting.Contains(FilterOptions.Type);
 
             //
             // Setup the Area choices.
@@ -580,7 +616,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             {
                 ddlArea.Items.Add(new ListItem(a.Name, a.AreaID.ToString()));
             }
-            trArea.Visible = FilterOptionsSetting.Contains(FilterOptions.Area);
+            lbFilterArea.Visible = FilterOptionsSetting.Contains(FilterOptions.Area);
         }
 
         #endregion

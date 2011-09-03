@@ -1,0 +1,20 @@
+﻿/* Add a little padding to the bottom of the filter. The height and overflow tags
+   fix the variable height problem of using floats. */
+div.sg_filter { margin-bottom: 8px; height: 1%; overflow: hidden; }
+
+/* Make the drop down lists 150px wide */
+div.sg_filter label select { width: 150px; }
+
+/* Make the label text right-aligned and also 150px (300px - above) */
+div.sg_filter label { text-align: right; display: block; float: left; width: 300px; }
+
+/* This line applied to any label will cause a line break. If you wish to have some
+   filter elements grouped together then only apply this css to those elements you
+   wish to start a new line. */
+div.sg_filter label { clear: left; }
+
+/* Make sure the Apply Filter button is on a line by itself. */
+div.sg_filter input { float: left; display: block; clear: left; margin-left: 150px; margin-top: 10px; }
+
+/* Uncomment the following to get rid of the "Hide Filter/Show Filter" option. */
+/* div.sgf_showhide { display: none; } */

@@ -130,13 +130,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl divFilter;
         
         /// <summary>
-        /// trCampus control.
+        /// lbFilterCampus control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlTableRow trCampus;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFilterCampus;
         
         /// <summary>
         /// ddlCampus control.
@@ -148,13 +148,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.DropDownList ddlCampus;
         
         /// <summary>
-        /// trMeetingDay control.
+        /// lbFilterMeetingDay control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlTableRow trMeetingDay;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFilterMeetingDay;
         
         /// <summary>
         /// ddlMeetingDay control.
@@ -166,13 +166,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.DropDownList ddlMeetingDay;
         
         /// <summary>
-        /// trTopic control.
+        /// lbFilterTopic control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlTableRow trTopic;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFilterTopic;
         
         /// <summary>
         /// ddlTopic control.
@@ -184,13 +184,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.DropDownList ddlTopic;
         
         /// <summary>
-        /// trMaritalPreference control.
+        /// lbFilterMaritalPreference control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlTableRow trMaritalPreference;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFilterMaritalPreference;
         
         /// <summary>
         /// ddlMaritalPreference control.
@@ -202,13 +202,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.DropDownList ddlMaritalPreference;
         
         /// <summary>
-        /// trAgeRange control.
+        /// lbFilterAgeRange control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlTableRow trAgeRange;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFilterAgeRange;
         
         /// <summary>
         /// ddlAgeRange control.
@@ -220,13 +220,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.DropDownList ddlAgeRange;
         
         /// <summary>
-        /// trType control.
+        /// lbFilterType control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlTableRow trType;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFilterType;
         
         /// <summary>
         /// ddlType control.
@@ -238,13 +238,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.DropDownList ddlType;
         
         /// <summary>
-        /// trArea control.
+        /// lbFilterArea control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlTableRow trArea;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFilterArea;
         
         /// <summary>
         /// ddlArea control.
@@ -274,12 +274,12 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.Panel pnlListResults;
         
         /// <summary>
-        /// dgResults control.
+        /// ltResultsContent control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::Arena.Custom.HDC.GoogleMaps.UI.DataGridWithHeaders dgResults;
+        protected global::System.Web.UI.WebControls.Literal ltResultsContent;
     }
 }
