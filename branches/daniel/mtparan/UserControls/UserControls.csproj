@@ -106,6 +106,8 @@
     <Content Include="Images\next.png" />
     <Content Include="Images\prev.png" />
     <Content Include="Includes\googlemaps.js" />
+    <Content Include="Includes\grouplocator.css" />
+    <Content Include="Includes\grouplocator.xslt" />
     <Content Include="Includes\jquery.tablesorter.min.js" />
     <Content Include="Includes\jquery.tablesorter.pager.js" />
     <Content Include="Includes\json2.js" />

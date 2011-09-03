@@ -58,14 +58,6 @@
 
     function ApplyFilter() {
     }
-
-    $(document).ready(function () {
-        $('.sglMapLink').click(function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            _ShowGroupPopup(null, $(this).find('a').attr('href'));
-        });
-    });
 </script>
 
 <GMap:GoogleMap runat="server" ID="map" HideDownload="true" HideAddtoTag="true" ShowMapType="false" ShowStreetView="false" MinZoomLevel="10" MaxZoomLevel="14" />
@@ -95,71 +87,43 @@
 
 <asp:Panel ID="pnlFilter" runat="server">
     <asp:HiddenField runat="server" ID="hfFilterVisible" Value="0" />
-    <div style="margin-bottom: 3px;">
+    <div class = "sgf_showhide" style="margin-bottom: 3px;">
         <span ID="toggleFilter" runat="server" style="color: blue; text-decoration: underline; cursor: pointer;" class="smallText">Show Filter</span>
     </div>
-    <div id="divFilter" runat="server" style="display: none; margin-bottom: 8px;">
-        <table border="0">
-            <tr runat="server" id="trCampus">
-                <td style="text-align: right;"><%= CampusCaption %>:</td>
-                <td><asp:DropDownList runat="server" ID="ddlCampus"></asp:DropDownList></td>
-            </tr>
-            <tr runat="server" id="trMeetingDay">
-                <td style="text-align: right;"><%= MeetingDayCaption %>:</td>
-                <td><asp:DropDownList runat="server" ID="ddlMeetingDay"></asp:DropDownList></td>
-            </tr>
-            <tr runat="server" id="trTopic">
-                <td style="text-align: right;"><%= TopicCaption %>:</td>
-                <td><asp:DropDownList runat="server" ID="ddlTopic"></asp:DropDownList></td>
-            </tr>
-            <tr runat="server" id="trMaritalPreference">
-                <td style="text-align: right;"><%= MaritalPreferenceCaption %>:</td>
-                <td><asp:DropDownList runat="server" ID="ddlMaritalPreference"></asp:DropDownList></td>
-            </tr>
-            <tr runat="server" id="trAgeRange">
-                <td style="text-align: right;"><%= AgeRangeCaption %>:</td>
-                <td><asp:DropDownList runat="server" ID="ddlAgeRange"></asp:DropDownList></td>
-            </tr>
-            <tr runat="server" id="trType">
-                <td style="text-align: right;"><%= TypeCaption %>:</td>
-                <td><asp:DropDownList runat="server" ID="ddlType"></asp:DropDownList></td>
-            </tr>
-            <tr runat="server" id="trArea">
-                <td style="text-align: right;"><%= AreaCaption %>:</td>
-                <td><asp:DropDownList runat="server" ID="ddlArea"></asp:DropDownList></td>
-            </tr>
-        </table>
+    <div id="divFilter" class="sg_filter" runat="server" style="display: none;">
+        <label ID="lbFilterCampus" runat="server" class="sgf_campus" for="<%= ddlCampus.ClientID %>">
+            <%= CampusCaption %>
+            <asp:DropDownList runat="server" ID="ddlCampus"></asp:DropDownList>
+        </label>
+        <label ID="lbFilterMeetingDay" runat="server" class="sgf_meetingday" for="<%= ddlMeetingDay.ClientID %>">
+            <%= MeetingDayCaption %>
+            <asp:DropDownList runat="server" ID="ddlMeetingDay"></asp:DropDownList>
+        </label>
+        <label ID="lbFilterTopic" runat="server" class="sgf_topic" for="<%= ddlTopic.ClientID %>">
+            <%= TopicCaption %>
+            <asp:DropDownList runat="server" ID="ddlTopic"></asp:DropDownList>
+        </label>
+        <label ID="lbFilterMaritalPreference" runat="server" class="sgf_maritalpreference" for="<%= ddlMaritalPreference.ClientID %>">
+            <%= MaritalPreferenceCaption %>
+            <asp:DropDownList runat="server" ID="ddlMaritalPreference"></asp:DropDownList>
+        </label>
+        <label ID="lbFilterAgeRange" runat="server" class="sgf_agerange" for="<%= ddlAgeRange.ClientID %>">
+            <%= AgeRangeCaption %>
+            <asp:DropDownList runat="server" ID="ddlAgeRange"></asp:DropDownList>
+        </label>
+        <label ID="lbFilterType" runat="server" class="sgf_type" for="<%= ddlType.ClientID %>">
+            <%= TypeCaption %>
+            <asp:DropDownList runat="server" ID="ddlType"></asp:DropDownList>
+        </label>
+        <label ID="lbFilterArea" runat="server" class="sgf_area" for="<%= ddlArea.ClientID %>">
+            <%= AreaCaption %>
+            <asp:DropDownList runat="server" ID="ddlArea"></asp:DropDownList>
+        </label>
+
         <Arena:ArenaButton runat="server" ID="btnFilter" Text="Apply Filter" OnClientClick="ApplyFilter(); return false;" OnClick="btnFilter_Click" />
     </div>
 </asp:Panel>
 
 <asp:Panel ID="pnlListResults" runat="server" Visible="true">
-    <GMap:DataGridWithHeaders ID="dgResults" runat="server" CssClass="tablesorter" CellPadding="5" AllowPaging="false" AutoGenerateColumns="false" GridLines="Horizontal" HeaderStyle-Font-Bold="true" OnItemDataBound="dgResults_ItemDataBound" HeaderStyle-CssClass="sglHeader">
-        <ItemStyle CssClass="sglRow" />
-        <AlternatingItemStyle CssClass="sglAlternateRow" />
-        <Columns>
-            <asp:BoundColumn HeaderText="Group" Visible="true" DataField="Name"></asp:BoundColumn>
-            <asp:BoundColumn HeaderText="Meeting Day" Visible="true" ItemStyle-Wrap="false" DataField="MeetingDay"></asp:BoundColumn>
-            <asp:BoundColumn HeaderText="Time" Visible="true" ItemStyle-Wrap="false" DataField="MeetingTime" DataFormatString="{0:t}"></asp:BoundColumn>
-            <asp:BoundColumn HeaderText="Type" Visible="true" ItemStyle-Wrap="false" DataField="Type"></asp:BoundColumn>
-            <asp:BoundColumn HeaderText="Topic" Visible="true" ItemStyle-Wrap="false" DataField="Topic"></asp:BoundColumn>
-            <asp:BoundColumn HeaderText="Avg Age" Visible="true" ItemStyle-Wrap="false" DataField="AverageAge"></asp:BoundColumn>
-            <asp:BoundColumn HeaderText="Notes" Visible="false" DataField="Notes"></asp:BoundColumn>
-            <asp:BoundColumn HeaderText="Distance" Visible="false" DataField="Distance"></asp:BoundColumn>
-            <asp:TemplateColumn HeaderText="View Map" Visible="true" ItemStyle-Wrap="false" ItemStyle-CssClass="sglMapLink"><ItemTemplate><a href="<%# DataBinder.Eval(Container.DataItem, "ID") %>">View Map</a></ItemTemplate></asp:TemplateColumn>
-        </Columns>
-    </GMap:DataGridWithHeaders>
-
-    <div id="<%= dgResults.ClientID %>_pager" class="pager">
-		<img src="UserControls/Custom/HDC/GoogleMaps/Images/first.png" class="first"/>
-		<img src="UserControls/Custom/HDC/GoogleMaps/Images/prev.png" class="prev"/>
-		<input type="text" class="pagedisplay" readonly />
-		<img src="UserControls/Custom/HDC/GoogleMaps/Images/next.png" class="next"/>
-		<img src="UserControls/Custom/HDC/GoogleMaps/Images/last.png" class="last"/>
-		<select class="pagesize" style="display: none">
-			<option selected="selected"  value="10">10</option>
-			<option value="25">25</option>
-			<option value="50">50</option>
-		</select>
-    </div>
+    <asp:Literal ID="ltResultsContent" runat="server" />
 </asp:Panel>
