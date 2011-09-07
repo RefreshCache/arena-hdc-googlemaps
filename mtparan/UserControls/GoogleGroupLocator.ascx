@@ -2,7 +2,7 @@
 <%@ Register TagPrefix="Arena" Namespace="Arena.Portal.UI" Assembly="Arena.Portal.UI" %>
 <%@ Register TagPrefix="GMap" Namespace="Arena.Custom.HDC.GoogleMaps.UI" Assembly="Arena.Custom.HDC.GoogleMaps" %>
 
-<script type="text/javascript" src="UserControls/Custom/HDC/GoogleMaps/Includes/jquery.tablesorter.js"></script>
+<script type="text/javascript" src="UserControls/Custom/HDC/GoogleMaps/Includes/jquery.tablesorter.min.js"></script>
 <script type="text/javascript" src="UserControls/Custom/HDC/GoogleMaps/Includes/jquery.tablesorter.pager.js"></script>
 <link rel="stylesheet" href="UserControls/Custom/HDC/GoogleMaps/Includes/tablesorter.css" type="text/css" media="print, projection, screen" />
 
@@ -60,7 +60,7 @@
     }
 </script>
 
-<GMap:GoogleMap runat="server" ID="map" HideDownload="true" HideAddtoTag="true" ShowMapType="false" ShowStreetView="false" MinZoomLevel="10" MaxZoomLevel="14" />
+<GMap:GoogleMap runat="server" ID="map" HideDownload="true" HideAddtoTag="true" ShowMapType="false" ShowStreetView="false" MinZoomLevel="4" MaxZoomLevel="14" />
 
 <asp:Panel ID="pnlAddress" runat="server">
     <p id="pAddressError" runat="server" style="color: red;" visible="false">

@@ -101,6 +101,9 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         [FileSetting("Xslt File", "The list results uses an XSLT file to display the data. Defaults to UserControls/Custom/HDC/GoogleMaps/Includes/grouplocator.xslt.", false)]
         public String XsltFileSetting { get { return Setting("XsltFile", "UserControls/Custom/HDC/GoogleMaps/Includes/grouplocator.xslt", false); } }
 
+        [BooleanSetting("Map Visible", "Wether or not to display a single common map.", false, true)]
+        public Boolean MapVisibleSetting { get { return Convert.ToBoolean(Setting("MapVisible", "true", false)); } }
+
         #endregion
 
 
@@ -144,10 +147,29 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 if (ShowListResultsSetting == false)
                     pnlListResults.Visible = false;
 
+                //
+                // Hide the map if they don't want it.
+                //
+                if (MapVisibleSetting == false)
+                {
+                    map.Visible = false;
+                    btnUpdate.Text = "Nearby Groups";
+                }
+
                 ViewState["has_distance"] = 0;
 
                 SetupCaptions();
                 SetupFilters();
+
+                //
+                // Set the default area selection.
+                //
+                if (!String.IsNullOrEmpty(Request.QueryString["area"]))
+                    ddlArea.SelectedValue = Request.QueryString["area"];
+
+                //
+                // Show the groups that have been selected by filter.
+                //
                 AddFilteredGroups();
             }
 
@@ -236,8 +258,11 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 //
                 if (address.Latitude != 0 && address.Longitude != 0)
                 {
-                    map.Center.Latitude = address.Latitude;
-                    map.Center.Longitude = address.Longitude;
+                    if (MapVisibleSetting)
+                    {
+                        map.Center.Latitude = address.Latitude;
+                        map.Center.Longitude = address.Longitude;
+                    }
                 }
                 else
                     pAddressError.Visible = true;
@@ -249,8 +274,11 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             }
             else
             {
-                map.Center.Latitude = ArenaContext.Current.Organization.Address.Latitude;
-                map.Center.Longitude = ArenaContext.Current.Organization.Address.Longitude;
+                if (MapVisibleSetting)
+                {
+                    map.Center.Latitude = ArenaContext.Current.Organization.Address.Latitude;
+                    map.Center.Longitude = ArenaContext.Current.Organization.Address.Longitude;
+                }
 
                 //
                 // Store the fact that we no longer have distance information available.
@@ -390,12 +418,19 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             attrib = xdoc.CreateAttribute("registration_page");
             attrib.InnerText = RegistrationPageSetting.ToString();
             xroot.Attributes.Append(attrib);
-            
+
             //
             // Inform the XSLT translator if we have distance calcualtions available.
             //
             attrib = xdoc.CreateAttribute("has_distance");
             attrib.InnerText = ViewState["has_distance"].ToString();
+            xroot.Attributes.Append(attrib);
+
+            //
+            // Configuration item indicating if the map is visible or not..
+            //
+            attrib = xdoc.CreateAttribute("has_map");
+            attrib.InnerText = MapVisibleSetting.ToString();
             xroot.Attributes.Append(attrib);
 
             //
@@ -467,6 +502,14 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         }
 
 
+        /// <summary>
+        /// Create an XML node for the given small group. The distance is the distance from
+        /// a single point to the location at which this small group meets.
+        /// </summary>
+        /// <param name="g">The Group's properties to populate the XML node with.</param>
+        /// <param name="xdoc">The XmlDocument that this node will be a part of.</param>
+        /// <param name="distance">The distance from a central point to where this group meets.</param>
+        /// <returns>A new XmlNode which identifies this small group.</returns>
         XmlNode GroupXmlNode(Group g, XmlDocument xdoc, double distance)
         {
             XmlElement group = xdoc.CreateElement("group");
@@ -479,6 +522,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
             attrib = xdoc.CreateAttribute("name");
             attrib.InnerText = g.Name;
+            group.Attributes.Append(attrib);
+
+            attrib = xdoc.CreateAttribute("leadername");
+            attrib.InnerText = g.Leader.FullName;
             group.Attributes.Append(attrib);
 
             attrib = xdoc.CreateAttribute("meetingday");
@@ -499,6 +546,22 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
             attrib = xdoc.CreateAttribute("averageage");
             attrib.InnerText = g.AverageAge.ToString();
+            group.Attributes.Append(attrib);
+
+            attrib = xdoc.CreateAttribute("agerange");
+            attrib.InnerText = g.PrimaryAge.Value;
+            group.Attributes.Append(attrib);
+
+            attrib = xdoc.CreateAttribute("maritalpreference");
+            attrib.InnerText = g.PrimaryMaritalStatus.Value;
+            group.Attributes.Append(attrib);
+
+            attrib = xdoc.CreateAttribute("description");
+            attrib.InnerText = g.Description;
+            group.Attributes.Append(attrib);
+
+            attrib = xdoc.CreateAttribute("schedule");
+            attrib.InnerText = g.Schedule;
             group.Attributes.Append(attrib);
 
             attrib = xdoc.CreateAttribute("notes");
