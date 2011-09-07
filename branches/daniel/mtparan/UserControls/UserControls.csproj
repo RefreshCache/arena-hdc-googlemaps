@@ -100,17 +100,28 @@
     <Content Include="Images\ajax-bar.gif" />
     <Content Include="Images\ajax-spin.gif" />
     <Content Include="Images\chapel.png" />
+    <Content Include="Images\colorbox\border.png" />
+    <Content Include="Images\colorbox\controls.png" />
+    <Content Include="Images\colorbox\loading.gif" />
+    <Content Include="Images\colorbox\loading_background.png" />
     <Content Include="Images\darkearth.png" />
     <Content Include="Images\first.png" />
     <Content Include="Images\last.png" />
     <Content Include="Images\next.png" />
     <Content Include="Images\prev.png" />
+    <Content Include="Includes\colorbox.css" />
     <Content Include="Includes\googlemaps.js" />
     <Content Include="Includes\grouplocator.css" />
-    <Content Include="Includes\grouplocator.xslt" />
+    <Content Include="Includes\grouplocator.xslt">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Includes\jquery.colorbox-min.js" />
     <Content Include="Includes\jquery.tablesorter.min.js" />
     <Content Include="Includes\jquery.tablesorter.pager.js" />
     <Content Include="Includes\json2.js" />
+    <Content Include="Includes\mtparan.xslt">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Includes\tablesorter.css" />
     <Content Include="KMLInsert.ascx" />
     <Content Include="MapViewer.ascx" />
