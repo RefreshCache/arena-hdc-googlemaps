@@ -572,6 +572,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             attrib.InnerText = distance.ToString();
             group.Attributes.Append(attrib);
 
+            attrib = xdoc.CreateAttribute("latitude");
+            attrib.InnerText = g.TargetLocation.Latitude.ToString();
+            group.Attributes.Append(attrib);
+            attrib = xdoc.CreateAttribute("longitude");
+            attrib.InnerText = g.TargetLocation.Longitude.ToString();
+            group.Attributes.Append(attrib);
+
             return group;
         }
 

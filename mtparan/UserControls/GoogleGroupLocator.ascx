@@ -62,7 +62,7 @@
 
 <GMap:GoogleMap runat="server" ID="map" HideDownload="true" HideAddtoTag="true" ShowMapType="false" ShowStreetView="false" MinZoomLevel="4" MaxZoomLevel="14" />
 
-<asp:Panel ID="pnlAddress" runat="server">
+<asp:Panel ID="pnlAddress" class="sgl_address" runat="server">
     <p id="pAddressError" runat="server" style="color: red;" visible="false">
         Could not find address, please check address and try again.
     </p>

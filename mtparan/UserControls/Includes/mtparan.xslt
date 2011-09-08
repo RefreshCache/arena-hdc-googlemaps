@@ -5,7 +5,7 @@
   <xsl:template match="/groups">
     <!-- This should probably be in a separate css, but for the moment if lives here. -->
     <xsl:text disable-output-escaping="yes"><![CDATA[
-<style>
+<style type="text/css">
 div.sgl_row {
   font-size: 12px;
   color: white;
@@ -36,20 +36,33 @@ div.sglr_details {
   height: 0px;
   overflow: hidden;
 }
+
 /* This is only used when displaying inline */
 div.sglr_details div.sglr_detailcontent {
   background-color: #5050d0;
   border-top: 1px solid gray;
 }
+
 /* This is always used */
 div.sglr_detailcontent {
   padding: 7px;
   font-size: 12px;
 }
+
+/* Make the group information display look pretty. Space out the title and data. */
 span.sglrc_title { float: left; text-align: right; width: 80px; }
 span.sglrc_data { display: block; padding-left: 85px; }
 </style>
 ]]></xsl:text>
+ 
+    <!-- Hide the address panel if there is no map. -->
+    <xsl:if test="/groups/@has_map != 'True'">
+      <xsl:text disable-output-escaping="yes"><![CDATA[
+<style type="text/css">
+div.sgl_address { display: none; }
+</style>
+]]></xsl:text>
+    </xsl:if>
 
     <div class="sgl_results" cellspacing="0" cellpadding="5" rules="rows" border="0">
       <xsl:for-each select="group">
@@ -64,6 +77,12 @@ span.sglrc_data { display: block; padding-left: 85px; }
           <span class="sglr_map">
             <xsl:attribute name="data-id">
               <xsl:value-of select="@id"/>
+            </xsl:attribute>
+            <xsl:attribute name="data-latitude">
+              <xsl:value-of select="@latitude"/>
+            </xsl:attribute>
+            <xsl:attribute name="data-longitude">
+              <xsl:value-of select="@longitude"/>
             </xsl:attribute>
             <xsl:text>Show On Map</xsl:text>
           </span>
@@ -176,10 +195,6 @@ span.sglrc_data { display: block; padding-left: 85px; }
     <xsl:text disable-output-escaping="yes"><![CDATA[
 <script type="text/javascript">
   $(document).ready(function() {
-    $('.sglr_map').click(function (e) {
-      _ShowGroupPopup(null, $(this).attr('data-id'));
-    });
-
     $('.sglr_info').click(function (e) {
       window.location = 'default.aspx?page=]]></xsl:text><xsl:value-of select="/groups/@registration_page" /><xsl:text disable-output-escaping="yes"><![CDATA[&group=' + $(this).attr('data-id');
     });
@@ -192,6 +207,10 @@ span.sglrc_data { display: block; padding-left: 85px; }
       <xsl:text disable-output-escaping="yes"><![CDATA[
 <script type="text/javascript">
   $(document).ready(function() {
+    $('.sglr_map').click(function (e) {
+      _ShowGroupPopup(null, $(this).attr('data-id'));
+    });
+
     $('.sglr_showdetails').click(function (e) {
       if ($(this).parent().next().height() == 0) {
         var content = $(this).parent().next().children();
@@ -213,9 +232,43 @@ span.sglrc_data { display: block; padding-left: 85px; }
 
     <!-- The javascript to show the group on a map when the central map is not available. Use colorbox. -->
     <xsl:if test="/groups/@has_map != 'True'">
+      <div style="overflow: hidden; width: 0px; height: 0px;">
+        <div id="mtparan_map" style="width: 420px; height: 360px;"></div>
+      </div>
       <xsl:text disable-output-escaping="yes"><![CDATA[
 <script type="text/javascript">
+  var mtparan_map, mtparan_marker = null;
   $(document).ready(function() {
+    var myOptions = {
+      zoom: 12,
+      center: new google.maps.LatLng(0, 0),
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      disableDefaultUI: true,
+      draggable: false,
+      scrollwheel: false,
+      keyboardShortcuts: false
+    };
+
+    mtparan_map = new google.maps.Map(document.getElementById('mtparan_map'), myOptions);
+  });
+
+  $(document).ready(function() {
+    $('.sglr_map').click(function (e) {
+      if (sgl_colorboxinit == false) {
+        $.colorbox.init();
+        sgl_colorboxinit = true;
+      }
+
+      /* Update the center of the map and the marker location. */
+      var center = new google.maps.LatLng($(this).attr('data-latitude'), $(this).attr('data-longitude'));
+      mtparan_map.setCenter(center);
+      if (mtparan_marker != null)
+        mtparan_marker.setMap(null);
+      mtparan_marker = new google.maps.Marker({position: center, map: mtparan_map, title: $(this).prev().prev().text()});
+
+      $.colorbox({inline: true, href: '#mtparan_map', opacity: 0.7, initialWidth: '300px', initialHeight: '100px'});
+    });
+
     $('.sglr_showdetails').click(function (e) {
       if (sgl_colorboxinit == false) {
         $.colorbox.init();
