@@ -71,6 +71,13 @@
     <Compile Include="GoogleGroupLocator.ascx.designer.cs">
       <DependentUpon>GoogleGroupLocator.ascx</DependentUpon>
     </Compile>
+    <Compile Include="JoinSmallGroup.ascx.cs">
+      <DependentUpon>JoinSmallGroup.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="JoinSmallGroup.ascx.designer.cs">
+      <DependentUpon>JoinSmallGroup.ascx</DependentUpon>
+    </Compile>
     <Compile Include="KMLInsert.ascx.cs">
       <DependentUpon>KMLInsert.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -123,6 +130,7 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Includes\tablesorter.css" />
+    <Content Include="JoinSmallGroup.ascx" />
     <Content Include="KMLInsert.ascx" />
     <Content Include="MapViewer.ascx" />
     <Content Include="PeopleInRange.ascx" />
