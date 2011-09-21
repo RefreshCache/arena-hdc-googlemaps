@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Arena">
+      <HintPath>..\..\..\..\Visual Studio 2010\Projects\Arena-SDK-2010.1\Arena.dll</HintPath>
+    </Reference>
     <Reference Include="Arena.Framework, Version=2010.2.100.29814, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Arena-SDK-2010.1\Arena.Framework.dll</HintPath>

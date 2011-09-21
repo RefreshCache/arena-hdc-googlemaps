@@ -13,22 +13,40 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
     public partial class JoinSmallGroup {
         
         /// <summary>
-        /// lbFieldName control.
+        /// lbFieldFirstName control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldName;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldFirstName;
         
         /// <summary>
-        /// tbName control.
+        /// tbFirstName control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox tbName;
+        protected global::System.Web.UI.WebControls.TextBox tbFirstName;
+        
+        /// <summary>
+        /// lbFieldLastName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldLastName;
+        
+        /// <summary>
+        /// tbLastName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox tbLastName;
         
         /// <summary>
         /// lbFieldEmail control.
@@ -49,22 +67,139 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.TextBox tbEmail;
         
         /// <summary>
-        /// lbFieldPhone control.
+        /// lbFieldHomePhone control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldPhone;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldHomePhone;
         
         /// <summary>
-        /// tbPhone control.
+        /// tbHomePhone control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox tbPhone;
+        protected global::System.Web.UI.WebControls.TextBox tbHomePhone;
+        
+        /// <summary>
+        /// lbFieldCellPhone control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldCellPhone;
+        
+        /// <summary>
+        /// tbCellPhone control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox tbCellPhone;
+        
+        /// <summary>
+        /// divFieldSpouse control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl divFieldSpouse;
+        
+        /// <summary>
+        /// cbSpouse control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.CheckBox cbSpouse;
+        
+        /// <summary>
+        /// divFieldSpouseContent control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl divFieldSpouseContent;
+        
+        /// <summary>
+        /// lbFieldSpouseFirstName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldSpouseFirstName;
+        
+        /// <summary>
+        /// tbSpouseFirstName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox tbSpouseFirstName;
+        
+        /// <summary>
+        /// lbFieldSpouseLastName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldSpouseLastName;
+        
+        /// <summary>
+        /// tbSpouseLastName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox tbSpouseLastName;
+        
+        /// <summary>
+        /// lbFieldSpouseEmail control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldSpouseEmail;
+        
+        /// <summary>
+        /// tbSpouseEmail control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox tbSpouseEmail;
+        
+        /// <summary>
+        /// lbFieldSpouseCellPhone control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldSpouseCellPhone;
+        
+        /// <summary>
+        /// tbSpouseCellPhone control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox tbSpouseCellPhone;
         
         /// <summary>
         /// divFieldAddress control.
@@ -94,13 +229,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.TextBox tbCity;
         
         /// <summary>
-        /// tbState control.
+        /// ddlState control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox tbState;
+        protected global::System.Web.UI.WebControls.DropDownList ddlState;
         
         /// <summary>
         /// tbZipcode control.
