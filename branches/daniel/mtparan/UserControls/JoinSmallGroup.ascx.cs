@@ -14,6 +14,7 @@ using Arena.Organization;
 using Arena.Portal;
 using Arena.SmallGroup;
 using Arena.Utility;
+using ArenaWeb;
 using Arena.Custom.HDC.GoogleMaps;
 using Arena.Custom.HDC.GoogleMaps.Maps;
 
@@ -22,9 +23,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
     public partial class JoinSmallGroup : PortalControl
     {
         const String FieldValueEmail = "1";
-        const String FieldValuePhone = "2";
-        const String FieldValueAddress = "3";
-        const String FieldValueComments = "4";
+        const String FieldValueHomePhone = "2";
+        const String FieldValueCellPhone = "3";
+        const String FieldValueAddress = "4";
+        const String FieldValueComments = "5";
 
         #region Module Settings
 
@@ -37,29 +39,305 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         [LookupSetting("New Member Role", "To automatically add the user to the small group select the role to use. (User must be logged in for this to work)", false)]
         public Int32 NewMemberRoleSetting { get { return Convert.ToInt32(Setting("NewMemberRole", "-1", false)); } }
 
+        [LookupSetting("Member Status", "The Member Status to set a user to when they add themself through this form. If not set them no records will be created.", false, "0B4532DB-3188-40F5-B188-E7E6E4448C85")]
+        public int MemberStatusIDSetting { get { return Convert.ToInt32(Setting("MemberStatusID", "-1", false)); } }
+
         [CustomListSetting("Available Fields", "Select which fields are available for the user to fill in. Defaults to all fields.", false, "",
-            new String[] { "E-mail", "Phone", "Address", "Comments" },
-            new String[] { FieldValueEmail, FieldValuePhone, FieldValueAddress, FieldValueComments })]
+            new String[] { "E-mail", "HomePhone", "CellPhone", "Address", "Comments" },
+            new String[] { FieldValueEmail, FieldValueHomePhone, FieldValueCellPhone, FieldValueAddress, FieldValueComments })]
         public String[] AvailableFieldsSetting { get { return Setting("AvailableFields", "", false).Split(new char[] { ',' }); } }
+
+        #endregion
+
+
+        #region Private Variables
+
+        private Person person = null;
+        private Person spouse = null;
 
         #endregion
 
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            //
+            // Load the original person and spouse, if we know them.
+            //
+            person = (CurrentPerson != null ? CurrentPerson : new Person());
+            spouse = (person.Spouse() != null ? person.Spouse() : new Person());
+
             if (!IsPostBack)
             {
                 if (AvailableFieldsSetting.Length > 0 && !AvailableFieldsSetting.Contains(FieldValueEmail))
+                {
                     lbFieldEmail.Visible = false;
-                
-                if (AvailableFieldsSetting.Length > 0 && !AvailableFieldsSetting.Contains(FieldValuePhone))
-                    lbFieldPhone.Visible = false;
-                
+                    lbFieldSpouseEmail.Visible = false;
+                }
+
+                if (AvailableFieldsSetting.Length > 0 && !AvailableFieldsSetting.Contains(FieldValueHomePhone))
+                    lbFieldHomePhone.Visible = false;
+
+                if (AvailableFieldsSetting.Length > 0 && !AvailableFieldsSetting.Contains(FieldValueCellPhone))
+                {
+                    lbFieldCellPhone.Visible = false;
+                    lbFieldSpouseCellPhone.Visible = false;
+                }
+
                 if (AvailableFieldsSetting.Length > 0 && !AvailableFieldsSetting.Contains(FieldValueAddress))
                     divFieldAddress.Visible = false;
                 
                 if (AvailableFieldsSetting.Length > 0 && !AvailableFieldsSetting.Contains(FieldValueComments))
                     lbFieldComments.Visible = false;
+
+                SetInfo();
+            }
+        }
+
+
+        /// <summary>
+        /// Set initial information to be displayed on the page.
+        /// </summary>
+        void SetInfo()
+        {
+            PersonPhone phone;
+
+
+            ddlState.SelectedIndex = -1;
+            Utilities.LoadStates(ddlState);
+
+            //
+            // Load name information for primary and spouse.
+            //
+            tbFirstName.Text = person.FirstName;
+            tbLastName.Text = person.LastName;
+            tbSpouseFirstName.Text = spouse.FirstName;
+            tbSpouseLastName.Text = spouse.LastName;
+            
+            //
+            // Load e-mail information for primary and spouse.
+            //
+            tbEmail.Text = person.Emails.FirstActive;
+            tbSpouseEmail.Text = spouse.Emails.FirstActive;
+
+            //
+            // Load phone information for primary and spouse.
+            //
+            phone = person.Phones.FindByType(SystemLookup.PhoneType_Home);
+            if (phone != null)
+                tbHomePhone.Text = phone.Number;
+            phone = person.Phones.FindByType(SystemLookup.PhoneType_Cell);
+            if (phone != null)
+                tbCellPhone.Text = phone.Number;
+            phone = spouse.Phones.FindByType(SystemLookup.PhoneType_Cell);
+            if (phone != null)
+                tbSpouseCellPhone.Text = phone.Number;
+
+            //
+            // Load address information for family.
+            //
+            if (person.PrimaryAddress != null && person.PrimaryAddress.AddressID != -1)
+            {
+                ListItem li;
+
+                tbStreet.Text = person.PrimaryAddress.StreetLine1;
+                tbCity.Text = person.PrimaryAddress.City;
+                li = ddlState.Items.FindByValue(person.PrimaryAddress.State);
+                if (li != null)
+                    li.Selected = true;
+                tbZipcode.Text = person.PrimaryAddress.PostalCode;
+            }
+        }
+
+
+        void SaveInfo()
+        {
+            Boolean newPerson = (person.PersonID == -1);
+            Boolean newSpouse = (spouse.PersonID == -1);
+            string userID = (!String.IsNullOrEmpty(CurrentUser.Identity.Name) ? CurrentUser.Identity.Name : "smallgrouplocator");
+            PersonPhone phone;
+            PersonAddress address;
+
+
+            //
+            // Set the primary's name.
+            //
+            person.FirstName = tbFirstName.Text.Trim();
+            person.LastName = tbLastName.Text.Trim();
+
+            //
+            // Set the primary's e-mail.
+            //
+            person.Emails.FirstActive = tbEmail.Text.Trim();
+
+            //
+            // Set the primary's home phone.
+            //
+            phone = person.Phones.FindByType(SystemLookup.PhoneType_Home);
+            if (phone == null)
+            {
+                phone = new PersonPhone();
+                phone.PhoneType = new Lookup(SystemLookup.PhoneType_Home);
+                person.Phones.Add(phone);
+            }
+            phone.Number = tbHomePhone.Text.Trim();
+
+            //
+            // Set the primary's cell phone.
+            //
+            phone = person.Phones.FindByType(SystemLookup.PhoneType_Cell);
+            if (phone == null)
+            {
+                phone = new PersonPhone();
+                phone.PhoneType = new Lookup(SystemLookup.PhoneType_Cell);
+                person.Phones.Add(phone);
+            }
+            phone.Number = tbCellPhone.Text.Trim();
+
+            //
+            // Set the primary's address.
+            //
+            address = person.Addresses.FindByType(SystemLookup.AddressType_Home);
+            if (address == null)
+            {
+                address = new PersonAddress();
+                address.AddressType = new Lookup(SystemLookup.AddressType_Home);
+                person.Addresses.Add(address);
+            }
+            address.Address = new Address(tbStreet.Text.Trim(), String.Empty, tbCity.Text.Trim(), ddlState.SelectedValue, tbZipcode.Text.Trim(), false);
+            address.Primary = true;
+
+            //
+            // Set some final information about the primary person if we are creating a new record.
+            //
+            if (person.PersonID == -1)
+            {
+                person.RecordStatus = Arena.Enums.RecordStatus.Pending;
+                person.MemberStatus = new Lookup(MemberStatusIDSetting);
+                if (tbSpouseFirstName.Text.Trim().Length == 0)
+                    person.MaritalStatus = new Lookup(SystemLookup.MaritalStatus_Unknown);
+                else
+                    person.MaritalStatus = new Lookup(SystemLookup.MaritalStatus_Married);
+                person.Gender = Arena.Enums.Gender.Unknown;
+            }
+
+            //
+            // Save the person record.
+            //
+            person.Save(CurrentPortal.OrganizationID, userID, false);
+            person.SaveAddresses(CurrentPortal.OrganizationID, userID);
+            person.SavePhones(CurrentPortal.OrganizationID, userID);
+            person.SaveEmails(CurrentPortal.OrganizationID, userID);
+
+            //
+            // Process the spouse if we have spousal(?) information.
+            //
+            if (tbSpouseFirstName.Text.Trim().Length > 0)
+            {
+                //
+                // Set the spouse's name.
+                //
+                spouse.FirstName = tbSpouseFirstName.Text.Trim();
+                spouse.LastName = tbSpouseLastName.Text.Trim();
+
+                //
+                // Set the spouse's e-mail.
+                //
+                spouse.Emails.FirstActive = tbSpouseEmail.Text.Trim();
+
+                //
+                // Set the spouse's home phone.
+                //
+                phone = spouse.Phones.FindByType(SystemLookup.PhoneType_Home);
+                if (phone == null)
+                {
+                    phone = new PersonPhone();
+                    phone.PhoneType = new Lookup(SystemLookup.PhoneType_Home);
+                    spouse.Phones.Add(phone);
+                }
+                phone.Number = tbHomePhone.Text.Trim();
+
+                //
+                // Set the spouse's cell phone.
+                //
+                phone = spouse.Phones.FindByType(SystemLookup.PhoneType_Cell);
+                if (phone == null)
+                {
+                    phone = new PersonPhone();
+                    phone.PhoneType = new Lookup(SystemLookup.PhoneType_Cell);
+                    spouse.Phones.Add(phone);
+                }
+                phone.Number = tbSpouseCellPhone.Text.Trim();
+
+                //
+                // Set the spouse's address.
+                //
+                address = spouse.Addresses.FindByType(SystemLookup.AddressType_Home);
+                if (address == null)
+                {
+                    address = new PersonAddress();
+                    address.AddressType = new Lookup(SystemLookup.AddressType_Home);
+                    spouse.Addresses.Add(address);
+                }
+                address.Address = new Address(tbStreet.Text.Trim(), String.Empty, tbCity.Text.Trim(), ddlState.SelectedValue, tbZipcode.Text.Trim(), false);
+                address.Primary = true;
+
+                //
+                // Update some final information about the spouse.
+                //
+                if (spouse.PersonID == -1)
+                {
+                    spouse.RecordStatus = Arena.Enums.RecordStatus.Pending;
+                    spouse.MemberStatus = new Lookup(MemberStatusIDSetting);
+                    spouse.MaritalStatus = new Lookup(SystemLookup.MaritalStatus_Married);
+                    spouse.Gender = Arena.Enums.Gender.Unknown;
+                }
+
+                //
+                // Save the spouse record.
+                //
+                spouse.Save(CurrentPortal.OrganizationID, userID, false);
+                spouse.SaveAddresses(CurrentPortal.OrganizationID, userID);
+                spouse.SavePhones(CurrentPortal.OrganizationID, userID);
+                spouse.SaveEmails(CurrentPortal.OrganizationID, userID);
+            }
+
+            //
+            // If we created a new person (and possibly spouse) record then setup
+            // the family information.
+            //
+            if (newPerson || newSpouse)
+            {
+                FamilyMember fm;
+                Family family;
+
+                //
+                // Create a new family record if we need one.
+                //
+                if (newPerson)
+                {
+                    family = new Family();
+                    family.OrganizationID = CurrentPortal.OrganizationID;
+                    family.FamilyName = tbLastName.Text.Trim() + " Family";
+                    family.Save(userID);
+
+                    fm = new FamilyMember(family.FamilyID, person.PersonID);
+                    fm.FamilyID = family.FamilyID;
+                    fm.FamilyRole = new Lookup(SystemLookup.FamilyRole_Adult);
+                    fm.Save(userID);
+                }
+                else
+                    family = person.Family();
+
+                //
+                // Add the spouse to the family if we have a spouse.
+                //
+                if (newSpouse)
+                {
+                    fm = new FamilyMember(family.FamilyID, spouse.PersonID);
+                    fm.FamilyID = family.FamilyID;
+                    fm.FamilyRole = new Lookup(SystemLookup.FamilyRole_Adult);
+                    fm.Save(userID);
+                }
             }
         }
 
@@ -74,35 +352,75 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
 
             //
+            // Verify information.
+            //
+            if (Page.IsValid == false)
+            {
+                Page.FindControl("valSummary").Visible = true;
+
+                return;
+            }
+
+            //
+            // Save people records if we are configured that way.
+            //
+            if (MemberStatusIDSetting != -1 || person.PersonID != -1)
+            {
+                SaveInfo();
+            }
+
+            //
             // Join the member into the small group if that has been requested.
             //
-            if (NewMemberRoleSetting != -1 && ArenaContext.Current.Person.PersonID != -1)
+            if (NewMemberRoleSetting != -1)
             {
-                GroupMember gm = new GroupMember(group.GroupID, ArenaContext.Current.Person.PersonID);
-
-                if (gm.GroupID == -1)
+                //
+                // If we have a valid person object then add them to the small group.
+                //
+                if (person.PersonID != -1)
                 {
-                    gm.Active = true;
-                    gm.DateJoined = DateTime.Now;
-                    gm.GroupID = group.GroupID;
-                    gm.MemberNotes = tbComments.Text;
-                    gm.Role = new Lookup(NewMemberRoleSetting);
+                    GroupMember gm = new GroupMember(group.GroupID, person.PersonID);
 
-                    gm.Save(ArenaContext.Current.Organization.OrganizationID,
-                        (ArenaContext.Current.Person.PersonID != -1 ? ArenaContext.Current.User.Identity.Name : "smallgrouplocator"));
+                    if (gm.GroupID == -1)
+                    {
+                        gm.Active = true;
+                        gm.DateJoined = DateTime.Now;
+                        gm.GroupID = group.GroupID;
+                        gm.MemberNotes = tbComments.Text;
+                        gm.Role = new Lookup(NewMemberRoleSetting);
+
+                        gm.Save(ArenaContext.Current.Organization.OrganizationID,
+                            (CurrentPerson != null ? ArenaContext.Current.User.Identity.Name : "smallgrouplocator"));
+                    }
+                }
+
+                //
+                // If we have a valid spouse object then add them to the small group.
+                //
+                if (spouse.PersonID != -1)
+                {
+                    GroupMember gm = new GroupMember(group.GroupID, spouse.PersonID);
+
+                    if (gm.GroupID == -1)
+                    {
+                        gm.Active = true;
+                        gm.DateJoined = DateTime.Now;
+                        gm.GroupID = group.GroupID;
+                        gm.MemberNotes = tbComments.Text;
+                        gm.Role = new Lookup(NewMemberRoleSetting);
+
+                        gm.Save(ArenaContext.Current.Organization.OrganizationID,
+                            (CurrentPerson != null ? ArenaContext.Current.User.Identity.Name : "smallgrouplocator"));
+                    }
                 }
             }
 
             //
             // E-mail the small group leader if the leader should be notified.
             //
-            if (NotifyGroupLeaderSetting == true)
+            if (NotifyGroupLeaderSetting == true && !String.IsNullOrEmpty(group.Leader.Emails.FirstActive))
             {
-                ArenaSendMail.SendMail("daniel@hdcnet.org",
-                    "Daniel Hazelbaker",
-                    group.Leader.Emails.FirstActive,
-                    "subject",
-                    MailMessageContents(group, true));
+                ArenaSendMail.SendMail(String.Empty, String.Empty, group.Leader.Emails.FirstActive, "Small Group Request", MailMessageContents(group, true));
             }
 
             //
@@ -110,6 +428,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             //
             foreach (String email in NotifyAddressSetting)
             {
+                ArenaSendMail.SendMail(String.Empty, String.Empty, email, "Small Group Request", MailMessageContents(group, false));
             }
         }
 
@@ -131,29 +450,56 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             sb.AppendFormat("Somebody is interested in joining {0} small group {1}. The information they provided is below.<br /><br />\r\n",
                 (toLeader ? "your" : "the"), group.Name);
 
-            sb.AppendFormat("<b>Name:</b> {0}<br />\r\n", tbName.Text);
             sb.AppendFormat("<b>Group ID:</b> {0}<br />\r\n", group.GroupID.ToString());
 
-            if (AvailableFieldsSetting.Length > 0 && !AvailableFieldsSetting.Contains(FieldValueEmail))
-            {
+            //
+            // Include the primary person's information.
+            //
+            sb.AppendFormat("<b>First Name:</b> {0}<br />\r\n", tbFirstName.Text);
+            sb.AppendFormat("<b>Last Name:</b> {0}<br />\r\n", tbLastName.Text);
+
+            if (AvailableFieldsSetting.Length == 0 || AvailableFieldsSetting.Contains(FieldValueEmail))
                 sb.AppendFormat("<b>E-mail:</b> {0}<br />\r\n", tbEmail.Text);
+
+            if (AvailableFieldsSetting.Length == 0 || AvailableFieldsSetting.Contains(FieldValueHomePhone))
+                sb.AppendFormat("<b>Home Phone:</b> {0}<br />\r\n", tbHomePhone.Text);
+
+            if (AvailableFieldsSetting.Length == 0 || AvailableFieldsSetting.Contains(FieldValueCellPhone))
+                sb.AppendFormat("<b>Cell Phone:</b> {0}<br />\r\n", tbCellPhone.Text);
+
+            //
+            // If the spouse is also interested then include their information.
+            //
+            if (cbSpouse.Checked && tbSpouseFirstName.Text.Length > 0 && tbSpouseLastName.Text.Length > 0)
+            {
+                sb.AppendFormat("<b>First Name:</b> {0}<br />\r\n", tbFirstName.Text);
+                sb.AppendFormat("<b>Last Name:</b> {0}<br />\r\n", tbLastName.Text);
+
+                if (AvailableFieldsSetting.Length == 0 || AvailableFieldsSetting.Contains(FieldValueEmail))
+                    sb.AppendFormat("<b>E-mail:</b> {0}<br />\r\n", tbEmail.Text);
+
+                if (AvailableFieldsSetting.Length == 0 || AvailableFieldsSetting.Contains(FieldValueHomePhone))
+                    sb.AppendFormat("<b>Home Phone:</b> {0}<br />\r\n", tbHomePhone.Text);
+
+                if (AvailableFieldsSetting.Length == 0 || AvailableFieldsSetting.Contains(FieldValueCellPhone))
+                    sb.AppendFormat("<b>Cell Phone:</b> {0}<br />\r\n", tbCellPhone.Text);
             }
 
-            if (AvailableFieldsSetting.Length > 0 && !AvailableFieldsSetting.Contains(FieldValuePhone))
-            {
-                sb.AppendFormat("<b>Phone:</b> {0}<br />\r\n", tbPhone.Text);
-            }
+            //
+            // Include standard address information.
+            //
+            if (AvailableFieldsSetting.Length == 0 || AvailableFieldsSetting.Contains(FieldValueAddress))
+                sb.AppendFormat("<b>Address:</b> {0}, {1}, {2} {3}<br />\r\n", tbStreet.Text, tbCity.Text, ddlState.SelectedValue, tbZipcode.Text);
 
-            if (AvailableFieldsSetting.Length > 0 && !AvailableFieldsSetting.Contains(FieldValueAddress))
-            {
-                sb.AppendFormat("<b>Address:</b> {0}, {1}, {2} {3}<br />\r\n", tbStreet.Text, tbCity.Text, tbState.Text, tbZipcode.Text);
-            }
-
-            if (AvailableFieldsSetting.Length > 0 && !AvailableFieldsSetting.Contains(FieldValueComments))
-            {
+            //
+            // Include any comments if the person entered any.
+            //
+            if (tbComments.Text.Length > 0 && (AvailableFieldsSetting.Length == 0 || AvailableFieldsSetting.Contains(FieldValueComments)))
                 sb.AppendFormat("<b>Comments:</b> {0}<br />\r\n", tbComments.Text);
-            }
 
+            //
+            // If the person has been added to the group then indicate that as well.
+            //
             if (NewMemberRoleSetting != -1 && ArenaContext.Current.Person.PersonID != -1 &&
                 new GroupMember(group.GroupID, ArenaContext.Current.Person.PersonID).GroupID != -1)
             {
