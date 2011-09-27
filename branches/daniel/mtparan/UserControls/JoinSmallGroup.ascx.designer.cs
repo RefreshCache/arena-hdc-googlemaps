@@ -31,6 +31,15 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.TextBox tbFirstName;
         
         /// <summary>
+        /// reqFirstName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator reqFirstName;
+        
+        /// <summary>
         /// lbFieldLastName control.
         /// </summary>
         /// <remarks>
@@ -47,6 +56,15 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox tbLastName;
+        
+        /// <summary>
+        /// reqLastName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator reqLastName;
         
         /// <summary>
         /// lbFieldEmail control.
@@ -67,6 +85,15 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.TextBox tbEmail;
         
         /// <summary>
+        /// reqEmail control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator reqEmail;
+        
+        /// <summary>
         /// lbFieldHomePhone control.
         /// </summary>
         /// <remarks>
@@ -82,7 +109,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox tbHomePhone;
+        protected global::Arena.Portal.UI.PhoneTextBox tbHomePhone;
         
         /// <summary>
         /// lbFieldCellPhone control.
@@ -100,7 +127,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox tbCellPhone;
+        protected global::Arena.Portal.UI.PhoneTextBox tbCellPhone;
         
         /// <summary>
         /// divFieldSpouse control.
@@ -199,7 +226,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox tbSpouseCellPhone;
+        protected global::Arena.Portal.UI.PhoneTextBox tbSpouseCellPhone;
         
         /// <summary>
         /// divFieldAddress control.
@@ -220,6 +247,15 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.TextBox tbStreet;
         
         /// <summary>
+        /// reqStreetAddress control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator reqStreetAddress;
+        
+        /// <summary>
         /// tbCity control.
         /// </summary>
         /// <remarks>
@@ -227,6 +263,15 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox tbCity;
+        
+        /// <summary>
+        /// reqCity control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator reqCity;
         
         /// <summary>
         /// ddlState control.
@@ -245,6 +290,15 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox tbZipcode;
+        
+        /// <summary>
+        /// reqZipCode control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator reqZipCode;
         
         /// <summary>
         /// lbFieldComments control.

@@ -1,12 +1,13 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="JoinSmallGroup.ascx.cs" CodeBehind="JoinSmallGroup.ascx.cs" Inherits="ArenaWeb.UserControls.Custom.HDC.GoogleMaps.JoinSmallGroup" %>
+<%@ Register TagPrefix="Arena" Namespace="Arena.Portal.UI" Assembly="Arena.Portal.UI" %>
 
 <script type="text/javascript">
     $(document).ready(function () {
-        $('input.jsg_spouseinterest').click(function () {
+        $('span.jsg_spouseinterest input').click(function () {
             if ($(this).attr('checked'))
-                $('#divFieldSpouseContent').css('display', '');
+                $('div.jsg_spousecontent').css('display', '');
             else
-                $('#divFieldSpouseContent').css('display', 'none');
+                $('div.jsg_spousecontent').css('display', 'none');
         });
     });
 </script>
@@ -15,26 +16,31 @@
     <label ID="lbFieldFirstName" runat="server" class="jsg_firstname" for="<%= tbFirstName.ClientID %>">
         First Name
         <asp:TextBox runat="server" ID="tbFirstName"></asp:TextBox>
+        <asp:RequiredFieldValidator ID="reqFirstName" Runat="server" ControlToValidate="tbFirstName" CssClass="errorText" 
+						Display="Static" ErrorMessage="First Name is required"> *</asp:RequiredFieldValidator>
     </label>
     <label ID="lbFieldLastName" runat="server" class="jsg_lastname" for="<%= tbLastName.ClientID %>">
         Last Name
         <asp:TextBox runat="server" ID="tbLastName"></asp:TextBox>
+        <asp:RequiredFieldValidator ID="reqLastName" Runat="server" ControlToValidate="tbLastName" CssClass="errorText" 
+						Display="Static" ErrorMessage="First Name is required"> *</asp:RequiredFieldValidator>
     </label>
     <label ID="lbFieldEmail" runat="server" class="jsg_email" for="<%= tbEmail.ClientID %>">
         E-mail
         <asp:TextBox runat="server" ID="tbEmail"></asp:TextBox>
-    </label>
+        <asp:RequiredFieldValidator ID="reqEmail" Runat="server" ControlToValidate="tbEmail" CssClass="errorText" 
+						Display="Static" ErrorMessage="Email is required"> *</asp:RequiredFieldValidator>    </label>
     <label ID="lbFieldHomePhone" runat="server" class="jsg_homephone" for="<%= tbHomePhone.ClientID %>">
         Home Phone
-        <asp:TextBox runat="server" ID="tbHomePhone"></asp:TextBox>
+        <Arena:PhoneTextBox runat="server" ID="tbHomePhone" ShowExtension="false" />
     </label>
     <label ID="lbFieldCellPhone" runat="server" class="jsg_cellphone" for="<%= tbCellPhone.ClientID %>">
         Cell Phone
-        <asp:TextBox runat="server" ID="tbCellPhone"></asp:TextBox>
+        <Arena:PhoneTextBox runat="server" ID="tbCellPhone" ShowExtension="false" />
     </label>
     <div id="divFieldSpouse" runat="server" class="jsg_spouse">
-        <asp:CheckBox ID="cbSpouse" CssClass="jsg_spouseinterest" runat="server" Text="My spouse is interested in joining to..." />
-        <div id="divFieldSpouseContent" runat="server" class="jsg_spousecontent">
+        <asp:CheckBox ID="cbSpouse" CssClass="jsg_spouseinterest" runat="server" Text="My spouse is also interested in joining..." />
+        <div id="divFieldSpouseContent" runat="server" class="jsg_spousecontent" style="display: none;">
             <label ID="lbFieldSpouseFirstName" runat="server" class="jsg_firstname" for="<%= tbSpouseFirstName.ClientID %>">
                 First Name
                 <asp:TextBox runat="server" ID="tbSpouseFirstName"></asp:TextBox>
@@ -49,7 +55,7 @@
             </label>
             <label ID="lbFieldSpouseCellPhone" runat="server" class="jsg_cellphone" for="<%= tbSpouseCellPhone.ClientID %>">
                 Cell Phone
-                <asp:TextBox runat="server" ID="tbSpouseCellPhone"></asp:TextBox>
+                <Arena:PhoneTextBox ID="tbSpouseCellPhone" runat="server" ShowExtension="false" />
             </label>
         </div>
     </div>
@@ -57,10 +63,14 @@
         <label id="lbFieldStreet" class="jsg_street">
             Street
             <asp:TextBox runat="server" ID="tbStreet"></asp:TextBox>
+            <asp:RequiredFieldValidator ID="reqStreetAddress" Runat="server" ControlToValidate="tbStreet" CssClass="errorText" 
+						Display="Static" ErrorMessage="Street Address is required"> *</asp:RequiredFieldValidator>
         </label>
         <label id="lbFieldCity" class="jsg_city">
             City
             <asp:TextBox runat="server" ID="tbCity"></asp:TextBox>
+            <asp:RequiredFieldValidator ID="reqCity" Runat="server" ControlToValidate="tbCity" CssClass="errorText" 
+						Display="Static" ErrorMessage="City is required"> *</asp:RequiredFieldValidator>
         </label>
         <label id="lbFieldState" class="jsg_state">
             State
@@ -69,6 +79,8 @@
         <label id="lbFieldZipcode" class="jsg_zipcode">
             Zipcode
             <asp:TextBox runat="server" ID="tbZipcode"></asp:TextBox>
+            <asp:RequiredFieldValidator ID="reqZipCode" Runat="server" ControlToValidate="tbZipcode" CssClass="errorText" 
+						Display="Static" ErrorMessage="Zip Code is required"> *</asp:RequiredFieldValidator>
         </label>
     </div>
     <label id="lbFieldComments" runat="server" class="jsg_comments">

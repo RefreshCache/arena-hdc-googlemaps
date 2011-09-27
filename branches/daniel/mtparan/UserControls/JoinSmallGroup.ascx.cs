@@ -36,7 +36,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         [TextSetting("Notify Address", "Enter one or more e-mail addresses, separated by a comma, to be notified of the request to join the small group.", false)]
         public String[] NotifyAddressSetting { get { return Setting("NotifyGroupLeader", "", false).Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries); } }
 
-        [LookupSetting("New Member Role", "To automatically add the user to the small group select the role to use. (User must be logged in for this to work)", false)]
+        [LookupSetting("New Member Role", "To automatically add the user to the small group select the role to use. (User must be logged in for this to work)", false, "BDF83C84-489B-401C-8B65-36C399D91B6E")]
         public Int32 NewMemberRoleSetting { get { return Convert.ToInt32(Setting("NewMemberRole", "-1", false)); } }
 
         [LookupSetting("Member Status", "The Member Status to set a user to when they add themself through this form. If not set them no records will be created.", false, "0B4532DB-3188-40F5-B188-E7E6E4448C85")]
@@ -44,8 +44,8 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
         [CustomListSetting("Available Fields", "Select which fields are available for the user to fill in. Defaults to all fields.", false, "",
             new String[] { "E-mail", "HomePhone", "CellPhone", "Address", "Comments" },
-            new String[] { FieldValueEmail, FieldValueHomePhone, FieldValueCellPhone, FieldValueAddress, FieldValueComments })]
-        public String[] AvailableFieldsSetting { get { return Setting("AvailableFields", "", false).Split(new char[] { ',' }); } }
+            new String[] { FieldValueEmail, FieldValueHomePhone, FieldValueCellPhone, FieldValueAddress, FieldValueComments }, ListSelectionMode.Multiple)]
+        public String[] AvailableFieldsSetting { get { return Setting("AvailableFields", "", false).Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries); } }
 
         #endregion
 
@@ -60,6 +60,8 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            BasePage.AddJavascriptInclude(Page, BasePage.JQUERY_INCLUDE);
+
             //
             // Load the original person and spouse, if we know them.
             //
@@ -104,6 +106,11 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
             ddlState.SelectedIndex = -1;
             Utilities.LoadStates(ddlState);
+            try
+            {
+                ddlState.SelectedValue = CurrentOrganization.Address.State;
+            }
+            catch { }
 
             //
             // Load name information for primary and spouse.
@@ -124,13 +131,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             //
             phone = person.Phones.FindByType(SystemLookup.PhoneType_Home);
             if (phone != null)
-                tbHomePhone.Text = phone.Number;
+                tbHomePhone.PhoneNumber = phone.Number;
             phone = person.Phones.FindByType(SystemLookup.PhoneType_Cell);
             if (phone != null)
-                tbCellPhone.Text = phone.Number;
+                tbCellPhone.PhoneNumber = phone.Number;
             phone = spouse.Phones.FindByType(SystemLookup.PhoneType_Cell);
             if (phone != null)
-                tbSpouseCellPhone.Text = phone.Number;
+                tbSpouseCellPhone.PhoneNumber = phone.Number;
 
             //
             // Load address information for family.
@@ -179,7 +186,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 phone.PhoneType = new Lookup(SystemLookup.PhoneType_Home);
                 person.Phones.Add(phone);
             }
-            phone.Number = tbHomePhone.Text.Trim();
+            phone.Number = tbHomePhone.PhoneNumber.Trim();
 
             //
             // Set the primary's cell phone.
@@ -191,20 +198,23 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 phone.PhoneType = new Lookup(SystemLookup.PhoneType_Cell);
                 person.Phones.Add(phone);
             }
-            phone.Number = tbCellPhone.Text.Trim();
+            phone.Number = tbCellPhone.PhoneNumber.Trim();
 
             //
             // Set the primary's address.
             //
-            address = person.Addresses.FindByType(SystemLookup.AddressType_Home);
-            if (address == null)
+            if (tbStreet.Text.Trim().Length > 0)
             {
-                address = new PersonAddress();
-                address.AddressType = new Lookup(SystemLookup.AddressType_Home);
-                person.Addresses.Add(address);
+                address = person.Addresses.FindByType(SystemLookup.AddressType_Home);
+                if (address == null)
+                {
+                    address = new PersonAddress();
+                    address.AddressType = new Lookup(SystemLookup.AddressType_Home);
+                    person.Addresses.Add(address);
+                }
+                address.Address = new Address(tbStreet.Text.Trim(), String.Empty, tbCity.Text.Trim(), ddlState.SelectedValue, tbZipcode.Text.Trim(), false);
+                address.Primary = true;
             }
-            address.Address = new Address(tbStreet.Text.Trim(), String.Empty, tbCity.Text.Trim(), ddlState.SelectedValue, tbZipcode.Text.Trim(), false);
-            address.Primary = true;
 
             //
             // Set some final information about the primary person if we are creating a new record.
@@ -224,7 +234,8 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             // Save the person record.
             //
             person.Save(CurrentPortal.OrganizationID, userID, false);
-            person.SaveAddresses(CurrentPortal.OrganizationID, userID);
+            if (tbStreet.Text.Trim().Length > 0)
+                person.SaveAddresses(CurrentPortal.OrganizationID, userID);
             person.SavePhones(CurrentPortal.OrganizationID, userID);
             person.SaveEmails(CurrentPortal.OrganizationID, userID);
 
@@ -254,7 +265,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                     phone.PhoneType = new Lookup(SystemLookup.PhoneType_Home);
                     spouse.Phones.Add(phone);
                 }
-                phone.Number = tbHomePhone.Text.Trim();
+                phone.Number = tbHomePhone.PhoneNumber.Trim();
 
                 //
                 // Set the spouse's cell phone.
@@ -266,7 +277,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                     phone.PhoneType = new Lookup(SystemLookup.PhoneType_Cell);
                     spouse.Phones.Add(phone);
                 }
-                phone.Number = tbSpouseCellPhone.Text.Trim();
+                phone.Number = tbSpouseCellPhone.PhoneNumber.Trim();
 
                 //
                 // Set the spouse's address.
@@ -462,10 +473,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 sb.AppendFormat("<b>E-mail:</b> {0}<br />\r\n", tbEmail.Text);
 
             if (AvailableFieldsSetting.Length == 0 || AvailableFieldsSetting.Contains(FieldValueHomePhone))
-                sb.AppendFormat("<b>Home Phone:</b> {0}<br />\r\n", tbHomePhone.Text);
+                sb.AppendFormat("<b>Home Phone:</b> {0}<br />\r\n", tbHomePhone.PhoneNumber);
 
             if (AvailableFieldsSetting.Length == 0 || AvailableFieldsSetting.Contains(FieldValueCellPhone))
-                sb.AppendFormat("<b>Cell Phone:</b> {0}<br />\r\n", tbCellPhone.Text);
+                sb.AppendFormat("<b>Cell Phone:</b> {0}<br />\r\n", tbCellPhone.PhoneNumber);
 
             //
             // If the spouse is also interested then include their information.
@@ -479,10 +490,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                     sb.AppendFormat("<b>E-mail:</b> {0}<br />\r\n", tbEmail.Text);
 
                 if (AvailableFieldsSetting.Length == 0 || AvailableFieldsSetting.Contains(FieldValueHomePhone))
-                    sb.AppendFormat("<b>Home Phone:</b> {0}<br />\r\n", tbHomePhone.Text);
+                    sb.AppendFormat("<b>Home Phone:</b> {0}<br />\r\n", tbHomePhone.PhoneNumber);
 
                 if (AvailableFieldsSetting.Length == 0 || AvailableFieldsSetting.Contains(FieldValueCellPhone))
-                    sb.AppendFormat("<b>Cell Phone:</b> {0}<br />\r\n", tbCellPhone.Text);
+                    sb.AppendFormat("<b>Cell Phone:</b> {0}<br />\r\n", tbCellPhone.PhoneNumber);
             }
 
             //
