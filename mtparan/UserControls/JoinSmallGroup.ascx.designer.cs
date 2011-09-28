@@ -13,13 +13,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
     public partial class JoinSmallGroup {
         
         /// <summary>
-        /// lbFieldFirstName control.
+        /// spFieldFirstName control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldFirstName;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl spFieldFirstName;
         
         /// <summary>
         /// tbFirstName control.
@@ -40,13 +40,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.RequiredFieldValidator reqFirstName;
         
         /// <summary>
-        /// lbFieldLastName control.
+        /// spFieldLastName control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldLastName;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl spFieldLastName;
         
         /// <summary>
         /// tbLastName control.
@@ -67,13 +67,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.RequiredFieldValidator reqLastName;
         
         /// <summary>
-        /// lbFieldEmail control.
+        /// spFieldEmail control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldEmail;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl spFieldEmail;
         
         /// <summary>
         /// tbEmail control.
@@ -94,13 +94,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.RequiredFieldValidator reqEmail;
         
         /// <summary>
-        /// lbFieldHomePhone control.
+        /// spFieldHomePhone control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldHomePhone;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl spFieldHomePhone;
         
         /// <summary>
         /// tbHomePhone control.
@@ -112,13 +112,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::Arena.Portal.UI.PhoneTextBox tbHomePhone;
         
         /// <summary>
-        /// lbFieldCellPhone control.
+        /// spFieldCellPhone control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldCellPhone;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl spFieldCellPhone;
         
         /// <summary>
         /// tbCellPhone control.
@@ -157,13 +157,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl divFieldSpouseContent;
         
         /// <summary>
-        /// lbFieldSpouseFirstName control.
+        /// spFieldSpouseFirstName control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldSpouseFirstName;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl spFieldSpouseFirstName;
         
         /// <summary>
         /// tbSpouseFirstName control.
@@ -175,13 +175,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.TextBox tbSpouseFirstName;
         
         /// <summary>
-        /// lbFieldSpouseLastName control.
+        /// spFieldSpouseLastName control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldSpouseLastName;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl spFieldSpouseLastName;
         
         /// <summary>
         /// tbSpouseLastName control.
@@ -193,13 +193,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.TextBox tbSpouseLastName;
         
         /// <summary>
-        /// lbFieldSpouseEmail control.
+        /// spFieldSpouseEmail control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldSpouseEmail;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl spFieldSpouseEmail;
         
         /// <summary>
         /// tbSpouseEmail control.
@@ -211,13 +211,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.TextBox tbSpouseEmail;
         
         /// <summary>
-        /// lbFieldSpouseCellPhone control.
+        /// spFieldSpouseCellPhone control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldSpouseCellPhone;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl spFieldSpouseCellPhone;
         
         /// <summary>
         /// tbSpouseCellPhone control.
@@ -301,13 +301,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         protected global::System.Web.UI.WebControls.RequiredFieldValidator reqZipCode;
         
         /// <summary>
-        /// lbFieldComments control.
+        /// spFieldComments control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lbFieldComments;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl spFieldComments;
         
         /// <summary>
         /// tbComments control.

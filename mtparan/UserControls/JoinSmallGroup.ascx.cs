@@ -72,24 +72,24 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             {
                 if (AvailableFieldsSetting.Length > 0 && !AvailableFieldsSetting.Contains(FieldValueEmail))
                 {
-                    lbFieldEmail.Visible = false;
-                    lbFieldSpouseEmail.Visible = false;
+                    spFieldEmail.Visible = false;
+                    spFieldSpouseEmail.Visible = false;
                 }
 
                 if (AvailableFieldsSetting.Length > 0 && !AvailableFieldsSetting.Contains(FieldValueHomePhone))
-                    lbFieldHomePhone.Visible = false;
+                    spFieldHomePhone.Visible = false;
 
                 if (AvailableFieldsSetting.Length > 0 && !AvailableFieldsSetting.Contains(FieldValueCellPhone))
                 {
-                    lbFieldCellPhone.Visible = false;
-                    lbFieldSpouseCellPhone.Visible = false;
+                    spFieldCellPhone.Visible = false;
+                    spFieldSpouseCellPhone.Visible = false;
                 }
 
                 if (AvailableFieldsSetting.Length > 0 && !AvailableFieldsSetting.Contains(FieldValueAddress))
                     divFieldAddress.Visible = false;
                 
                 if (AvailableFieldsSetting.Length > 0 && !AvailableFieldsSetting.Contains(FieldValueComments))
-                    lbFieldComments.Visible = false;
+                    spFieldComments.Visible = false;
 
                 SetInfo();
             }
