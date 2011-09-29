@@ -34,7 +34,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         public Boolean NotifyGroupLeaderSetting { get { return Convert.ToBoolean(Setting("NotifyGroupLeader", "true", true)); } }
 
         [TextSetting("Notify Address", "Enter one or more e-mail addresses, separated by a comma, to be notified of the request to join the small group.", false)]
-        public String[] NotifyAddressSetting { get { return Setting("NotifyGroupLeader", "", false).Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries); } }
+        public String[] NotifyAddressSetting { get { return Setting("NotifyAddress", "", false).Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries); } }
 
         [LookupSetting("New Member Role", "To automatically add the user to the small group select the role to use. (User must be logged in for this to work)", false, "BDF83C84-489B-401C-8B65-36C399D91B6E")]
         public Int32 NewMemberRoleSetting { get { return Convert.ToInt32(Setting("NewMemberRole", "-1", false)); } }
@@ -47,6 +47,9 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             new String[] { FieldValueEmail, FieldValueHomePhone, FieldValueCellPhone, FieldValueAddress, FieldValueComments }, ListSelectionMode.Multiple)]
         public String[] AvailableFieldsSetting { get { return Setting("AvailableFields", "", false).Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries); } }
 
+        [CssSetting("Style Css", "If you wish to customize the styling you can duplicate the joinsmallgroup.css file and enter the path to it here. Defaults to UserControls/Custom/HDC/GoogleMaps/Includes/joinsmallgroup.css", false)]
+        public String StyleCssSetting { get { return Setting("StyleCss", "UserControls/Custom/HDC/GoogleMaps/Includes/joinsmallgroup.css", false); } }
+
         #endregion
 
 
@@ -58,8 +61,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         #endregion
 
 
+        /// <summary>
+        /// The page is loading and not yet displayed. Prepare any dynamic information
+        /// that needs to be set before page processing begins.
+        /// </summary>
         protected void Page_Load(object sender, EventArgs e)
         {
+            BasePage.AddCssLink(Page, StyleCssSetting);
             BasePage.AddJavascriptInclude(Page, BasePage.JQUERY_INCLUDE);
 
             //
@@ -68,6 +76,9 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             person = (CurrentPerson != null ? CurrentPerson : new Person());
             spouse = (person.Spouse() != null ? person.Spouse() : new Person());
 
+            //
+            // Set the initial information on the page as well as the field visibility.
+            //
             if (!IsPostBack)
             {
                 if (AvailableFieldsSetting.Length > 0 && !AvailableFieldsSetting.Contains(FieldValueEmail))
@@ -97,13 +108,17 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
 
         /// <summary>
-        /// Set initial information to be displayed on the page.
+        /// Set initial information to be displayed on the page. If the user is logged in
+        /// then this function will fill in their personal information automatically for them.
         /// </summary>
         void SetInfo()
         {
             PersonPhone phone;
 
 
+            //
+            // Load up the available states to choose from.
+            //
             ddlState.SelectedIndex = -1;
             Utilities.LoadStates(ddlState);
             try
@@ -156,10 +171,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         }
 
 
+        /// <summary>
+        /// Save the information the user entered on the form into their person records.
+        /// </summary>
         void SaveInfo()
         {
             Boolean newPerson = (person.PersonID == -1);
-            Boolean newSpouse = (spouse.PersonID == -1);
+            Boolean newSpouse = (spouse.PersonID == -1 && cbSpouse.Checked && tbSpouseFirstName.Text.Trim().Length > 0 && tbSpouseLastName.Text.Trim().Length > 0);
             string userID = (!String.IsNullOrEmpty(CurrentUser.Identity.Name) ? CurrentUser.Identity.Name : "smallgrouplocator");
             PersonPhone phone;
             PersonAddress address;
@@ -242,7 +260,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             //
             // Process the spouse if we have spousal(?) information.
             //
-            if (tbSpouseFirstName.Text.Trim().Length > 0)
+            if (tbSpouseFirstName.Text.Trim().Length > 0 && tbSpouseLastName.Text.Trim().Length > 0)
             {
                 //
                 // Set the spouse's name.
@@ -383,7 +401,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             //
             // Join the member into the small group if that has been requested.
             //
-            if (NewMemberRoleSetting != -1)
+            if (NewMemberRoleSetting != -1 && group.GroupID != -1)
             {
                 //
                 // If we have a valid person object then add them to the small group.

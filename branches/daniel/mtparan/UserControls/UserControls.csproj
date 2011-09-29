@@ -125,6 +125,7 @@
     <Content Include="Includes\grouplocator.xslt">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Includes\joinsmallgroup.css" />
     <Content Include="Includes\jquery.colorbox-min.js" />
     <Content Include="Includes\jquery.tablesorter.min.js" />
     <Content Include="Includes\jquery.tablesorter.pager.js" />
