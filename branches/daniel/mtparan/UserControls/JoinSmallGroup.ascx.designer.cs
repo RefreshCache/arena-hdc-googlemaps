@@ -13,6 +13,15 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
     public partial class JoinSmallGroup {
         
         /// <summary>
+        /// pnlForm control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlForm;
+        
+        /// <summary>
         /// spFieldFirstName control.
         /// </summary>
         /// <remarks>
@@ -326,5 +335,14 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnSubmit;
+        
+        /// <summary>
+        /// pnlThankYou control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlThankYou;
     }
 }
