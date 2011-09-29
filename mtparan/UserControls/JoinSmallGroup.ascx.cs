@@ -50,6 +50,9 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         [CssSetting("Style Css", "If you wish to customize the styling you can duplicate the joinsmallgroup.css file and enter the path to it here. Defaults to UserControls/Custom/HDC/GoogleMaps/Includes/joinsmallgroup.css", false)]
         public String StyleCssSetting { get { return Setting("StyleCss", "UserControls/Custom/HDC/GoogleMaps/Includes/joinsmallgroup.css", false); } }
 
+        [TextSetting("Redirect URL", "The URL that the user will be redirected to after selecting or creating their account.", false)]
+        public string RedirectSetting { get { return Setting("Redirect", "", false); } }
+
         #endregion
 
 
@@ -458,6 +461,19 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             foreach (String email in NotifyAddressSetting)
             {
                 ArenaSendMail.SendMail(String.Empty, String.Empty, email, "Small Group Request", MailMessageContents(group, false));
+            }
+
+            //
+            // Either redirect the user or hide the form input and show a thank you panel.
+            //
+            if (RedirectSetting.Trim() != String.Empty)
+            {
+                Response.Redirect(RedirectSetting.Trim(), true);
+            }
+            else
+            {
+                pnlForm.Visible = false;
+                pnlThankYou.Visible = true;
             }
         }
 
