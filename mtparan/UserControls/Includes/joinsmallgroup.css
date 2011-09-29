@@ -1,0 +1,41 @@
+﻿/* Make sure the Apply Filter button is on a line by itself. */
+div.jsg_fields > input.jsg_submit { display: block; margin-left: 156px; margin-top: 10px; }
+
+/* This line applied to any label will cause a line break. If you wish to have some
+   filter elements grouped together then only apply this css to those elements you
+   wish to start a new line. */
+div.jsg_fields > span, div.jsg_spousecontent > span, div.jsg_address > span
+{
+    display: block;
+}
+
+/* Make the label text right-aligned and also 150px */
+div.jsg_fields > span > label, div.jsg_spousecontent > span > label, div.jsg_address > span > label
+{
+    width: 150px;
+    text-align: right;
+    display: inline-block;
+}
+span.jsg_comments > label { vertical-align: top; }
+
+/* Set the width of the input fields */
+span.jsg_firstname > input,span.jsg_lastname > input { width: 150px; }
+span.jsg_email > input { width: 180px; }
+span.jsg_phone > input { width: 135px; }
+span.jsg_street > input { width: 180px; }
+span.jsg_city > input { width: 135px; }
+span.jsg_zipcode > input { width: 80px; }
+span.jsg_comments > textarea { width: 200px; height: 40px; }
+
+/* Style the spouse interest checkbox. */
+span.jsg_spouseinterest
+{
+    padding-left: 156px;
+    display: inline-block;
+    width: 200px;
+}
+span.jsg_spouseinterest > input { margin-left: 0px; }
+div.jsg_spouseholder { overflow: hidden; height: 0px; }
+
+/* Pad the address section. */
+div.jsg_address { margin-top: 10px; margin-bottom: 10px; }
