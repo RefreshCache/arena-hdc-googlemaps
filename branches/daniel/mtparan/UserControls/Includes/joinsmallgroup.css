@@ -9,7 +9,13 @@ div.jsg_fields > span, div.jsg_spousecontent > span, div.jsg_address > span
     display: block;
 }
 
-/* Make the label text right-aligned and also 150px */
+/* Put some spacing between all the elements. */
+div.jsg_fields > span, div.jsg_spousecontent > span, div.jsg_address > span
+{
+    margin-bottom: 3px;
+}
+
+/* Make the label text right-aligned and 150px wide*/
 div.jsg_fields > span > label, div.jsg_spousecontent > span > label, div.jsg_address > span > label
 {
     width: 150px;

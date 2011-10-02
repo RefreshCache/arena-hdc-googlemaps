@@ -5,10 +5,11 @@
     $(document).ready(function () {
         $('span.jsg_spouseinterest input').click(function () {
             if ($(this).attr('checked')) {
+                $('div.jsg_spousecontent').show();
                 $('div.jsg_spouseholder').animate({ height: $('div.jsg_spousecontent').height() + 'px' }, 300);
             }
             else
-                $('div.jsg_spouseholder').animate({ height: '0px' }, 300);
+                $('div.jsg_spouseholder').animate({ height: '0px' }, 300, function () { $('div.jsg_spousecontent').hide(); });
         });
     });
 </script>
@@ -45,7 +46,7 @@
         <div id="divFieldSpouse" runat="server" class="jsg_spouse">
             <asp:CheckBox ID="cbSpouse" CssClass="jsg_spouseinterest" runat="server" Text="My spouse is also interested in joining..." />
             <div class="jsg_spouseholder">
-                <div id="divFieldSpouseContent" runat="server" class="jsg_spousecontent">
+                <div id="divFieldSpouseContent" runat="server" class="jsg_spousecontent" style="display: none;">
                     <span ID="spFieldSpouseFirstName" runat="server" class="jsg_firstname">
                         <label for="<%= tbSpouseFirstName.ClientID %>">First Name</label>
                         <asp:TextBox runat="server" ID="tbSpouseFirstName"></asp:TextBox>
