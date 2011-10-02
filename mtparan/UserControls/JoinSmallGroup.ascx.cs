@@ -517,17 +517,16 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             //
             if (cbSpouse.Checked && tbSpouseFirstName.Text.Length > 0 && tbSpouseLastName.Text.Length > 0)
             {
-                sb.AppendFormat("<b>First Name:</b> {0}<br />\r\n", tbFirstName.Text);
-                sb.AppendFormat("<b>Last Name:</b> {0}<br />\r\n", tbLastName.Text);
+                sb.AppendFormat("<br />\r\n");
+                sb.AppendFormat("<b>Spouse First Name:</b> {0}<br />\r\n", tbFirstName.Text);
+                sb.AppendFormat("<b>Spouse Last Name:</b> {0}<br />\r\n", tbLastName.Text);
 
                 if (AvailableFieldsSetting.Length == 0 || AvailableFieldsSetting.Contains(FieldValueEmail))
-                    sb.AppendFormat("<b>E-mail:</b> {0}<br />\r\n", tbEmail.Text);
-
-                if (AvailableFieldsSetting.Length == 0 || AvailableFieldsSetting.Contains(FieldValueHomePhone))
-                    sb.AppendFormat("<b>Home Phone:</b> {0}<br />\r\n", tbHomePhone.PhoneNumber);
+                    sb.AppendFormat("<b>Spouse E-mail:</b> {0}<br />\r\n", tbEmail.Text);
 
                 if (AvailableFieldsSetting.Length == 0 || AvailableFieldsSetting.Contains(FieldValueCellPhone))
-                    sb.AppendFormat("<b>Cell Phone:</b> {0}<br />\r\n", tbCellPhone.PhoneNumber);
+                    sb.AppendFormat("<b>Spouse Cell Phone:</b> {0}<br />\r\n", tbCellPhone.PhoneNumber);
+                sb.AppendFormat("<br />\r\n");
             }
 
             //
@@ -545,7 +544,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             //
             // If the person has been added to the group then indicate that as well.
             //
-            if (NewMemberRoleSetting != -1 && ArenaContext.Current.Person.PersonID != -1 &&
+            if (NewMemberRoleSetting != -1 && ArenaContext.Current.Person != null &&
                 new GroupMember(group.GroupID, ArenaContext.Current.Person.PersonID).GroupID != -1)
             {
                 sb.AppendFormat("<br />This person has been added to the small group as a {0}.<br />\r\n",
