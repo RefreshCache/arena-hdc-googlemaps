@@ -55,9 +55,6 @@
             }
         });
     }
-
-    function ApplyFilter() {
-    }
 </script>
 
 <GMap:GoogleMap runat="server" ID="map" HideDownload="true" HideAddtoTag="true" ShowMapType="false" ShowStreetView="false" MinZoomLevel="4" MaxZoomLevel="14" />
@@ -120,7 +117,7 @@
             <asp:DropDownList runat="server" ID="ddlArea"></asp:DropDownList>
         </label>
 
-        <Arena:ArenaButton runat="server" ID="btnFilter" Text="Apply Filter" OnClientClick="ApplyFilter(); return false;" OnClick="btnFilter_Click" />
+        <Arena:ArenaButton runat="server" ID="btnFilter" Text="Apply Filter" OnClick="btnFilter_Click" />
     </div>
 </asp:Panel>
 
