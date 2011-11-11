@@ -40,13 +40,11 @@
         g.infowindow.open(g.map, marker);
 
         $.ajax({
-            url: g.serviceurl + "/GroupDetailsInfoWindow",
-            type: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({ groupID: id }),
-            dataType: "json",
+            url: window.location + "&info_group_id=" + id,
+            type: "GET",
+            contentType: "text/html",
             success: function (data, status) {
-                g.infowindow.setContent(data.d + '<div style="text-align: center"><hr width="75%" /><a href="default.aspx?page=<%= RegistrationPageSetting %>&group=' + id + '">Register for this group</a></div>');
+                g.infowindow.setContent(data + '<div style="text-align: center"><hr width="75%" /><a href="default.aspx?page=<%= RegistrationPageSetting %>&group=' + id + '">Register for this group</a></div>');
             },
             error: function () {
                 g.infowindow.close();

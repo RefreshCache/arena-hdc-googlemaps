@@ -104,6 +104,9 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         [BooleanSetting("Map Visible", "Wether or not to display a single common map.", false, true)]
         public Boolean MapVisibleSetting { get { return Convert.ToBoolean(Setting("MapVisible", "true", false)); } }
 
+        [FileSetting("Info Xslt File", "The small group popup information window uses an XSLT file to format the data displayed. Defaults to UserControls/Custom/HDC/GoogleMaps/Includes/groupinfo.xslt.", false)]
+        public String InfoXsltFileSetting { get { return Setting("InfoXsltFile", "UserControls/Custom/HDC/GoogleMaps/Includes/groupinfo.xslt", false); } }
+
         #endregion
 
 
@@ -125,6 +128,17 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         protected void Page_Load(object sender, EventArgs e)
         {
             BasePage.AddCssLink(Page, StyleCssSetting);
+
+
+            //
+            // If the page is requesting the info to be displayed in the small group popup info window
+            // then send it.
+            //
+            if (!String.IsNullOrEmpty(Request.Params["info_group_id"]))
+            {
+                SmallGroupInfo(Convert.ToInt32(Request.Params["info_group_id"]));
+                return;
+            }
 
             if (!IsPostBack)
             {
@@ -420,7 +434,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             xroot.Attributes.Append(attrib);
 
             //
-            // Inform the XSLT translator if we have distance calcualtions available.
+            // Inform the XSLT translator if we have distance calculations available.
             //
             attrib = xdoc.CreateAttribute("has_distance");
             attrib.InnerText = ViewState["has_distance"].ToString();
@@ -532,8 +546,12 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             attrib.InnerText = g.MeetingDay.Value;
             group.Attributes.Append(attrib);
 
-            attrib = xdoc.CreateAttribute("meetingtime");
+            attrib = xdoc.CreateAttribute("meetingstarttime");
             attrib.InnerText = g.MeetingStartTime.ToString("t");
+            group.Attributes.Append(attrib);
+
+            attrib = xdoc.CreateAttribute("meetingendtime");
+            attrib.InnerText = g.MeetingEndTime.ToString("t");
             group.Attributes.Append(attrib);
 
             attrib = xdoc.CreateAttribute("type");
@@ -566,6 +584,13 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
             attrib = xdoc.CreateAttribute("notes");
             attrib.InnerText = g.Notes;
+            group.Attributes.Append(attrib);
+
+            attrib = xdoc.CreateAttribute("picture");
+            if (g.ImageBlob.BlobID != -1)
+                attrib.InnerText = String.Format("CachedBlob.aspx?guid={0}", g.ImageBlob.GUID);
+            else
+                attrib.InnerText = "";
             group.Attributes.Append(attrib);
 
             attrib = xdoc.CreateAttribute("distance");
@@ -687,6 +712,96 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 ddlArea.Items.Add(new ListItem(a.Name, a.AreaID.ToString()));
             }
             lbFilterArea.Visible = FilterOptionsSetting.Contains(FilterOptions.Area);
+        }
+
+
+        private void SmallGroupInfo(int groupID)
+        {
+            XmlDocument xdoc = new XmlDocument();
+            XmlNode xroot;
+            XmlAttribute xattrib;
+            Group group = new Group(groupID);
+
+
+            //
+            // Setup the XML document.
+            //
+            xroot = xdoc.CreateElement("Data");
+            xdoc.AppendChild(xroot);
+
+            //
+            // Add the registration page setting for use during XSLT.
+            //
+            xattrib = xdoc.CreateAttribute("registration_page");
+            xattrib.InnerText = RegistrationPageSetting.ToString();
+            xroot.Attributes.Append(xattrib);
+
+            //
+            // Add all the various captions.
+            //
+            xattrib = xdoc.CreateAttribute("agegroup_caption");
+            xattrib.InnerText = group.ClusterType.Category.AgeGroupCaption.ToString();
+            xroot.Attributes.Append(xattrib);
+            xattrib = xdoc.CreateAttribute("description_caption");
+            xattrib.InnerText = group.ClusterType.Category.DescriptionCaption.ToString();
+            xroot.Attributes.Append(xattrib);
+            xattrib = xdoc.CreateAttribute("leader_caption");
+            xattrib.InnerText = group.ClusterType.Category.LeaderCaption.ToString();
+            xroot.Attributes.Append(xattrib);
+            xattrib = xdoc.CreateAttribute("maritalpreference_caption");
+            xattrib.InnerText = group.ClusterType.Category.MaritalPreferenceCaption.ToString();
+            xroot.Attributes.Append(xattrib);
+            xattrib = xdoc.CreateAttribute("meetingday_caption");
+            xattrib.InnerText = group.ClusterType.Category.MeetingDayCaption.ToString();
+            xroot.Attributes.Append(xattrib);
+            xattrib = xdoc.CreateAttribute("meetingendtime_caption");
+            xattrib.InnerText = group.ClusterType.Category.MeetingEndTimeCaption.ToString();
+            xroot.Attributes.Append(xattrib);
+            xattrib = xdoc.CreateAttribute("meetingstarttime_caption");
+            xattrib.InnerText = group.ClusterType.Category.MeetingStartTimeCaption.ToString();
+            xroot.Attributes.Append(xattrib);
+            xattrib = xdoc.CreateAttribute("name_caption");
+            xattrib.InnerText = group.ClusterType.Category.NameCaption.ToString();
+            xroot.Attributes.Append(xattrib);
+            xattrib = xdoc.CreateAttribute("notes_caption");
+            xattrib.InnerText = group.ClusterType.Category.NotesCaption.ToString();
+            xroot.Attributes.Append(xattrib);
+            xattrib = xdoc.CreateAttribute("picture_caption");
+            xattrib.InnerText = group.ClusterType.Category.PictureCaption.ToString();
+            xroot.Attributes.Append(xattrib);
+            xattrib = xdoc.CreateAttribute("schedule_caption");
+            xattrib.InnerText = group.ClusterType.Category.ScheduleCaption.ToString();
+            xroot.Attributes.Append(xattrib);
+            xattrib = xdoc.CreateAttribute("topic_caption");
+            xattrib.InnerText = group.ClusterType.Category.TopicCaption.ToString();
+            xroot.Attributes.Append(xattrib);
+            xattrib = xdoc.CreateAttribute("type_caption");
+            xattrib.InnerText = group.ClusterType.Category.TypeCaption.ToString();
+            xroot.Attributes.Append(xattrib);
+            xattrib = xdoc.CreateAttribute("url_caption");
+            xattrib.InnerText = group.ClusterType.Category.UrlCaption.ToString();
+            xroot.Attributes.Append(xattrib);
+
+            //
+            // Add in the small group information.
+            //
+            xroot.AppendChild(GroupXmlNode(group, xdoc, -1));
+
+            //
+            // Translate it with XSLT.
+            //
+            XPathNavigator xnav = xdoc.CreateNavigator();
+            XslCompiledTransform xtrans = new XslCompiledTransform();
+            xtrans.Load(base.Server.MapPath(InfoXsltFileSetting));
+            StringBuilder sb = new StringBuilder();
+            xtrans.Transform((IXPathNavigable)xnav, null, new StringWriter(sb));
+
+            //
+            // Send the response.
+            //
+            Response.Clear();
+            Response.Write(sb.ToString());
+            Response.End();
         }
 
         #endregion

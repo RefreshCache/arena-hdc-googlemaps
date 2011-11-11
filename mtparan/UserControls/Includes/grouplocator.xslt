@@ -30,7 +30,7 @@
                 <xsl:value-of select="@meetingday"/>
               </td>
               <td>
-                <xsl:value-of select="@meetingtime"/>
+                <xsl:value-of select="@meetingstarttime"/>
               </td>
               <td>
                 <xsl:value-of select="@type"/>
