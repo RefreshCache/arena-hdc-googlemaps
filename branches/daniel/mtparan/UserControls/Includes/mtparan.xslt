@@ -117,9 +117,9 @@ div.sgl_address { display: none; }
               </span>
               <span class="sglrc_data">
                 <xsl:value-of select="@meetingday"/>
-                <xsl:if test="@meetingtime != '12:00 AM'">
+                <xsl:if test="@meetingstarttime != '12:00 AM'">
                   <xsl:text> </xsl:text>
-                  <xsl:value-of select="@meetingtime"/>
+                  <xsl:value-of select="@meetingstarttime"/>
                 </xsl:if>
               </span>
             </div>
