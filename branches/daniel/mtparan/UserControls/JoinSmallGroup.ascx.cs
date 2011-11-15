@@ -39,7 +39,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         [LookupSetting("New Member Role", "To automatically add the user to the small group select the role to use. (User must be logged in for this to work)", false, "BDF83C84-489B-401C-8B65-36C399D91B6E")]
         public Int32 NewMemberRoleSetting { get { return Convert.ToInt32(Setting("NewMemberRole", "-1", false)); } }
 
-        [LookupSetting("Member Status", "The Member Status to set a user to when they add themself through this form. If not set them no records will be created.", false, "0B4532DB-3188-40F5-B188-E7E6E4448C85")]
+        [LookupSetting("Member Status", "The Member Status to set a user to when they add themself through this form. If not set then no person records will be created.", false, "0B4532DB-3188-40F5-B188-E7E6E4448C85")]
         public int MemberStatusIDSetting { get { return Convert.ToInt32(Setting("MemberStatusID", "-1", false)); } }
 
         [CustomListSetting("Available Fields", "Select which fields are available for the user to fill in. Defaults to all fields.", false, "",
@@ -50,7 +50,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         [CssSetting("Style Css", "If you wish to customize the styling you can duplicate the joinsmallgroup.css file and enter the path to it here. Defaults to UserControls/Custom/HDC/GoogleMaps/Includes/joinsmallgroup.css", false)]
         public String StyleCssSetting { get { return Setting("StyleCss", "UserControls/Custom/HDC/GoogleMaps/Includes/joinsmallgroup.css", false); } }
 
-        [TextSetting("Redirect URL", "The URL that the user will be redirected to after selecting or creating their account.", false)]
+        [TextSetting("Redirect URL", "The URL that the user will be redirected to after submitting the form.", false)]
         public string RedirectSetting { get { return Setting("Redirect", "", false); } }
 
         #endregion
