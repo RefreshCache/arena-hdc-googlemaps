@@ -122,7 +122,9 @@
     <Content Include="Images\prev.png" />
     <Content Include="Includes\colorbox.css" />
     <Content Include="Includes\googlemaps.js" />
-    <Content Include="Includes\groupinfo.xslt" />
+    <Content Include="Includes\groupinfo.xslt">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Includes\grouplocator.css" />
     <Content Include="Includes\grouplocator.xslt">
       <SubType>Designer</SubType>
