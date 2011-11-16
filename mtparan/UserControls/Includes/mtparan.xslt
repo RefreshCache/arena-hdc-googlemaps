@@ -2,6 +2,9 @@
     xmlns:msxsl="urn:schemas-microsoft-com:xslt" exclude-result-prefixes="msxsl">
   <xsl:output method="html" indent="yes"/>
 
+  <xsl:param name="detailsAsPopup">no</xsl:param>
+  <xsl:param name="registrationAsPopup">yes</xsl:param>
+
   <xsl:template match="/groups">
     <!-- This should probably be in a separate css, but for the moment if lives here. -->
     <xsl:text disable-output-escaping="yes"><![CDATA[
@@ -191,14 +194,51 @@ div.sgl_address { display: none; }
 ]]></xsl:text>
     </xsl:if>
 
-    <!-- The javascript that is used to do final initialization and handle click events. -->
-    <xsl:text disable-output-escaping="yes"><![CDATA[
+    <!-- Show registration page inline -->
+    <xsl:if test="$registrationAsPopup != 'yes'">
+      <xsl:text disable-output-escaping="yes"><![CDATA[
 <script type="text/javascript">
   $(document).ready(function() {
     $('.sglr_info').click(function (e) {
-      window.location = 'default.aspx?page=]]></xsl:text><xsl:value-of select="/groups/@registration_page" /><xsl:text disable-output-escaping="yes"><![CDATA[&group=' + $(this).attr('data-id');
+      window.location = 'default.aspx?page=]]></xsl:text>
+<xsl:value-of select="/groups/@registration_page" />
+<xsl:text disable-output-escaping="yes"><![CDATA[&group=' + $(this).attr('data-id');
     });
   });
+</script>
+]]></xsl:text>
+    </xsl:if>
+
+    <!-- Show registration page as popup -->
+    <xsl:if test="$registrationAsPopup = 'yes'">
+      <xsl:text disable-output-escaping="yes"><![CDATA[
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('.sglr_info').click(function (e) {
+      if (sgl_colorboxinit == false) {
+        $.colorbox.init();
+        sgl_colorboxinit = true;
+      }
+
+      var url = 'default.aspx?page=]]></xsl:text>
+      <xsl:value-of select="/groups/@registration_page" />
+      <xsl:text disable-output-escaping="yes"><![CDATA[&group=' + $(this).attr('data-id');
+
+      $.colorbox({iframe: true, href: url, opacity: 0.7, width: '450px', height: '600px', initialWidth: '350px', initialHeight: '500px'});
+    });
+  });
+</script>
+]]></xsl:text>
+    </xsl:if>
+
+    <!-- The javascript that is used to do final initialization. -->
+    <xsl:text disable-output-escaping="yes"><![CDATA[
+<script type="text/javascript">
+  var original_RegisterSmallGroup = RegisterSmallGroup;
+  function RegisterSmallGroup(gm, marker) {
+    marker.icon = "Custom/MtParan/star.png";
+    original_RegisterSmallGroup(gm, marker);
+  }
 </script>
 ]]></xsl:text>
     
@@ -209,21 +249,6 @@ div.sgl_address { display: none; }
   $(document).ready(function() {
     $('.sglr_map').click(function (e) {
       _ShowGroupPopup(null, $(this).attr('data-id'));
-    });
-
-    $('.sglr_showdetails').click(function (e) {
-      if ($(this).parent().next().height() == 0) {
-        var content = $(this).parent().next().children();
-        var ptop = parseInt(content.css("padding-top"));
-        var pbottom = parseInt(content.css("padding-bottom"));
-
-        $(this).parent().next().animate({height: content.height() + ptop + pbottom}, 200);
-        $(this).text('Hide Details');
-      }
-      else {
-        $(this).parent().next().animate({height: 0}, 200);
-        $(this).text('Show Details');
-      }
     });
   });
 </script>
@@ -246,7 +271,8 @@ div.sgl_address { display: none; }
       disableDefaultUI: true,
       draggable: false,
       scrollwheel: false,
-      keyboardShortcuts: false
+      keyboardShortcuts: false,
+      maxZoom: 14
     };
 
     mtparan_map = new google.maps.Map(document.getElementById('mtparan_map'), myOptions);
@@ -264,17 +290,50 @@ div.sgl_address { display: none; }
       mtparan_map.setCenter(center);
       if (mtparan_marker != null)
         mtparan_marker.setMap(null);
-      mtparan_marker = new google.maps.Marker({position: center, map: mtparan_map, title: $(this).prev().prev().text()});
+      mtparan_marker = new google.maps.Marker({position: center, map: mtparan_map, title: $(this).prev().prev().text(), icon: 'Custom/MtParan/star.png'});
 
       $.colorbox({inline: true, href: '#mtparan_map', opacity: 0.7, initialWidth: '300px', initialHeight: '100px'});
     });
+  });
+</script>
+]]></xsl:text>
+    </xsl:if>
 
+    <!-- The javascript to show the group details as a popup. -->
+    <xsl:if test="$detailsAsPopup = 'yes'">
+      <xsl:text disable-output-escaping="yes"><![CDATA[
+<script type="text/javascript">
+  $(document).ready(function() {
     $('.sglr_showdetails').click(function (e) {
       if (sgl_colorboxinit == false) {
         $.colorbox.init();
         sgl_colorboxinit = true;
       }
       $.colorbox({inline: true, href: '#' + $(this).parent().next().children().attr('id'), maxWidth: '550px', opacity: 0.7, initialWidth: '300px', initialHeight: '100px'});
+    });
+  });
+</script>
+]]></xsl:text>
+    </xsl:if>
+
+    <!-- The javascript to show the group details inline. -->
+    <xsl:if test="$detailsAsPopup != 'yes'">
+      <xsl:text disable-output-escaping="yes"><![CDATA[
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('.sglr_showdetails').click(function (e) {
+      if ($(this).parent().next().height() == 0) {
+        var content = $(this).parent().next().children();
+        var ptop = parseInt(content.css("padding-top"));
+        var pbottom = parseInt(content.css("padding-bottom"));
+
+        $(this).parent().next().animate({height: content.height() + ptop + pbottom}, 200);
+        $(this).text('Hide Details');
+      }
+      else {
+        $(this).parent().next().animate({height: 0}, 200);
+        $(this).text('Show Details');
+      }
     });
   });
 </script>
