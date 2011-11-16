@@ -120,6 +120,7 @@
     <Content Include="Images\last.png" />
     <Content Include="Images\next.png" />
     <Content Include="Images\prev.png" />
+    <Content Include="Images\star.png" />
     <Content Include="Includes\colorbox.css" />
     <Content Include="Includes\googlemaps.js" />
     <Content Include="Includes\groupinfo.xslt">
