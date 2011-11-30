@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
@@ -31,27 +32,40 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         #region Module Settings
 
         [BooleanSetting("Notify Group Leader", "Notify the small group leader about the request to join the small group.", true, false)]
+        [Category("Notification")]
         public Boolean NotifyGroupLeaderSetting { get { return Convert.ToBoolean(Setting("NotifyGroupLeader", "true", true)); } }
 
         [TextSetting("Notify Address", "Enter one or more e-mail addresses, separated by a comma, to be notified of the request to join the small group.", false)]
+        [Category("Notification")]
         public String[] NotifyAddressSetting { get { return Setting("NotifyAddress", "", false).Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries); } }
 
+
         [LookupSetting("New Member Role", "To automatically add the user to the small group select the role to use. (User must be logged in for this to work)", false, "BDF83C84-489B-401C-8B65-36C399D91B6E")]
+        [Category("Action")]
         public Int32 NewMemberRoleSetting { get { return Convert.ToInt32(Setting("NewMemberRole", "-1", false)); } }
 
+        [BooleanSetting("Pending Registration", "To add this person as a pending registration to the small group set this value to true. This option cannot be used at the same time as the New Member Role option.", true, true)]
+        [Category("Action")]
+        public Boolean PendingRegistrationSetting { get { return Convert.ToBoolean(Setting("PendingRegistration", "true", false)); } }
+
         [LookupSetting("Member Status", "The Member Status to set a user to when they add themself through this form. If not set then no person records will be created.", false, "0B4532DB-3188-40F5-B188-E7E6E4448C85")]
+        [Category("Action")]
         public int MemberStatusIDSetting { get { return Convert.ToInt32(Setting("MemberStatusID", "-1", false)); } }
+
+        [TextSetting("Redirect URL", "The URL that the user will be redirected to after submitting the form.", false)]
+        [Category("Action")]
+        public string RedirectSetting { get { return Setting("Redirect", "", false); } }
+
 
         [CustomListSetting("Available Fields", "Select which fields are available for the user to fill in. Defaults to all fields.", false, "",
             new String[] { "E-mail", "HomePhone", "CellPhone", "Address", "Comments" },
             new String[] { FieldValueEmail, FieldValueHomePhone, FieldValueCellPhone, FieldValueAddress, FieldValueComments }, ListSelectionMode.Multiple)]
+        [Category("Formatting")]
         public String[] AvailableFieldsSetting { get { return Setting("AvailableFields", "", false).Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries); } }
 
         [CssSetting("Style Css", "If you wish to customize the styling you can duplicate the joinsmallgroup.css file and enter the path to it here. Defaults to UserControls/Custom/HDC/GoogleMaps/Includes/joinsmallgroup.css", false)]
+        [Category("Formatting")]
         public String StyleCssSetting { get { return Setting("StyleCss", "UserControls/Custom/HDC/GoogleMaps/Includes/joinsmallgroup.css", false); } }
-
-        [TextSetting("Redirect URL", "The URL that the user will be redirected to after submitting the form.", false)]
-        public string RedirectSetting { get { return Setting("Redirect", "", false); } }
 
         #endregion
 
@@ -72,6 +86,12 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         {
             BasePage.AddCssLink(Page, StyleCssSetting);
             BasePage.AddJavascriptInclude(Page, BasePage.JQUERY_INCLUDE);
+
+            //
+            // Make sure settings are valid.
+            //
+            if (NewMemberRoleSetting != -1 && PendingRegistrationSetting)
+                throw new System.Exception("Cannot set both New Member Role and Pending Registration settings.");
 
             //
             // Load the original person and spouse, if we know them.
@@ -381,6 +401,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         protected void btnSubmit_Click(object sender, EventArgs e)
         {
             Group group = new Group(Convert.ToInt32(Request.QueryString["group"]));
+            GroupCluster cluster = new GroupCluster(Convert.ToInt32(Request.QueryString["cluster"]));
 
 
             //
@@ -448,6 +469,48 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             }
 
             //
+            // If we are using pending registrations, add the person and spouse to a new pending
+            // registration and add it to the system.
+            //
+            if (PendingRegistrationSetting && (person.PersonID != -1 || spouse.PersonID != -1))
+            {
+                Registration reg = new Registration();
+
+                //
+                // Setup the basic information about the registration.
+                //
+                reg.OrganizationID = CurrentPortal.OrganizationID;
+                if (group.GroupID != -1)
+                {
+                    reg.ClusterType = group.ClusterType;
+                    reg.GroupID = group.GroupID;
+                    reg.GroupType = null;
+                    if (group != null && group.GroupType.ToString() != String.Empty)
+                        reg.GroupType = group.GroupType;
+                }
+                else if (cluster.GroupClusterID != -1)
+                {
+                    reg.ClusterType = cluster.ClusterType;
+                    reg.ClusterID = cluster.GroupClusterID;
+                    reg.GroupType = null;
+                }
+                reg.Notes = tbComments.Text;
+                reg.DayOfWeek.Add(group.MeetingDay);
+                reg.AgeRange.Add(group.PrimaryAge);
+                reg.MaritalPreference.Add(group.PrimaryMaritalStatus);
+
+                //
+                // Add the person and spouse to the registration.
+                //
+                if (person.PersonID != -1)
+                    reg.Persons.Add(person);
+                if (spouse.PersonID != -1)
+                    reg.Persons.Add(spouse);
+
+                reg.Save(CurrentPortal.OrganizationID, CurrentUser.Identity.Name);
+            }
+
+            //
             // E-mail the small group leader if the leader should be notified.
             //
             if (NotifyGroupLeaderSetting == true && !String.IsNullOrEmpty(group.Leader.Emails.FirstActive))
@@ -492,10 +555,16 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
             //
             // Put up the header information.
             //
-            sb.AppendFormat("Somebody is interested in joining {0} small group {1}. The information they provided is below.<br /><br />\r\n",
-                (toLeader ? "your" : "the"), group.Name);
-
-            sb.AppendFormat("<b>Group ID:</b> {0}<br />\r\n", group.GroupID.ToString());
+            if (group.GroupID != -1)
+            {
+                sb.AppendFormat("Somebody is interested in joining {0} small group {1}. The information they provided is below.<br /><br />\r\n",
+                    (toLeader ? "your" : "the"), group.Name);
+                sb.AppendFormat("<b>Group ID:</b> {0}<br />\r\n", group.GroupID.ToString());
+            }
+            else
+            {
+                sb.AppendFormat("Somebody is interested in joining a small group. The information they provided is below.<br /><br />\r\n");
+            }
 
             //
             // Include the primary person's information.
