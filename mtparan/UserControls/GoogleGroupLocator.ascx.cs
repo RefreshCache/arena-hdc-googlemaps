@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
@@ -37,12 +38,15 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
 
         #region Module Settings
 
+        [Category("Viewing Options")]
         [BooleanSetting("Show Campuses", "Shows the campus locations on the map.", false, true)]
         public Boolean ShowCampusesSetting { get { return Convert.ToBoolean(Setting("ShowCampuses", "true", false)); } }
 
+        [Category("Layout")]
         [NumericSetting("Map Width", "The width in pixels to make the map. Default is 480.", false)]
         public int MapWidthSetting { get { return Convert.ToInt32(Setting("MapWidth", "480", false)); } }
 
+        [Category("Layout")]
         [NumericSetting("Map Height", "The height in pixels to make the map. Default is 360.", false)]
         public int MapHeightSetting { get { return Convert.ToInt32(Setting("MapHeight", "360", false)); } }
 
@@ -77,33 +81,41 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         [ClusterCategorySetting("Category ID", "The category to use for searching for a small group.", true)]
         public Category CategorySetting { get { return new Category(Convert.ToInt32(Setting("Category", "", true))); } }
 
+        [Category("Viewing Options")]
         [BooleanSetting("Filter Expanded", "If set to true then the filter will be expanded and visible by default.", true, true)]
         public Boolean FilterExpandedSetting { get { return Convert.ToBoolean(Setting("FilterExpanded", "true", true)); } }
 
         [PageSetting("Registration Page", "The page to redirect to when somebody wishes to join a small group.", true)]
         public int RegistrationPageSetting { get { return Convert.ToInt32(Setting("RegistrationPage", "", true)); } }
 
+        [Category("Layout")]
         [BooleanSetting("Address On Top", "Show the center-on-address fields above the map instead of below.", false, false)]
         public Boolean AddressOnTopSetting { get { return Convert.ToBoolean(Setting("AddressOnTop", "false", false)); } }
 
+        [Category("Layout")]
         [BooleanSetting("Filter On Top", "Show the filter fields above the map instead of below.", false, false)]
         public Boolean FilterOnTopSetting { get { return Convert.ToBoolean(Setting("FilterOnTop", "false", false)); } }
 
         [ClusterTypeSetting("Limit To Cluster Type", "Limit the results to the selected cluster type, as defined in the small group structure.", false)]
         public int LimitToClusterTypeSetting { get { return Convert.ToInt32(Setting("LimitToClusterType", "-1", false)); } }
 
+        [Category("Viewing Options")]
         [BooleanSetting("Show List Results", "Shows the results in list-view below the map.", false, false)]
         public Boolean ShowListResultsSetting { get { return Convert.ToBoolean(Setting("ShowListResults", "false", false)); } }
 
+        [Category("Styling")]
         [CssSetting("Style Css", "If you wish to customize the styling you can duplicate the grouplocator.css file and enter the path to it here. Defaults to UserControls/Custom/HDC/GoogleMaps/Includes/grouplocator.css", false)]
         public String StyleCssSetting { get { return Setting("StyleCss", "UserControls/Custom/HDC/GoogleMaps/Includes/grouplocator.css", false); } }
 
+        [Category("Styling")]
         [FileSetting("Xslt File", "The list results uses an XSLT file to display the data. Defaults to UserControls/Custom/HDC/GoogleMaps/Includes/grouplocator.xslt.", false)]
         public String XsltFileSetting { get { return Setting("XsltFile", "UserControls/Custom/HDC/GoogleMaps/Includes/grouplocator.xslt", false); } }
 
+        [Category("Viewing Options")]
         [BooleanSetting("Map Visible", "Wether or not to display a single common map.", false, true)]
         public Boolean MapVisibleSetting { get { return Convert.ToBoolean(Setting("MapVisible", "true", false)); } }
 
+        [Category("Styling")]
         [FileSetting("Info Xslt File", "The small group popup information window uses an XSLT file to format the data displayed. Defaults to UserControls/Custom/HDC/GoogleMaps/Includes/groupinfo.xslt.", false)]
         public String InfoXsltFileSetting { get { return Setting("InfoXsltFile", "UserControls/Custom/HDC/GoogleMaps/Includes/groupinfo.xslt", false); } }
 
