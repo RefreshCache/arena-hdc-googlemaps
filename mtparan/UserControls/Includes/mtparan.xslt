@@ -236,7 +236,7 @@ div.sgl_address { display: none; }
 <script type="text/javascript">
   var original_RegisterSmallGroup = RegisterSmallGroup;
   function RegisterSmallGroup(gm, marker) {
-    marker.icon = "Custom/MtParan/star.png";
+    marker.icon = "UserControls/Custom/HDC/GoogleMaps/Images/star.png";
     original_RegisterSmallGroup(gm, marker);
   }
 </script>
@@ -290,7 +290,7 @@ div.sgl_address { display: none; }
       mtparan_map.setCenter(center);
       if (mtparan_marker != null)
         mtparan_marker.setMap(null);
-      mtparan_marker = new google.maps.Marker({position: center, map: mtparan_map, title: $(this).prev().prev().text(), icon: 'Custom/MtParan/star.png'});
+      mtparan_marker = new google.maps.Marker({position: center, map: mtparan_map, title: $(this).prev().prev().text(), icon: 'UserControls/Custom/HDC/GoogleMaps/Images/star.png'});
 
       $.colorbox({inline: true, href: '#mtparan_map', opacity: 0.7, initialWidth: '300px', initialHeight: '100px'});
     });
