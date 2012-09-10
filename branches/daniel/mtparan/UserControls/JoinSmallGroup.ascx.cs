@@ -188,7 +188,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 tbCity.Text = person.PrimaryAddress.City;
                 li = ddlState.Items.FindByValue(person.PrimaryAddress.State);
                 if (li != null)
+                {
+                    ddlState.ClearSelection();
                     li.Selected = true;
+                }
                 tbZipcode.Text = person.PrimaryAddress.PostalCode;
             }
         }
