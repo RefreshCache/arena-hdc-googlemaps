@@ -453,7 +453,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 //
                 // If we have a valid spouse object then add them to the small group.
                 //
-                if (spouse.PersonID != -1)
+                if (spouse.PersonID != -1 && cbSpouse.Enabled)
                 {
                     GroupMember gm = new GroupMember(group.GroupID, spouse.PersonID);
 
