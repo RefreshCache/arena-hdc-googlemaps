@@ -119,6 +119,10 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
         [FileSetting("Info Xslt File", "The small group popup information window uses an XSLT file to format the data displayed. Defaults to UserControls/Custom/HDC/GoogleMaps/Includes/groupinfo.xslt.", false)]
         public String InfoXsltFileSetting { get { return Setting("InfoXsltFile", "UserControls/Custom/HDC/GoogleMaps/Includes/groupinfo.xslt", false); } }
 
+        [Category("Viewing Options")]
+        [BooleanSetting("Hide Full Groups", "If set to true then groups which are full will not be displayed.", false, false)]
+        public Boolean HideFullGroupsSetting { get { return Convert.ToBoolean(Setting("HideFullGroups", "false", false)); } }
+
         #endregion
 
 
@@ -489,6 +493,8 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                     if (ddlArea.SelectedValue != "-1" && g.AreaID != -1 && g.AreaID != Convert.ToInt32(ddlArea.SelectedValue))
                         continue;
                     if (ddlCampus.SelectedValue != "-1" && g.Leader.Campus.CampusId != Convert.ToInt32(ddlCampus.SelectedValue))
+                        continue;
+                    if (HideFullGroupsSetting && (g.Members.Count + 1) >= g.MaxMembers)
                         continue;
 
                     //
