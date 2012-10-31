@@ -494,8 +494,22 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                         continue;
                     if (ddlCampus.SelectedValue != "-1" && g.Leader.Campus.CampusId != Convert.ToInt32(ddlCampus.SelectedValue))
                         continue;
-                    if (HideFullGroupsSetting && (g.Members.Count + 1) >= g.MaxMembers)
-                        continue;
+
+                    //
+                    // Check if the group is full.
+                    //
+                    if (HideFullGroupsSetting)
+                    {
+                        int activeCount = 1;
+
+                        foreach (GroupMember gm in g.Members)
+                        {
+                            if (gm.Active == true)
+                                activeCount += 1;
+                        }
+                        if (activeCount >= g.MaxMembers)
+                            continue;
+                    }
 
                     //
                     // Add the group to the map.
