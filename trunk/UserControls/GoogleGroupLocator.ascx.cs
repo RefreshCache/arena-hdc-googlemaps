@@ -417,6 +417,7 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                 try
                 {
                     Group g = new Group(Convert.ToInt32(rdr[0]));
+                    int activeCount = 1; // Count the leader
 
                     if (ddlMeetingDay.SelectedValue != "-1" && g.MeetingDay.LookupID != Convert.ToInt32(ddlMeetingDay.SelectedValue))
                         continue;
@@ -437,6 +438,17 @@ namespace ArenaWeb.UserControls.Custom.HDC.GoogleMaps
                         continue;
 
                     if (ddlCampus.SelectedValue != "-1" && g.Leader.Campus.CampusId != Convert.ToInt32(ddlCampus.SelectedValue))
+                        continue;
+
+                    //
+                    // Check if the group is full.
+                    //
+                    foreach (GroupMember gm in g.Members)
+                    {
+                        if (gm.Active == true)
+                            activeCount += 1;
+                    }
+                    if (activeCount >= g.MaxMembers)
                         continue;
 
                     //
