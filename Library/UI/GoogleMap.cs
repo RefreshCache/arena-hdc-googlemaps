@@ -240,7 +240,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
         /// <param name="e">Unused parameter.</param>
         protected override void OnLoad(EventArgs e)
         {
-            BasePage.AddJavascriptInclude(Page, BasePage.JQUERY_INCLUDE);
+//            BasePage.AddJavascriptInclude(Page, BasePage.JQUERY_INCLUDE);
             BasePage.AddJavascriptInclude(Page, "http://maps.google.com/maps/api/js?sensor=false");
             BasePage.AddJavascriptInclude(Page, "UserControls/Custom/HDC/GoogleMaps/Includes/googlemaps.js");
             BasePage.AddJavascriptInclude(Page, "UserControls/Custom/HDC/GoogleMaps/Includes/json2.js");
