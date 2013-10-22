@@ -111,7 +111,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Library\Library.csproj">
       <Project>{697D3FD5-025B-40F7-BBDC-3842BF601402}</Project>
-      <Name>Library</Name>
+      <Name>Library %28Google Maps\Library%29</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
