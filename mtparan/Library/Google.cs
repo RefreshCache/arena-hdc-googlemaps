@@ -97,7 +97,7 @@ namespace Arena.Custom.HDC.GoogleMaps
             {
                 p = profile.Members[i];
 
-                if (p.Status.Qualifier != "D")
+                if (p.Status.Qualifier != "D" && p.RecordStatus != Enums.RecordStatus.Inactive)
                 {
                     try
                     {
@@ -233,7 +233,10 @@ namespace Arena.Custom.HDC.GoogleMaps
             {
                 try
                 {
-                    people.Add(new PersonPlacemark(new Person(peopleids[i])));
+                    Person p = new Person(peopleids[i]);
+
+                    if (p.RecordStatus != Enums.RecordStatus.Inactive)
+                        people.Add(new PersonPlacemark(p));
                 }
                 catch { }
             }
@@ -327,7 +330,8 @@ namespace Arena.Custom.HDC.GoogleMaps
             {
                 try
                 {
-                    people.Add(new PersonPlacemark(group.Members[i]));
+                    if (group.Members[i].RecordStatus != Enums.RecordStatus.Inactive)
+                        people.Add(new PersonPlacemark(group.Members[i]));
                 }
                 catch { }
             }
