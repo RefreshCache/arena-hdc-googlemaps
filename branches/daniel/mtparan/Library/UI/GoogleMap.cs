@@ -251,7 +251,7 @@ namespace Arena.Custom.HDC.GoogleMaps.UI
             {
                 BasePage.AddJavascriptInclude(Page, "include/scripts/jquery.1.3.2.min.js");
             }
-            BasePage.AddJavascriptInclude(Page, "http://maps.google.com/maps/api/js?sensor=false");
+            BasePage.AddJavascriptInclude(Page, "//maps.google.com/maps/api/js?sensor=false");
             BasePage.AddJavascriptInclude(Page, "UserControls/Custom/HDC/GoogleMaps/Includes/googlemaps.js");
             BasePage.AddJavascriptInclude(Page, "UserControls/Custom/HDC/GoogleMaps/Includes/json2.js");
         }
